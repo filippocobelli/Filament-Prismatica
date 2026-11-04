@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.2
+
+Pagina del progetto in italiano e inglese (`site/`, pubblicata con GitHub Pages insieme all'app in `/app/`), licenza MIT. Nessuna modifica al funzionamento.
+
 ## FilamentBox 2.0.1
 
 Prima versione pubblica nel repository Filament-Prismatica: documentazione aggiornata, nessuna modifica al funzionamento.

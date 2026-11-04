@@ -16,11 +16,11 @@ Per averla "come un programma", crea un collegamento sul desktop a `lite/index.h
 
 ### 2. Dal web, con GitHub Pages
 
-Il repository contiene il workflow `.github/workflows/pages.yml`, che pubblica la cartella `lite/` a ogni modifica.
+Il repository contiene il workflow `.github/workflows/pages.yml`, che a ogni modifica pubblica la pagina del progetto (cartella `site/`) e, sotto `/app/`, la cartella `lite/`.
 
 1. Su GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 2. Vai in **Actions → Pubblica FilamentBox Lite → Run workflow** (oppure fai un push su `main`).
-3. Dopo un minuto l'indirizzo compare in Settings → Pages: `https://<utente>.github.io/Filament-Prismatica/`.
+3. Dopo un minuto il sito è online: la pagina del progetto su `https://<utente>.github.io/Filament-Prismatica/` e l'app su `https://<utente>.github.io/Filament-Prismatica/app/`.
 
 Se fai un fork, Pages funziona gratis finché il fork è pubblico; su un repository privato serve un piano a pagamento.
 

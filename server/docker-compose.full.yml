@@ -1,4 +1,4 @@
-# FilamentBox v2.0.1 — edizione FULL (Home Assistant + lettore NFC + Prismatica)
+# FilamentBox v2.0.2 — edizione FULL (Home Assistant + lettore NFC + Prismatica)
 # Copia il contenuto della cartella server/ in /opt/filamentbox sul server, poi crea lo stack.
 services:
   filamentbox:

@@ -1,11 +1,11 @@
-# Pubblica l'edizione Lite (cartella lite/) su GitHub Pages a ogni push su main.
-# Attiva Pages in Settings → Pages → Source: "GitHub Actions".
+# Pubblica su GitHub Pages il sito del progetto (cartella site/) e l'edizione Lite (cartella lite/ → /app/).
+# Prima volta: Settings → Pages → Source: "GitHub Actions", poi rilancia il workflow da Actions.
 # Gratis con un repository pubblico; su un repository privato serve un piano a pagamento.
 name: Pubblica FilamentBox Lite
 on:
   push:
     branches: [main]
-    paths: ['lite/**', '.github/workflows/pages.yml']
+    paths: ['lite/**', 'site/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,8 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Prepara il sito (pagina del progetto + app in /app/)
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          cp -r lite _site/app
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: lite
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

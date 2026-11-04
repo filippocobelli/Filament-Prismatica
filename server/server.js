@@ -1,5 +1,6 @@
-// FilamentBox server — v2.0.1
+// FilamentBox server — v2.0.2
 // CHANGELOG
+// v2.0.2 — pagina del progetto su GitHub Pages (site/), licenza MIT: nessuna modifica al server
 // v2.0.1 — progetto pubblico Filament-Prismatica: solo documentazione e numero di versione
 // v2.0.0 — tre edizioni: FB_EDITION=full (tutto) | smart (HA + lettore NFC, senza Prismatica);
 //          la edizione Lite (senza server) sta in /lite. /edition.js dice al frontend cosa mostrare.
@@ -25,7 +26,7 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3025;
-const VERSION = '2.0.1';
+const VERSION = '2.0.2';
 const EDITION = (process.env.FB_EDITION || 'full').toLowerCase() === 'smart' ? 'smart' : 'full';
 const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica'];
 const DB_PATH = path.join(__dirname, 'db.json');

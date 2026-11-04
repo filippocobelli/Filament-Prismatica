@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filament-Prismatica · lab.cobelli.uk</title>
+<meta name="description" content="FilamentBox, l'inventario dei filamenti per la stampa 3D, e Prismatica, che trasforma un'immagine in una wall art 3D a triangoli. Funziona nel browser senza server o sul tuo server di casa con Home Assistant.">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="it" href="https://lab.cobelli.uk/Filament-Prismatica/it/">
+<link rel="alternate" hreflang="en" href="https://lab.cobelli.uk/Filament-Prismatica/">
+<script>try{var t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+/* Sito Filament-Prismatica v2.0.2 — stesso stile di lab.cobelli.uk */
+@font-face{font-family:"Barlow";src:url(/fonts/Barlow-Regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Barlow";src:url(/fonts/Barlow-SemiBold.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Barlow Condensed";src:url(/fonts/BarlowCondensed-Bold.woff2) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"JetBrains Mono";src:url(/fonts/JetBrainsMono-500.woff2) format("woff2");font-weight:500;font-display:swap}
+[data-theme=dark]{--bg:#1C1C1C;--card:#232323;--text:#F2F1EC;--soft:#A3A29C;--line:#343433;--accent:#F2C400;--on-accent:#1C1C1C;--link:#FAFAF7}
+[data-theme=light]{--bg:#FAFAF7;--card:#FFFFFF;--text:#1C1C1C;--soft:#5A5C62;--line:#E2E1DB;--accent:#C42424;--on-accent:#FFFFFF;--link:#1C1C1C}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--text);background:var(--bg);font:400 18px/1.6 "Barlow",system-ui,sans-serif}
+a{color:var(--link);text-decoration-color:var(--accent);text-underline-offset:3px;text-decoration-thickness:2px}
+a:hover{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:14px;letter-spacing:-.2px}
+.wrap{max-width:920px;margin:0 auto;padding:0 24px}
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:16px;height:64px}
+.home{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto}
+.cursor{display:inline-block;width:10px;height:18px;background:var(--accent);vertical-align:-3px}
+nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+nav a{text-decoration:none;color:var(--soft)}nav a:hover{color:var(--text)}
+.toggle{background:none;border:1px solid var(--line);color:var(--soft);border-radius:6px;padding:6px 10px;cursor:pointer}
+.toggle:hover{color:var(--text);border-color:var(--soft)}
+@media(max-width:620px){nav .opt{display:none}}
+.hero{padding:64px 0 28px}
+.prompt{color:var(--soft);margin:0 0 14px}.prompt b{color:var(--accent);font-weight:500}
+h1{font:700 clamp(52px,10vw,104px)/.88 "Barlow Condensed",sans-serif;margin:0 0 20px;letter-spacing:-1px;text-wrap:balance}
+.lead{font-size:21px;max-width:34em;margin:0 0 26px}
+.status{display:inline-block;margin:0 0 18px;padding:2px 8px;border-radius:4px;color:var(--on-accent);background:var(--accent)}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 34px}
+.btn{display:inline-block;padding:10px 16px;border-radius:8px;border:1px solid var(--line);text-decoration:none;font-weight:600;background:var(--card)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{color:var(--on-accent);filter:brightness(1.07)}
+.shot{display:block;width:100%;height:auto;margin:0 0 20px}
+h2{font:700 34px/1.1 "Barlow Condensed",sans-serif;margin:0 0 10px;text-wrap:balance}
+h3{font:700 26px/1.1 "Barlow Condensed",sans-serif;margin:0 0 8px}
+section{padding:30px 0}
+.label{color:var(--soft);margin:0 0 10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:720px){.two{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px 24px}
+.card p{margin:0 0 12px;color:var(--soft)}
+.card ul{margin:0;padding-left:20px;color:var(--soft)}
+.card li{margin:4px 0}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.tags li{padding:2px 8px;border-radius:4px;background:var(--bg);border:1px solid var(--line);color:var(--soft);margin:0}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:16px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+thead th{font:700 20px/1 "Barlow Condensed",sans-serif}
+td.y{color:var(--accent);font-weight:600}td.n{color:var(--soft)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;position:relative;padding:0 0 12px 40px;color:var(--soft)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font:500 13px "JetBrains Mono",monospace;color:var(--text)}
+.steps b{color:var(--text);font-weight:600}
+code{font-family:"JetBrains Mono",monospace;font-size:.85em;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.about{margin:10px 0 0;padding:22px 24px;border-left:3px solid var(--accent);background:var(--card);border-radius:0 12px 12px 0}
+.about p{margin:0}
+.risk{margin:28px auto 0;font-size:.8rem;line-height:1.5;color:var(--soft)}
+footer{padding:16px 0 56px;color:var(--soft)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="home" href="/it/"><span class="mono">lab.cobelli.uk</span><span class="cursor" aria-hidden="true"></span></a>
+  <nav class="mono">
+    <a class="opt" href="#edizioni">edizioni</a>
+    <a class="opt" href="#inizia">come iniziare</a>
+    <a href="https://github.com/filippocobelli/Filament-Prismatica">github</a>
+    <a href="../" hreflang="en" lang="en">en</a>
+    <button class="toggle mono" id="toggle" type="button" aria-label="Cambia tema">chiaro</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="prompt mono"><b>~/lab/filament-prismatica</b> $ ./open</p>
+    <h1>Filament-Prismatica</h1>
+    <span class="status mono" data-repo="filippocobelli/Filament-Prismatica">v2.0.2 · live</span>
+    <p class="lead">L'inventario dei filamenti per la stampa 3D, più uno strumento che trasforma un'immagine in una wall art 3D a triangoli, stampata un colore per piatto con i filamenti che hai davvero.</p>
+    <div class="cta">
+      <a class="btn primary" href="../app/">Apri FilamentBox</a>
+      <a class="btn" href="../app/prismatica/index.html">Apri Prismatica</a>
+      <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica/archive/refs/heads/main.zip">Scarica (zip)</a>
+      <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica">Codice</a>
+    </div>
+    <img class="shot" src="../img/hero.webp" alt="Anteprima 3D di Prismatica con una wall art a triangoli corallo, viola e bianchi, accanto a FilamentBox su un telefono con la libreria delle bobine" width="1600" height="1200">
+  </section>
+
+  <section>
+    <p class="label mono">due strumenti, un inventario</p>
+    <div class="two">
+      <div class="card">
+        <h3>FilamentBox</h3>
+        <p>Tiene traccia di ogni bobina: quanto ne resta, dov'è, se è ancora sigillata.</p>
+        <ul>
+          <li>Bobine aggiunte a mano, dal barcode, da una foto dell'etichetta (Claude AI) o in blocco da una fattura Bambu Lab (PDF)</li>
+          <li>Vista scaffali, slot AMS, registro delle stampe e statistiche</li>
+          <li>Con Home Assistant i grammi usati vengono tolti da soli dalla bobina giusta dopo ogni stampa</li>
+          <li>Tag NFC OpenTag3D, scritti con il telefono o con un lettore D1 Mini + PN532</li>
+        </ul>
+        <ul class="tags mono"><li>PWA</li><li>Node.js</li><li>Home Assistant</li><li>NFC</li></ul>
+      </div>
+      <div class="card">
+        <h3>Prismatica</h3>
+        <p>Trasforma un'immagine in una wall art fatta di centinaia di triangoli stampati in 3D che si incastrano in un telaio.</p>
+        <ul>
+          <li>Sei forme di pezzo, con altezze e direzione delle punte guidate dall'immagine</li>
+          <li>Sceglie i colori tra i filamenti disponibili, aggiornati in tempo reale</li>
+          <li>Piatti 3MF e STL già numerati, un colore per piatto: l'AMS non serve</li>
+          <li>Dima di montaggio 1:1 per stampanti A4 e color mixing Bambu facoltativo</li>
+        </ul>
+        <ul class="tags mono"><li>three.js</li><li>3MF · STL</li><li>Bambu Studio</li><li>dima A4</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="edizioni">
+    <h2>Tre edizioni</h2>
+    <p class="label">Stessa app, stesse schermate. Scegli quella adatta a quello che hai in casa.</p>
+    <div class="table">
+      <table>
+        <thead><tr><th></th><th>Lite</th><th>Smart</th><th>Full</th></tr></thead>
+        <tbody>
+          <tr><td>Serve un server</td><td class="y">no</td><td>Docker</td><td>Docker</td></tr>
+          <tr><td>Dove stanno i dati</td><td>nel browser</td><td>sul tuo server</td><td>sul tuo server</td></tr>
+          <tr><td>Inventario, scaffali, fatture, barcode</td><td class="y">sì</td><td class="y">sì</td><td class="y">sì</td></tr>
+          <tr><td>Scansione etichette con Claude AI</td><td class="y">sì</td><td class="y">sì</td><td class="y">sì</td></tr>
+          <tr><td>Consumi automatici da Home Assistant</td><td class="n">no</td><td class="y">sì</td><td class="y">sì</td></tr>
+          <tr><td>Lettore NFC (D1 Mini + PN532)</td><td class="n">no</td><td class="y">sì</td><td class="y">sì</td></tr>
+          <tr><td>Prismatica</td><td class="y">sì</td><td class="n">no</td><td class="y">sì, collegata all'inventario</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="inizia">
+    <h2>Come iniziare</h2>
+    <div class="two">
+      <div class="card">
+        <h3>Lite: niente da installare</h3>
+        <ol class="steps">
+          <li><b>Nel browser:</b> premi «Apri FilamentBox» qui sopra. Con Chrome o Edge puoi installarla come app e usarla anche offline.</li>
+          <li><b>Sul PC senza internet:</b> scarica lo zip, estrailo e apri <code>lite/index.html</code>.</li>
+          <li>Le bobine restano in quel browser: ogni tanto esporta un backup da Settings.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Smart e Full: server di casa</h3>
+        <ol class="steps">
+          <li>Copia la cartella <code>server/</code> su un computer con Docker (NAS, mini PC, Raspberry Pi).</li>
+          <li>Avvia lo stack di <code>docker-compose.full.yml</code> o <code>docker-compose.smart.yml</code>.</li>
+          <li>Collega Home Assistant da Settings e incolla in HA il YAML del webhook generato.</li>
+        </ol>
+      </div>
+    </div>
+    <p style="margin:18px 0 0;color:var(--soft)">Per la scansione delle etichette serve una chiave API di Anthropic, da inserire in Settings → Claude AI. Le guide passo passo sono nella <a href="https://github.com/filippocobelli/Filament-Prismatica/tree/main/docs">cartella docs</a>.</p>
+  </section>
+
+  <section>
+    <div class="about">
+      <p>Non sono un programmatore. Ho pensato FilamentBox e Prismatica per la mia stampante e i miei scaffali e li ho costruiti con l'AI (Claude): io decido cosa devono fare e li provo in casa, l'AI scrive il codice. Segnalazioni e pull request sono benvenute su <a href="https://github.com/filippocobelli/Filament-Prismatica">GitHub</a>.</p>
+    </div>
+  </section>
+</main>
+
+<p class="risk wrap"><strong>Uso a tuo rischio.</strong> Il software è fornito così com'è, senza alcuna garanzia. Controlla i file prima di stamparli e tieni un backup dei tuoi dati.</p>
+
+<footer><div class="wrap mono">
+  <a href="/it/">lab.cobelli.uk</a>
+  <a href="https://github.com/filippocobelli/Filament-Prismatica">github</a>
+  <a href="https://ko-fi.com/filippocobelli">ko-fi</a>
+</div></footer>
+
+<script>
+(function(){
+  var b=document.getElementById("toggle"),r=document.documentElement;
+  function label(){b.textContent=r.dataset.theme==="dark"?"chiaro":"scuro"}
+  label();
+  b.onclick=function(){r.dataset.theme=r.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("theme",r.dataset.theme)}catch(e){}label()};
+})();
+(function(){
+  document.querySelectorAll("[data-repo]").forEach(function(el){
+    var repo=el.getAttribute("data-repo"),key="release:"+repo,now=Date.now(),c=null;
+    function show(tag){if(tag)el.textContent="v"+String(tag).replace(/^v/i,"")+" · live"}
+    try{c=JSON.parse(localStorage.getItem(key))}catch(e){}
+    if(c&&c.tag){show(c.tag);if(now-c.t<3600000)return}
+    fetch("https://api.github.com/repos/"+repo+"/releases/latest",{headers:{Accept:"application/vnd.github+json"}})
+      .then(function(r){return r.ok?r.json():null})
+      .then(function(j){if(j&&j.tag_name){show(j.tag_name);try{localStorage.setItem(key,JSON.stringify({tag:j.tag_name,t:now}))}catch(e){}}})
+      .catch(function(){});
+  });
+})();
+</script>
+</body>
+</html>
