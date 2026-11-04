@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.4 · Prismatica 1.7
+
+Link Ko-fi per le donazioni: sezione «Supporta il progetto» in Settings, pulsante in Prismatica, pagina del progetto, README e pulsante Sponsor di GitHub (`.github/FUNDING.yml`).
+
 ## FilamentBox 2.0.3
 
 Aggiunto il firmware del lettore NFC (`nfc-reader/`, v1.1: indirizzo del server in una sola costante, versione stampata all'avvio) e la guida completa con collegamenti, librerie e LED.
@@ -41,6 +45,7 @@ Vista Scaffali; bobine sigillate/aperte.
 Lettore NFC fisico (heartbeat, coda di scrittura), sincronizzazione pesi da Home Assistant.
 
 ## Prismatica
+- **1.7**: link Ko-fi.
 - **1.6**: supporto edizione Lite, link a FilamentBox, testi senza riferimenti personali.
 - **1.5**: dima con sovrapposizione e crocini, mappa dei fogli, carta A4/A3/Letter, risparmio inchiostro.
 - **1.4**: integrazione con FilamentBox (inventario, eventi in tempo reale, slot AMS nei mix).

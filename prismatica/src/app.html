@@ -34,6 +34,8 @@ header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:
 .brand{display:flex;align-items:baseline;gap:8px}
 .back{font:600 13px var(--body);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 9px;background:#fff}
 .back:hover{border-color:var(--ink)}
+.kofi{font:600 12px var(--body);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff;white-space:nowrap}
+.kofi:hover{border-color:var(--accent);color:var(--accent)}
 .brand h1{font:800 20px/1 var(--display);letter-spacing:-.01em;margin:0}
 .ver{font:500 11px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
 .stats{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
@@ -123,8 +125,9 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.6</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.7</span></div>
   <div class="stats" id="stats"></div>
+  <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
 <main>
 <aside>
@@ -279,7 +282,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /*__CORE__*/
 
-const VERSION = 'v1.6'; // v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.7'; // v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;

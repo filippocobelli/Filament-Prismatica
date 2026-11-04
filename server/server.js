@@ -1,5 +1,6 @@
-// FilamentBox server — v2.0.3
+// FilamentBox server — v2.0.4
 // CHANGELOG
+// v2.0.4 — link Ko-fi in Settings, Prismatica e nella documentazione: nessuna modifica al server
 // v2.0.3 — aggiunto il firmware del lettore NFC (nfc-reader/): nessuna modifica al server
 // v2.0.2 — pagina del progetto su GitHub Pages (site/), licenza MIT: nessuna modifica al server
 // v2.0.1 — progetto pubblico Filament-Prismatica: solo documentazione e numero di versione
@@ -27,7 +28,7 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3025;
-const VERSION = '2.0.3';
+const VERSION = '2.0.4';
 const EDITION = (process.env.FB_EDITION || 'full').toLowerCase() === 'smart' ? 'smart' : 'full';
 const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica'];
 const DB_PATH = path.join(__dirname, 'db.json');

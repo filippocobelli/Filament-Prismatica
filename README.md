@@ -2,7 +2,9 @@
 
 **FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero.
 
-Versione **2.0.3** · Prismatica **1.6**
+Versione **2.0.4** · Prismatica **1.7**
+
+[☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
 FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa c'è dietro.
 
@@ -60,6 +62,10 @@ Per modificare FilamentBox si lavora su `server/public/`; poi `cd tools && npm i
 ## Dati personali
 
 Nel repository non ci sono dati personali: niente inventario, token, chiavi, indirizzi IP o nomi di rete. I file con dati e segreti (`db.json`, `ha_config.json`, `claude_config.json`) restano solo sul tuo server e sono esclusi da `.gitignore`.
+
+## Supporta il progetto
+
+FilamentBox e Prismatica sono gratuiti e open source. Se ti sono utili puoi offrirmi un caffè su [Ko-fi](https://ko-fi.com/filippocobelli): aiuta a coprire il tempo e i filamenti per le prove. Lo trovi anche in Settings → Supporta il progetto e in alto a destra in Prismatica.
 
 ## Licenza
 

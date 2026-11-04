@@ -2,7 +2,7 @@
 
 Prismatica trasforma un'immagine in una **wall art 3D a triangoli**: un telaio a incastro con centinaia di pezzi in rilievo, ognuno con un colore e una punta orientata, che insieme ricompongono l'immagine. Genera i file di stampa già divisi in **piatti numerati, uno per colore**, quindi l'AMS non serve.
 
-Versione 1.6. È inclusa nelle edizioni **Full** e **Lite**. Si può usare anche da sola, senza inventario.
+Versione 1.7. È inclusa nelle edizioni **Full** e **Lite**. Si può usare anche da sola, senza inventario.
 
 ## Il flusso
 
