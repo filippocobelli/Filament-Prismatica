@@ -1,0 +1,30 @@
+# Pubblica l'edizione Lite (cartella lite/) su GitHub Pages a ogni push su main.
+# Attiva Pages in Settings → Pages → Source: "GitHub Actions".
+# Gratis con un repository pubblico; su un repository privato serve un piano a pagamento.
+name: Pubblica FilamentBox Lite
+on:
+  push:
+    branches: [main]
+    paths: ['lite/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: lite
+      - id: deployment
+        uses: actions/deploy-pages@v4

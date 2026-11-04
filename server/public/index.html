@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<!-- FilamentBox frontend v2.0.1 — v2.0.1: solo versione · v2.0.0: edizioni Lite/Smart/Full (window.FB_EDITION), Claude AI e backup in Settings, entità HA configurabili, percorsi relativi · v1.7.0: v1.7.0: import bobine da fattura PDF (Bambu Lab) · v1.6.1: Prismatica v1.5 · v1.6.0: link a Prismatica nella barra in basso · v1.5.1: solo versione (fix consumi lato server) · v1.5.0: vista Scaffali + stato sigillata/aperta -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FilamentBox</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FilamentBox">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2d5a3d">
+<script src="edition.js"></script>
+<script>
+  // Edizione: Lite (senza server), Smart (HA + NFC) o Full (tutto). Il server o la build Lite la impostano.
+  window.FB_EDITION = window.FB_EDITION || { name: 'full', version: '2.0.1', features: ['ha', 'nfc', 'server', 'prismatica'] };
+  window.FB_HAS = (f) => window.FB_EDITION.features.includes(f);
+  document.addEventListener('DOMContentLoaded', () => { for (const f of ['ha', 'nfc', 'server', 'prismatica']) document.body.classList.toggle('f-' + f, FB_HAS(f)); document.body.classList.add('ed-' + FB_EDITION.name); });
+</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect x='0' y='0' width='40' height='40' rx='8' fill='%232d5a3d'/><path d='M8 30 Q8 10 20 10 Q32 10 32 20 Q32 30 20 30 Q12 30 12 22 Q12 17 20 17' fill='none' stroke='%23f5f0e8' stroke-width='2.5' stroke-linecap='round'/><circle cx='20' cy='17' r='2.5' fill='%23b8913a'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ── Edizioni (v2.0.0): nasconde ciò che l'edizione non include ── */
+body:not(.f-ha) .need-ha, body:not(.f-nfc) .need-nfc, body:not(.f-prismatica) .need-prismatica, body:not(.f-server) .need-server { display: none !important; }
+body.f-server .need-local { display: none !important; }
+:root{
+  --bg:#e8edf5;--surface:#fff;--surface2:#f0f4fa;--border:rgba(0,0,0,.07);
+  --text:#0d1b2a;--text2:#4a5568;--text3:#94a3b8;
+  --accent:#2563eb;--accent2:#0ea5e9;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;
+  --r:20px;--rs:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:110px}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:380px;
+  background:linear-gradient(160deg,#c7d8f5 0%,#dce8f8 40%,#f0e8f5 100%);z-index:0;pointer-events:none}
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 16px}
+
+/* ── Header ── */
+.header{padding:52px 0 20px}
+.header-label{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--accent2);text-transform:uppercase;margin-bottom:4px}
+.header h1{font-size:36px;font-weight:800;line-height:1.1;margin-bottom:6px}
+.header-sub{font-size:14px;color:var(--text2)}
+.header-sub .warn{color:var(--yellow);font-weight:600}
+
+/* ── Stats strip ── */
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface);border-radius:var(--rs);padding:12px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.stat-value{font-size:19px;font-weight:800}
+.stat-label{font-size:11px;color:var(--text3);margin-top:2px;font-weight:500}
+
+/* ── View tabs ── */
+.view-tabs{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;padding-bottom:2px}
+.search-bar{width:100%;padding:13px 16px;border-radius:12px;border:2px solid var(--border);
+  background:var(--surface);font-size:15px;margin-bottom:18px;font-family:inherit;box-sizing:border-box}
+.search-bar:focus{outline:none;border-color:var(--accent)}
+.view-tabs::-webkit-scrollbar{display:none}
+.vtab{flex-shrink:0;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;
+  font-family:inherit;font-size:13px;font-weight:600;
+  background:var(--surface);color:var(--text2);box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s}
+.vtab.active{background:var(--text);color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+
+/* ── Material section ── */
+.mat-section{margin-bottom:20px}
+.mat-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;user-select:none}
+.mat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mat-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;flex:1}
+.mat-count{font-size:12px;color:var(--text3);font-weight:500}
+.mat-chevron{font-size:12px;color:var(--text3);transition:transform .2s}
+.mat-section.collapsed .mat-chevron{transform:rotate(-90deg)}
+.mat-section.collapsed .mat-body{display:none}
+
+/* ── Spool card ── */
+.spool-card{background:var(--surface);border-radius:var(--r);padding:18px 18px 14px;margin-bottom:10px;
+  box-shadow:0 2px 14px rgba(0,0,0,.07);position:relative;overflow:visible}
+.spool-card-main{display:flex;align-items:center;gap:14px;cursor:pointer}
+.spool-info{flex:1;min-width:0}
+.spool-brand{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:1px}
+.spool-name{font-size:24px;font-weight:800;line-height:1;margin-bottom:3px}
+.spool-colorname{font-size:12px;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.color-swatch{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.1)}
+.spool-weight{font-size:13px;font-weight:700}
+.spool-weight-label{font-size:11px;color:var(--text3);font-weight:500}
+.spool-bar{height:4px;background:var(--surface2);border-radius:4px;margin-top:8px;overflow:hidden}
+.spool-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+.spool-svg-wrap{flex-shrink:0;width:80px;height:80px}
+
+/* ── AMS slot row (inside card) ── */
+.ams-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.ams-row-label{font-size:12px;font-weight:600;color:var(--text3);flex-shrink:0}
+.ams-select{flex:1;padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--surface2);font-family:inherit;font-size:13px;font-weight:600;color:var(--text);
+  outline:none;cursor:pointer;transition:border-color .2s}
+.ams-select:focus{border-color:var(--accent)}
+.ams-select.has-slot{border-color:var(--accent);background:#eff6ff;color:var(--accent)}
+.ams-save-btn{padding:6px 12px;border-radius:8px;background:var(--accent);color:#fff;
+  border:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;flex-shrink:0}
+.ams-save-btn:hover{opacity:.85}
+
+/* ── Status badges ── */
+.status-badge{position:absolute;top:14px;right:14px;
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;
+  text-transform:uppercase;letter-spacing:.07em;pointer-events:none}
+.badge-low{background:#fef3c7;color:#92400e}
+.badge-empty{background:#fee2e2;color:#991b1b}
+.badge-slot{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:84px;right:20px;
+  width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;cursor:pointer;font-size:26px;color:#fff;
+  box-shadow:0 6px 18px rgba(37,99,235,.4);display:flex;align-items:center;justify-content:center;
+  transition:transform .25s;z-index:200}
+.fab.open{transform:rotate(45deg)}
+
+/* ── Bottom nav ── */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:calc(100% - 32px);max-width:448px;
+  background:rgba(255,255,255,.93);backdrop-filter:blur(20px);
+  border-radius:24px 24px 0 0;padding:10px 0 18px;
+  display:flex;justify-content:space-around;
+  box-shadow:0 -4px 28px rgba(0,0,0,.08);z-index:99}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:4px;
+  border:none;background:none;cursor:pointer;font-family:inherit;
+  color:var(--text3);font-size:11px;font-weight:600;padding:4px 6px;transition:color .2s;flex:1;min-width:0}
+.nav-btn.active{color:var(--text)}
+.nav-btn svg{width:22px;height:22px}
+
+/* ── Scaffali (v1.5.0) ── */
+.loc-section{padding:18px 0 22px;border-top:1px solid var(--border)}
+.loc-section:first-of-type{border-top:none}
+.loc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.loc-title{font-size:24px;font-weight:800;line-height:1.1}
+.loc-sub{font-size:13px;color:var(--text3);margin-top:3px}
+.loc-count{margin-left:auto;font-family:'Space Mono',monospace;font-size:15px;color:var(--text2);padding-top:4px}
+.loc-count.full{color:var(--red)}
+.loc-edit{background:none;border:none;cursor:pointer;font-size:17px;color:var(--accent);padding:2px 4px}
+.shelf{position:relative;margin:0 -16px;padding:0 16px}
+.shelf-row{display:flex;align-items:flex-end;gap:6px;overflow-x:auto;padding:4px 4px 0;height:128px;
+  scrollbar-width:none;position:relative;z-index:1}
+.shelf-row::-webkit-scrollbar{display:none}
+.shelf-front{position:relative;z-index:2;height:56px;margin-top:-30px;border-radius:16px;pointer-events:none;
+  box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.shelf.st-box .shelf-front{background:rgba(255,255,255,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.6)}
+.shelf.st-wood .shelf-front{background:
+  repeating-linear-gradient(8deg,rgba(120,80,30,.08) 0 3px,transparent 3px 11px),
+  linear-gradient(180deg,#e9cf9c,#d8b67a)}
+.shelf.st-shelf .shelf-front{background:linear-gradient(180deg,#8a8f98,#5f646c)}
+.sp{flex:0 0 58px;height:120px;display:flex;align-items:flex-end;cursor:pointer;position:relative;
+  background:none;border:none;padding:0;font:inherit}
+.sp-flange{width:7px;height:100%;background:#1f2430;border-radius:2px;flex-shrink:0}
+.sp-body{flex:1;align-self:flex-end;border-radius:2px;position:relative;
+  background-image:repeating-linear-gradient(180deg,rgba(255,255,255,.18) 0 1px,transparent 1px 4px),
+    linear-gradient(90deg,rgba(0,0,0,.18),rgba(255,255,255,.12) 45%,rgba(0,0,0,.2))}
+.sp.sealed::after{content:'';position:absolute;inset:-2px -1px 0;border-radius:6px;
+  background:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.08) 35%,rgba(255,255,255,.3) 60%,rgba(255,255,255,.05) 100%);
+  border:1px solid rgba(255,255,255,.7)}
+.sp-lock{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:12px;z-index:1}
+.sp-empty{flex:0 0 58px;height:120px;border:2px dashed rgba(0,0,0,.12);border-radius:8px}
+.style-chips .chip{flex:1;text-align:center}
+.seal-toggle{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-radius:var(--rs);
+  border:1.5px solid var(--border);background:var(--surface2);font-family:inherit;font-size:14px;font-weight:600;
+  color:var(--text);cursor:pointer;margin-bottom:14px;text-align:left}
+.seal-toggle .hint{margin-left:auto;font-size:11px;color:var(--text3);font-weight:500}
+.seal-check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--text2);cursor:pointer}
+.seal-check input{width:18px;height:18px;accent-color:var(--accent)}
+
+/* ── Views ── */
+.view{display:none}.view.active{display:block}
+
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
+.empty-state .icon{font-size:44px;margin-bottom:12px}
+
+/* ── Modals ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(6px);
+  z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:28px 28px 0 0;
+  width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:26px 20px 40px;
+  animation:slideUp .28s ease}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 18px}
+.modal-title{font-size:22px;font-weight:800;margin-bottom:18px}
+.modal-subtitle{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:5px}
+
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.form-input{width:100%;padding:12px 14px;border-radius:var(--rs);border:1.5px solid var(--border);
+  background:var(--surface2);font-family:inherit;font-size:15px;color:var(--text);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);
+  background:var(--surface2);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--text2);transition:all .15s}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
+.color-row{display:flex;align-items:center;gap:10px}
+.color-picker{width:46px;height:46px;border-radius:10px;border:none;cursor:pointer;padding:2px;background:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{width:100%;padding:15px;border-radius:var(--rs);
+  background:linear-gradient(135deg,var(--text),#1e40af);color:#fff;border:none;font-family:inherit;
+  font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;margin-top:8px}
+.btn-primary:hover{opacity:.9}
+.btn-danger{width:100%;padding:13px;border-radius:var(--rs);background:#fee2e2;color:var(--red);
+  border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-secondary{width:100%;padding:13px;border-radius:var(--rs);background:var(--surface2);color:var(--text2);
+  border:none;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn-outline{padding:10px 18px;border-radius:var(--rs);background:transparent;color:var(--accent);
+  border:1.5px solid var(--accent);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-outline:hover{background:var(--accent);color:#fff}
+
+/* ── Detail modal ── */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.detail-cell{background:var(--surface2);border-radius:var(--rs);padding:13px}
+.detail-cell-value{font-size:17px;font-weight:800}
+.detail-cell-label{font-size:11px;color:var(--text3);font-weight:500;margin-top:2px}
+.log-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
+.weight-slider{width:100%;accent-color:var(--accent);margin-top:5px}
+
+/* ── Stats view ── */
+.section-card{background:var(--surface);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.section-card h3{font-size:14px;font-weight:700;margin-bottom:12px}
+.bar-item{margin-bottom:14px}
+.bar-label{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;justify-content:space-between}
+.bar-bg{height:8px;background:var(--surface2);border-radius:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:8px;transition:width .5s}
+.log-item{background:var(--surface);border-radius:var(--rs);padding:13px;margin-bottom:8px;
+  box-shadow:0 1px 5px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+.log-name{font-size:14px;font-weight:600}
+.log-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.log-used{font-size:14px;font-weight:800;color:var(--accent);text-align:right}
+.tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;margin-left:4px}
+.tag-ha{background:#dbeafe;color:#1d4ed8}
+.tag-rfid{background:#dcfce7;color:#166534}
+
+/* ── Settings view ── */
+.settings-section{background:var(--surface);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.settings-section h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.settings-section p{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+.token-box{background:var(--surface2);border-radius:var(--rs);padding:11px 13px;
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--text2);word-break:break-all;
+  margin-bottom:10px;border:1px solid var(--border)}
+.token-box strong{display:block;font-size:10px;color:var(--text3);margin-bottom:3px;letter-spacing:.08em;text-transform:uppercase}
+.ha-yaml{background:#0d1117;color:#e6edf3;border-radius:var(--rs);
+  padding:13px;font-family:'Space Mono',monospace;font-size:10.5px;line-height:1.6;
+  overflow-x:auto;margin-bottom:10px;white-space:pre}
+.copy-btn{padding:8px 14px;border-radius:var(--rs);background:var(--surface2);
+  border:1.5px solid var(--border);font-family:inherit;font-size:12px;font-weight:600;
+  color:var(--text2);cursor:pointer;transition:all .2s}
+.copy-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.copy-btn.copied{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ── AMS Sync modal ── */
+.sync-slot{background:var(--surface2);border-radius:var(--rs);padding:14px;margin-bottom:12px}
+.sync-slot-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sync-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.1)}
+.sync-slot-title{font-size:14px;font-weight:700;flex:1}
+.sync-slot-sub{font-size:12px;color:var(--text3)}
+.sync-candidates{display:flex;flex-direction:column;gap:6px}
+.sync-candidate{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  background:var(--surface);border:2px solid transparent;cursor:pointer;transition:all .2s}
+.sync-candidate:hover{border-color:var(--accent2)}
+.sync-candidate.selected{border-color:var(--accent);background:#eff6ff}
+.sync-cand-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.1)}
+.sync-cand-info{flex:1;font-size:13px;font-weight:600}
+.sync-cand-sub{font-size:11px;color:var(--text3);font-weight:500}
+.sync-cand-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fef3c7;color:#92400e}
+.sync-cand-badge.bound{background:#dcfce7;color:#166534}
+.sync-none{font-size:13px;color:var(--text3);font-style:italic;padding:6px 0}
+
+/* ── AMS view (slot cards) ── */
+.ams-slot-card{background:var(--surface2);border-radius:var(--r);padding:18px;margin-bottom:14px;
+  cursor:pointer;transition:all .2s;border:2px solid transparent}
+.ams-slot-card:hover{border-color:var(--accent2)}
+.ams-slot-card.empty{border:2px dashed var(--border);background:transparent}
+.ams-slot-card-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ams-slot-num{width:30px;height:30px;border-radius:9px;background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+.ams-slot-card.empty .ams-slot-num{background:var(--border);color:var(--text3)}
+.ams-slot-title{font-size:15px;font-weight:700;flex:1}
+.ams-slot-empty-label{font-size:13px;color:var(--text3);font-weight:600}
+.ams-slot-body{display:flex;align-items:center;gap:14px}
+.ams-slot-dot{width:44px;height:44px;border-radius:50%;flex-shrink:0;border:3px solid rgba(0,0,0,.08)}
+.ams-slot-info{flex:1;min-width:0}
+.ams-slot-name{font-size:14px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ams-slot-sub{font-size:12px;color:var(--text3)}
+.ams-slot-pct{font-size:18px;font-weight:800;flex-shrink:0}
+.ams-slot-bar{height:5px;background:var(--border);border-radius:3px;margin-top:10px;overflow:hidden}
+.ams-slot-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.ams-slot-tap-hint{font-size:11px;color:var(--text3);text-align:center;margin-top:10px;font-weight:600}
+
+/* ── AMS picker modal ── */
+.ams-picker-search{width:100%;padding:13px 16px;border-radius:12px;border:2px solid var(--border);
+  background:var(--surface2);font-size:15px;margin-bottom:14px;font-family:inherit}
+.ams-picker-search:focus{outline:none;border-color:var(--accent)}
+.ams-picker-list{max-height:50vh;overflow-y:auto}
+
+/* ── Toast ── */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--text);color:#fff;padding:11px 20px;border-radius:100px;
+  font-size:14px;font-weight:600;z-index:999;transition:transform .3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{background:var(--green)}.toast.error{background:var(--red)}
+
+.version-badge{position:fixed;bottom:80px;right:12px;font-family:'Space Mono',monospace;
+  font-size:10px;color:var(--text3);background:var(--surface);padding:3px 7px;border-radius:6px;opacity:.5;pointer-events:none;z-index:50}
+
+/* ── FAB menu ── */
+.fab-menu{position:fixed;bottom:144px;right:20px;
+  display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:200;pointer-events:none}
+.fab-item{display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(10px);
+  pointer-events:none;transition:all .22s ease}
+.fab-item.show{opacity:1;transform:translateY(0);pointer-events:auto}
+.fab-item-label{background:var(--text);color:#fff;font-size:13px;font-weight:700;
+  padding:6px 12px;border-radius:100px;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.fab-item-btn{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;
+  font-size:20px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.2);flex-shrink:0;transition:transform .15s}
+.fab-item-btn:hover{transform:scale(1.1)}
+.fab-item-btn.scan{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+.fab-item-btn.manual{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.fab-item-btn.invoice{background:linear-gradient(135deg,#10b981,#0ea5e9)}
+/* ── Import fattura (v1.7.0) ── */
+.inv-drop{display:block;border:2px dashed rgba(0,0,0,.15);border-radius:var(--rs);padding:22px;text-align:center;
+  cursor:pointer;color:var(--text2);font-size:14px;font-weight:600;margin-bottom:12px}
+.inv-drop input{display:none}
+.inv-meta{font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5}
+.inv-row{display:grid;grid-template-columns:22px 34px 1fr 58px;gap:8px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--border)}
+.inv-row.off{opacity:.4}
+.inv-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+.inv-row input[type=color]{width:34px;height:34px;border:none;border-radius:50%;padding:0;background:none;cursor:pointer}
+.inv-row .inv-name{font-size:14px;font-weight:700;line-height:1.2}
+.inv-row .inv-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.inv-row .inv-color{width:100%;border:none;background:none;font:inherit;font-size:12px;color:var(--text2);padding:2px 0;outline:none;border-bottom:1px dashed transparent}
+.inv-row .inv-color:focus{border-bottom-color:var(--accent)}
+.inv-row .inv-qty{width:58px;padding:7px 6px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);
+  font:inherit;font-size:14px;font-weight:700;text-align:center}
+.inv-gift{display:inline-block;background:#fef3c7;color:#b45309;border-radius:6px;padding:0 6px;font-size:10px;font-weight:700;margin-left:4px}
+
+
+/* ── Scanner modal ── */
+.scan-modal{background:#0d1117;border-radius:28px 28px 0 0;
+  width:100%;max-width:480px;max-height:95vh;overflow-y:auto;padding:24px 20px 40px;
+  animation:slideUp .28s ease}
+#scanVideo{width:100%;border-radius:var(--r);background:#000;display:block;
+  max-height:55vw;object-fit:cover}
+.scan-frame{position:relative;margin-bottom:16px}
+.scan-overlay{position:absolute;inset:0;border-radius:var(--r);pointer-events:none;
+  display:flex;align-items:center;justify-content:center}
+.scan-box{width:200px;height:120px;border:2.5px solid rgba(255,255,255,.7);border-radius:12px;
+  box-shadow:0 0 0 1000px rgba(0,0,0,.45)}
+.scan-line{position:absolute;width:180px;height:2px;background:linear-gradient(90deg,transparent,#a855f7,transparent);
+  animation:scanAnim 2s ease-in-out infinite}
+@keyframes scanAnim{0%,100%{top:calc(50% - 55px)}50%{top:calc(50% + 55px)}}
+@keyframes nfcPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+.nfc-pulse{animation:nfcPulse 1.2s ease-in-out infinite}
+.scan-status{color:rgba(255,255,255,.8);font-size:14px;font-weight:600;text-align:center;margin-bottom:14px;min-height:20px}
+.scan-status.found{color:#4ade80}
+.scan-status.error{color:#f87171}
+.scan-tabs{display:flex;gap:8px;margin-bottom:16px}
+.scan-tab{flex:1;padding:9px;border-radius:var(--rs);border:1.5px solid rgba(255,255,255,.15);
+  background:transparent;color:rgba(255,255,255,.6);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.scan-tab.active{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
+.scan-section{display:none}.scan-section.active{display:block}
+.vision-preview{width:100%;border-radius:var(--r);max-height:200px;object-fit:contain;margin-bottom:12px;display:none}
+.scan-result-card{background:rgba(255,255,255,.08);border-radius:var(--rs);padding:14px;margin-bottom:14px;border:1px solid rgba(255,255,255,.12)}
+.scan-result-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px}
+.scan-result-key{color:rgba(255,255,255,.5);font-weight:500}
+.scan-result-val{color:#fff;font-weight:700;text-align:right;max-width:60%}
+.btn-scan-primary{width:100%;padding:14px;border-radius:var(--rs);
+  background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;font-family:inherit;
+  font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;margin-top:6px}
+.btn-scan-primary:hover{opacity:.9}
+.btn-scan-secondary{width:100%;padding:12px;border-radius:var(--rs);
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.15);
+  font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ── HOME VIEW ── -->
+<div class="view active" id="viewHome">
+  <div class="header">
+    <div class="header-label">Smart Inventory</div>
+    <h1>Filament Box</h1>
+    <div class="header-sub" id="headerSub">Loading...</div>
+  </div>
+  <div class="stats-strip">
+    <div class="stat-card"><div class="stat-value" id="statWeight">—</div><div class="stat-label">Available</div></div>
+    <div class="stat-card"><div class="stat-value" id="statMost">—</div><div class="stat-label">Most used</div></div>
+    <div class="stat-card"><div class="stat-value" id="statReorder">—</div><div class="stat-label">To reorder</div></div>
+  </div>
+  <div class="view-tabs" id="viewTabs">
+    <button class="vtab active" data-mat="all">All</button>
+    <button class="vtab" data-mat="PLA">PLA</button>
+    <button class="vtab" data-mat="PETG">PETG</button>
+    <button class="vtab" data-mat="ABS">ABS</button>
+    <button class="vtab" data-mat="TPU">TPU</button>
+  </div>
+  <input class="search-bar" id="spoolSearch" placeholder="🔍 Cerca per nome, marca, colore..." oninput="renderSpools()">
+  <div id="spoolList"></div>
+</div>
+
+<!-- ── AMS VIEW ── -->
+<div class="view" id="viewAMS">
+  <div class="header">
+    <div class="header-label">Caricamento rapido</div>
+    <h1>AMS</h1>
+    <div class="header-sub" id="amsHeaderSub">Stato live da Home Assistant</div>
+  </div>
+  <button class="btn-outline need-ha" style="width:100%;margin-bottom:16px" onclick="syncRemainFromHA()">
+    🔄 Sincronizza pesi reali da HA
+  </button>
+  <div id="amsContent"></div>
+</div>
+
+<!-- ── SCAFFALI VIEW (v1.5.0) ── -->
+<div class="view" id="viewStorage">
+  <div class="header" style="display:flex;align-items:flex-end;gap:10px">
+    <div style="flex:1">
+      <div class="header-label">Magazzino</div>
+      <h1>Scaffali</h1>
+      <div class="header-sub" id="storageSub">Caricamento...</div>
+    </div>
+    <button class="btn-outline" style="flex-shrink:0;margin-bottom:6px" onclick="openLocationEdit('')">+ Posizione</button>
+  </div>
+  <div id="storageContent"></div>
+</div>
+
+<!-- ── STATS VIEW ── -->
+<div class="view" id="viewStats">
+  <div class="header"><div class="header-label">Analytics</div><h1>Statistics</h1></div>
+  <div id="statsContent"></div>
+</div>
+
+<!-- ── SETTINGS VIEW ── -->
+<div class="view" id="viewSettings">
+  <div class="header"><div class="header-label">Configuration</div><h1>Settings</h1></div>
+
+  <div class="settings-section">
+    <h3>🤖 Claude AI · scansione etichette</h3>
+    <p>Con una chiave API di Anthropic puoi fotografare l'etichetta di una bobina e far compilare i campi a Claude. <span class="need-server">La chiave resta sul tuo server.</span><span class="need-local">La chiave resta solo in questo browser e viene inviata direttamente ad Anthropic.</span></p>
+    <div id="claudeStatus" style="padding:10px 12px;border-radius:10px;background:var(--surface2);font-size:13px;margin-bottom:10px">Caricamento...</div>
+    <div class="form-group">
+      <label class="form-label">Chiave API (sk-ant-…)</label>
+      <input class="form-input" id="claudeKey" type="password" placeholder="Incolla la chiave da console.anthropic.com" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Modello</label>
+      <select class="form-input" id="claudeModel"></select>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" style="margin-top:0" onclick="saveClaudeConfig()">💾 Salva</button>
+      <button class="btn-secondary" style="margin-top:0;flex:0 0 auto;width:auto;padding:13px 18px" onclick="testClaude()">🔌 Test</button>
+      <button class="btn-secondary" style="margin-top:0;flex:0 0 auto;width:auto;padding:13px 18px" onclick="removeClaudeKey()">🗑️ Rimuovi chiave</button>
+    </div>
+    <div id="claudeTestResult" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+  </div>
+
+  <div class="settings-section">
+    <h3>💾 Backup dei dati</h3>
+    <p>Esporta bobine, posizioni, consumi e fatture importate in un file JSON (senza token né chiavi). Puoi ripristinarlo qui o in un'altra edizione di FilamentBox.<span class="need-local"> Nell'edizione Lite i dati vivono solo in questo browser: fai un backup ogni tanto.</span></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-outline" style="flex:1" onclick="exportBackup()">⬇️ Esporta backup</button>
+      <label class="btn-outline" style="flex:1;text-align:center;cursor:pointer">⬆️ Ripristina<input type="file" accept=".json,application/json" style="display:none" onchange="importBackup(this)"></label>
+    </div>
+  </div>
+
+  <div class="settings-section need-ha">
+    <h3>🏠 Connessione Home Assistant</h3>
+    <p>Necessario per la sincronizzazione AMS. Inserisci l'URL interno di HA e un Long-Lived Access Token (Profilo → Token di accesso a lungo termine).</p>
+    <div class="form-group">
+      <label class="form-label">URL Home Assistant</label>
+      <input class="form-input" id="haUrl" placeholder="http://homeassistant.local:8123" oninput="haConfigChanged()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Long-Lived Access Token</label>
+      <input class="form-input" id="haToken" type="password" placeholder="eyJhbGciOi..." oninput="haConfigChanged()">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" style="margin-top:0" onclick="saveHaConfig()">💾 Salva</button>
+      <button class="btn-secondary" style="margin-top:0;flex:0 0 auto;width:auto;padding:13px 18px" onclick="testHaConnection()">🔌 Test</button>
+    </div>
+    <div id="haTestResult" style="margin-top:10px;font-size:13px;font-weight:600"></div>
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--text2)">Entità della stampante in Home Assistant</summary>
+      <p style="margin-top:8px">I nomi dipendono dal nome della stampante e dalla lingua di HA. Li trovi in HA → Strumenti per sviluppatori → Stati. Lascia vuoto per il valore predefinito.</p>
+      <div id="haEntities"></div>
+    </details>
+  </div>
+
+  <div class="settings-section need-ha">
+    <h3>📡 AMS Sync da Home Assistant</h3>
+    <p>Legge i filamenti attualmente caricati nell'AMS direttamente dai sensori HA e ti guida nel bindarli alla libreria. Usa questo quando inserisci nuove bobine.</p>
+    <button class="btn-outline" onclick="openAmsSync()" style="width:100%">🔄 Sincronizza AMS adesso</button>
+  </div>
+
+  <div class="settings-section need-nfc">
+    <h3>📟 Lettore NFC fisico</h3>
+    <p>Stato del lettore D1 Mini + PN532 montato vicino alla stampante — nessun bisogno di scollegare nulla per verificare che sia acceso e funzionante.</p>
+    <div id="readerStatus" style="padding:12px 14px;border-radius:10px;background:var(--surface2);font-size:13px">Caricamento...</div>
+    <button class="btn-outline" style="width:100%;margin-top:10px" onclick="loadReaderStatus()">🔄 Aggiorna stato</button>
+  </div>
+
+  <div class="settings-section need-ha">
+    <h3>🔗 Home Assistant Webhook</h3>
+    <p>Incolla il <code>rest_command</code> in <code>configuration.yaml</code> e crea l'automazione. Ogni stampa aggiorna automaticamente la bobina giusta.</p>
+    <div class="token-box"><strong>Webhook URL</strong><span id="webhookUrl">Loading...</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="copy-btn" id="copyUrlBtn" onclick="copyWebhookUrl()">📋 Copy URL</button>
+      <button class="copy-btn" onclick="regenerateToken()">🔄 Rigenera token</button>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:7px">configuration.yaml + Automazione HA</div>
+    <div class="ha-yaml" id="haYaml">Loading...</div>
+    <button class="copy-btn" id="copyYamlBtn" onclick="copyYaml()">📋 Copy YAML</button>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-item" id="fabScanItem">
+    <div class="fab-item-label">Scan barcode / label</div>
+    <button class="fab-item-btn scan" onclick="openScanner(event)">📷</button>
+  </div>
+  <div class="fab-item" id="fabInvoiceItem">
+    <div class="fab-item-label">Importa da fattura</div>
+    <button class="fab-item-btn invoice" onclick="openInvoiceImport(event)">🧾</button>
+  </div>
+  <div class="fab-item" id="fabManualItem">
+    <div class="fab-item-label">Add manually</div>
+    <button class="fab-item-btn manual" onclick="openManual(event)">✏️</button>
+  </div>
+</div>
+<button class="fab" id="fabBtn" onclick="toggleFab(event)">+</button>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navHome" onclick="showView('Home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home
+  </button>
+  <button class="nav-btn" id="navAMS" onclick="showView('AMS')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="14" r="2"/></svg>AMS
+  </button>
+  <button class="nav-btn" id="navStorage" onclick="showView('Storage')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="6" rx="1"/><path d="M5 10v10h14V10"/><line x1="10" y1="14" x2="14" y2="14"/></svg>Scaffali
+  </button>
+  <button class="nav-btn" id="navStats" onclick="showView('Stats')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Statistics
+  </button>
+  <a class="nav-btn need-prismatica" id="navPrismatica" href="prismatica/index.html" style="text-decoration:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l9 16H3z"/><path d="M12 3v16M7.5 11h9"/></svg>Prismatica
+  </a>
+  <button class="nav-btn" id="navSettings" onclick="showView('Settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
+  </button>
+</nav>
+
+<div class="version-badge" id="versionBadge">v2.0.1</div>
+<div class="toast" id="toast"></div>
+
+<!-- ── IMPORT FATTURA MODAL (v1.7.0) ── -->
+<div class="modal-overlay" id="invoiceModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Nuove bobine</div>
+    <div class="modal-title">Importa da fattura</div>
+    <label class="inv-drop" id="invDrop">
+      <input type="file" id="invFile" accept="application/pdf,.pdf" onchange="onInvoiceFile(this.files[0])">
+      <span id="invDropText">📄 Scegli il PDF della fattura<br><span style="font-size:12px;font-weight:500;color:var(--text3)">Bambu Lab Store (EU)</span></span>
+    </label>
+    <div id="invResult"></div>
+    <div id="invOptions" style="display:none">
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">Posizione per tutte</label>
+        <input class="form-input" id="invLocation" list="invLocList" placeholder="Scaffale 1, Box N... (opzionale)">
+        <datalist id="invLocList"></datalist>
+      </div>
+      <div class="form-group"><label class="seal-check"><input type="checkbox" id="invSealed" checked> 🔒 Segna come sigillate</label></div>
+      <button class="btn-primary" id="invSaveBtn" onclick="saveInvoiceImport()">Aggiungi bobine</button>
+    </div>
+    <button class="btn-secondary" onclick="closeModal('invoiceModal')">Chiudi</button>
+  </div>
+</div>
+
+<!-- ── ADD MODAL ── -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">New Spool</div>
+    <div class="modal-title">Add filament</div>
+    <div class="chips" id="addMatChips">
+      <button class="chip active" data-val="PLA">PLA</button>
+      <button class="chip" data-val="PETG">PETG</button>
+      <button class="chip" data-val="ABS">ABS</button>
+      <button class="chip" data-val="TPU">TPU</button>
+      <button class="chip" data-val="ASA">ASA</button>
+      <button class="chip" data-val="Nylon">Nylon</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Brand</label>
+      <input class="form-input" id="addBrand" placeholder="Bambu Lab, Anycubic, Overture...">
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:7px">
+        <button class="chip" onclick="qi('addBrand','Bambu Lab')">Bambu Lab</button>
+        <button class="chip" onclick="qi('addBrand','Anycubic')">Anycubic</button>
+        <button class="chip" onclick="qi('addBrand','Overture')">Overture</button>
+        <button class="chip" onclick="qi('addBrand','Creality')">Creality</button>
+        <button class="chip" onclick="qi('addBrand','Prusament')">Prusament</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Name / commercial color</label><input class="form-input" id="addName" placeholder="PLA Basic, Matte PLA..."></div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="color-row">
+        <input type="color" class="color-picker" id="addColorHex" value="#22c55e">
+        <input class="form-input" id="addColorName" placeholder="Color name (e.g. Jade Green)">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Spool weight (g)</label><input class="form-input" id="addTotal" type="number" value="1000"></div>
+      <div class="form-group"><label class="form-label">Remaining (g)</label><input class="form-input" id="addRemaining" type="number" value="1000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nozzle min (°C)</label><input class="form-input" id="addNozzMin" type="number" value="190"></div>
+      <div class="form-group"><label class="form-label">Nozzle max (°C)</label><input class="form-input" id="addNozzMax" type="number" value="220"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Bed (°C)</label><input class="form-input" id="addBed" type="number" value="60"></div>
+    <div class="form-group">
+      <label class="form-label">Posizione</label>
+      <input class="form-input" id="addLocation" placeholder="Scaffale 1, Scaffale 2, Armadio...">
+      <div class="chips" style="margin-top:8px">
+        <button class="chip" onclick="qi('addLocation','Scaffale 1')">Scaffale 1</button>
+        <button class="chip" onclick="qi('addLocation','Scaffale 2')">Scaffale 2</button>
+        <button class="chip" onclick="qi('addLocation','Scaffale 3')">Scaffale 3</button>
+      </div>
+    </div>
+    <div class="form-group"><label class="seal-check"><input type="checkbox" id="addSealed"> 🔒 Sigillata (mai aperta)</label></div>
+    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="addNotes" placeholder="Optional notes..."></div>
+    <button class="btn-primary" onclick="saveSpool()">Save filament</button>
+    <button class="btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ── DETAIL MODAL ── -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" id="detailContent"></div>
+</div>
+
+<!-- ── EDIT MODAL ── -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Edit</div>
+    <div class="modal-title">Update spool</div>
+    <input type="hidden" id="editId">
+    <div class="chips" id="editMatChips">
+      <button class="chip active" data-val="PLA">PLA</button>
+      <button class="chip" data-val="PETG">PETG</button>
+      <button class="chip" data-val="ABS">ABS</button>
+      <button class="chip" data-val="TPU">TPU</button>
+      <button class="chip" data-val="ASA">ASA</button>
+      <button class="chip" data-val="Nylon">Nylon</button>
+    </div>
+    <div class="form-group"><label class="form-label">Brand</label><input class="form-input" id="editBrand"></div>
+    <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="editName"></div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="color-row">
+        <input type="color" class="color-picker" id="editColorHex">
+        <input class="form-input" id="editColorName" placeholder="Color name">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Spool weight (g)</label><input class="form-input" id="editTotal" type="number"></div>
+      <div class="form-group"><label class="form-label">Remaining (g)</label><input class="form-input" id="editRemaining" type="number"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nozzle min (°C)</label><input class="form-input" id="editNozzMin" type="number"></div>
+      <div class="form-group"><label class="form-label">Nozzle max (°C)</label><input class="form-input" id="editNozzMax" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Bed (°C)</label><input class="form-input" id="editBed" type="number"></div>
+    <div class="form-group">
+      <label class="form-label">Posizione</label>
+      <input class="form-input" id="editLocation" placeholder="Scaffale 1, Scaffale 2, Armadio...">
+    </div>
+    <div class="form-group"><label class="seal-check"><input type="checkbox" id="editSealed"> 🔒 Sigillata (mai aperta)</label></div>
+    <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="editNotes"></div>
+    <button class="btn-primary" onclick="updateSpool()">Save changes</button>
+    <button class="btn-danger" onclick="deleteSpool()">Delete spool</button>
+    <button class="btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ── LOCATION MODAL (v1.5.0) ── -->
+<div class="modal-overlay" id="locationModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Scaffali</div>
+    <div class="modal-title" id="locModalTitle">Posizione</div>
+    <input type="hidden" id="locOldName">
+    <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="locName" placeholder="Scaffale 1, Box N, Armadio..."></div>
+    <div class="form-group"><label class="form-label">Capienza (bobine)</label><input class="form-input" id="locCapacity" type="number" min="1" placeholder="es. 10 — vuoto = illimitata"></div>
+    <div class="form-group">
+      <label class="form-label">Aspetto</label>
+      <div class="chips style-chips" id="locStyleChips">
+        <button class="chip" data-val="box">📦 Box</button>
+        <button class="chip" data-val="wood">🪵 Legno</button>
+        <button class="chip active" data-val="shelf">🗄️ Ripiano</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveLocation()">Salva</button>
+    <button class="btn-danger" id="locDeleteBtn" onclick="deleteLocation()">Elimina posizione</button>
+    <button class="btn-secondary" onclick="closeModal('locationModal')">Annulla</button>
+  </div>
+</div>
+
+<!-- ── AMS SYNC MODAL ── -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Home Assistant</div>
+    <div class="modal-title">AMS Sync</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5">
+      Questi sono i filamenti rilevati nell'AMS dalla P1S. Associa ogni slot alla bobina corrispondente nella libreria.
+    </p>
+    <div id="syncContent">Loading...</div>
+    <button class="btn-primary" id="syncSaveBtn" onclick="saveSyncBindings()" style="display:none">💾 Salva bindings</button>
+    <button class="btn-secondary" onclick="closeModal('syncModal')">Chiudi</button>
+  </div>
+</div>
+
+<!-- ── AMS PICKER MODAL ── -->
+<div class="modal-overlay" id="amsPickerModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Carica filamento</div>
+    <div class="modal-title" id="amsPickerTitle">Assegna bobina</div>
+    <input class="ams-picker-search" id="amsPickerSearch" placeholder="Cerca per nome, marca, colore...">
+    <div class="ams-picker-list" id="amsPickerList"></div>
+    <button class="btn-secondary" onclick="closeModal('amsPickerModal')">Chiudi</button>
+  </div>
+</div>
+
+<!-- ── NFC WRITE STATUS MODAL ── -->
+<div class="modal-overlay" id="nfcWriteModal">
+  <div class="modal" style="text-align:center">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Lettore fisico PN532</div>
+    <div id="nfcWriteIcon" style="font-size:56px;margin:16px 0">📟</div>
+    <div class="modal-title" id="nfcWriteTitle" style="margin-bottom:8px">Invio comando al lettore...</div>
+    <div id="nfcWriteSubtitle" style="color:var(--text3);font-size:14px;margin-bottom:20px">Attendere...</div>
+    <div id="nfcWriteActions">
+      <button class="btn-secondary" onclick="closeModal('nfcWriteModal')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ASSIGN LOG TO SPOOL MODAL ── -->
+<div class="modal-overlay" id="assignLogModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-subtitle">Log di stampa non assegnato</div>
+    <div class="modal-title">A quale bobina appartiene?</div>
+    <input class="ams-picker-search" id="assignLogSearch" placeholder="Cerca per nome, marca, colore...">
+    <div class="ams-picker-list" id="assignLogList"></div>
+    <button class="btn-secondary" onclick="closeModal('assignLogModal')">Chiudi</button>
+  </div>
+</div>
+
+<!-- ── SCANNER MODAL ── -->
+<div class="modal-overlay" id="scanModal">
+  <div class="scan-modal">
+    <div class="modal-handle" style="background:rgba(255,255,255,.2)"></div>
+    <div style="color:rgba(255,255,255,.5);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">Add filament</div>
+    <div style="color:#fff;font-size:22px;font-weight:800;margin-bottom:16px">Scan filament</div>
+
+    <div class="scan-tabs">
+      <button class="scan-tab active" onclick="switchScanTab('barcode',this)">📦 Barcode</button>
+      <button class="scan-tab" onclick="switchScanTab('vision',this)">🤖 AI Label Scan</button>
+    </div>
+
+    <!-- BARCODE TAB -->
+    <div class="scan-section active" id="scanBarcode">
+      <div class="scan-frame">
+        <video id="scanVideo" autoplay playsinline muted></video>
+        <div class="scan-overlay">
+          <div style="position:relative;display:flex;align-items:center;justify-content:center">
+            <div class="scan-box"></div>
+            <div class="scan-line"></div>
+          </div>
+        </div>
+      </div>
+      <div class="scan-status" id="scanStatus">Punta la fotocamera sul barcode della confezione</div>
+      <div id="scanResultCard" style="display:none"></div>
+      <button class="btn-scan-primary" id="scanUseBtn" style="display:none" onclick="useScanResult()">✅ Usa questi dati</button>
+      <button class="btn-scan-secondary" onclick="rescan()">🔄 Scansiona di nuovo</button>
+    </div>
+
+    <!-- VISION TAB -->
+    <div class="scan-section" id="scanVision">
+      <div style="color:rgba(255,255,255,.7);font-size:13px;line-height:1.6;margin-bottom:16px">
+        Fotografa l'etichetta della bobina. Claude leggerà brand, materiale, colore e temperature direttamente dall'immagine.
+      </div>
+      <img id="visionPreview" class="vision-preview">
+      <div class="scan-status" id="visionStatus"></div>
+      <div id="visionResultCard" style="display:none"></div>
+      <button class="btn-scan-primary" id="visionUseBtn" style="display:none" onclick="useVisionResult()">✅ Usa questi dati</button>
+      <label style="width:100%">
+        <div class="btn-scan-secondary" style="text-align:center;cursor:pointer">📷 Scatta foto etichetta</div>
+        <input type="file" accept="image/*" capture="environment" id="visionInput" style="display:none" onchange="handleVisionPhoto(this)">
+      </label>
+    </div>
+
+    <button class="btn-scan-secondary" onclick="closeScanner()" style="margin-top:10px">Annulla</button>
+  </div>
+</div>
+
+<script>
+let spools=[], currentFilter='all', syncSuggestions=[], syncSelections={};
+
+// ── SVG ───────────────────────────────────────────────────
+function spoolSVG(color,pct,size=80){
+  const cx=size/2,cy=size/2,oR=size*.42,cR=size*.22,rings=7;
+  const filled=Math.max(0,Math.min(rings,Math.round(pct*rings)));
+  let p='';
+  for(let i=rings;i>=1;i--){
+    const r=cR+(oR-cR)*(i/rings);
+    p+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="1.7" opacity="${i<=filled?1:.11}"/>`;
+  }
+  return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${cx}" cy="${cy}" r="${oR+4}" fill="rgba(255,255,255,.5)"/>
+    ${p}<circle cx="${cx}" cy="${cy}" r="${cR}" fill="#1a1a2e"/>
+    <circle cx="${cx}" cy="${cy}" r="${oR+4}" fill="none" stroke="rgba(0,0,0,.05)" stroke-width="1.5"/>
+  </svg>`;
+}
+
+// ── Utils ─────────────────────────────────────────────────
+function qi(id,val){document.getElementById(id).value=val}
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.className=`toast${type?' '+type:''} show`;setTimeout(()=>t.classList.remove('show'),2600);
+}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function wLabel(g){return g>=1000?(g/1000).toFixed(2)+' kg':g+'g'}
+
+// ── Views ─────────────────────────────────────────────────
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view'+name).classList.add('active');
+  document.getElementById('nav'+name).classList.add('active');
+  document.getElementById('fabBtn').style.display=name==='Home'?'flex':'none';
+  if(name==='AMS') loadAMSView();
+  if(name==='Storage') loadStorage();
+  if(name==='Stats') loadStats();
+  if(name==='Settings') loadSettings();
+}
+
+// ── Material colors ───────────────────────────────────────
+const MAT_COLORS={PLA:'#22c55e',PETG:'#3b82f6',ABS:'#f59e0b',TPU:'#a855f7',ASA:'#ef4444',Nylon:'#06b6d4'};
+
+// ── Load & render spools ──────────────────────────────────
+async function loadSpools(){
+  try{
+    spools=await(await fetch(`/api/spools?material=${currentFilter}`)).json();
+    renderSpools();
+    const s=await(await fetch('/api/stats')).json();
+    document.getElementById('statWeight').textContent=s.totalWeight>=1000?(s.totalWeight/1000).toFixed(1)+' kg':s.totalWeight+'g';
+    document.getElementById('statMost').textContent=s.mostUsed;
+    document.getElementById('statReorder').textContent=s.toReorder;
+    const low=s.runningLow>0?`<span class="warn">${s.runningLow} running low</span>`:'0 running low';
+    document.getElementById('headerSub').innerHTML=`${s.totalSpools} saved spools · ${low}`;
+  }catch(e){console.error(e)}
+}
+
+function renderSpools(){
+  const el=document.getElementById('spoolList');
+  if(!spools.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">🧵</div><p>No spools yet. Tap + to add your first filament.</p></div>';
+    return;
+  }
+
+  const query=(document.getElementById('spoolSearch')?.value||'').trim().toLowerCase();
+  let filtered=spools;
+  if(query){
+    filtered=spools.filter(s=>
+      (s.name||'').toLowerCase().includes(query)
+      || (s.brand||'').toLowerCase().includes(query)
+      || (s.material||'').toLowerCase().includes(query)
+      || (s.colorName||'').toLowerCase().includes(query)
+      || (s.location||'').toLowerCase().includes(query)
+    );
+  }
+
+  if(!filtered.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">🔍</div><p>Nessuna bobina trovata per "'+query+'".</p></div>';
+    return;
+  }
+
+  if(currentFilter!=='all'){
+    el.innerHTML=filtered.map(s=>spoolCardHTML(s)).join('');
+    return;
+  }
+
+  // Group by material
+  const groups={};
+  filtered.forEach(s=>{
+    if(!groups[s.material])groups[s.material]=[];
+    groups[s.material].push(s);
+  });
+  const matOrder=['PLA','PETG','ABS','TPU','ASA','Nylon'];
+  const sorted=Object.keys(groups).sort((a,b)=>{
+    const ia=matOrder.indexOf(a), ib=matOrder.indexOf(b);
+    return (ia===-1?99:ia)-(ib===-1?99:ib);
+  });
+  el.innerHTML=sorted.map(mat=>`
+    <div class="mat-section" id="matSec_${mat}">
+      <div class="mat-header" onclick="toggleMat('${mat}')">
+        <div class="mat-dot" style="background:${MAT_COLORS[mat]||'#888'}"></div>
+        <div class="mat-title">${mat}</div>
+        <div class="mat-count">${groups[mat].length} spool${groups[mat].length>1?'s':''}</div>
+        <div class="mat-chevron">▼</div>
+      </div>
+      <div class="mat-body">${groups[mat].map(s=>spoolCardHTML(s)).join('')}</div>
+    </div>`).join('');
+}
+
+function toggleMat(mat){
+  document.getElementById('matSec_'+mat).classList.toggle('collapsed');
+}
+
+function spoolCardHTML(s){
+  const pct=s.totalWeight>0?s.remainingWeight/s.totalWeight:0;
+  let badge='';
+  if(s.amsSlot!==null&&s.amsSlot!==undefined) badge=`<span class="status-badge badge-slot">AMS ${s.amsSlot}</span>`;
+  else if(s.status==='low') badge='<span class="status-badge badge-low">Low</span>';
+  else if(s.status==='empty') badge='<span class="status-badge badge-empty">Empty</span>';
+
+  const hasOtherBadge = (s.amsSlot!==null&&s.amsSlot!==undefined) || s.status==='low' || s.status==='empty';
+  const newBadge=(s.createdViaNfc && !s.location)
+    ? `<span class="status-badge" style="background:#f59e0b;color:#fff;${hasOtherBadge?'top:44px;':''}">📍 NEW</span>` : '';
+
+  const badgeCount = (hasOtherBadge?1:0) + (s.createdViaNfc && !s.location?1:0);
+  const tagBadge = s.nfcUid
+    ? `<span class="status-badge" style="background:#6366f1;color:#fff;${badgeCount>0?`top:${14+badgeCount*30}px;`:''}">🏷️ Tag</span>` : '';
+
+  // AMS slot select options
+  const slotOpts=['<option value="">— No slot —</option>',
+    [1,2,3,4].map(n=>`<option value="${n}" ${s.amsSlot===n?'selected':''}>AMS Slot ${n}</option>`).join(''),
+    `<option value="ext" ${s.printerSlot==='p1s_ext'?'selected':''}>Bobina Esterna</option>`
+  ].join('');
+
+  const hasSlot=s.amsSlot!==null&&s.amsSlot!==undefined;
+
+  return `<div class="spool-card" id="card_${s.id}">
+    <div class="spool-card-main" onclick="openDetail('${s.id}')">
+      <div class="spool-info">
+        <div class="spool-brand">${s.brand}</div>
+        <div class="spool-name">${s.material}</div>
+        <div class="spool-colorname">
+          <div class="color-swatch" style="background:${s.colorHex}"></div>
+          ${s.colorName||s.name}
+        </div>
+        ${(s.location||s.sealed)?`<div style="font-size:11px;color:var(--text3);margin-top:2px">${s.location?'📍 '+s.location:''}${s.location&&s.sealed?' · ':''}${s.sealed?'🔒 Sigillata':''}</div>`:''}
+        <div class="spool-weight">${wLabel(s.remainingWeight)} <span class="spool-weight-label">remaining</span></div>
+        <div class="spool-bar"><div class="spool-bar-fill" style="width:${Math.max(2,pct*100)}%;background:${s.colorHex}"></div></div>
+      </div>
+      <div class="spool-svg-wrap">${spoolSVG(s.colorHex,pct)}</div>
+      ${badge}
+      ${newBadge}
+      ${tagBadge}
+    </div>
+    <div class="ams-row">
+      <div class="ams-row-label">🖨️ P1S:</div>
+      <select class="ams-select ${hasSlot?'has-slot':''}" id="amsSelect_${s.id}" onchange="onAmsSelectChange('${s.id}',this)">
+        ${slotOpts}
+      </select>
+      <button class="ams-save-btn" onclick="saveAmsSlot('${s.id}')">Save</button>
+    </div>
+  </div>`;
+}
+
+function onAmsSelectChange(id, sel){
+  sel.classList.toggle('has-slot', sel.value!=='');
+}
+
+async function saveAmsSlot(id){
+  const sel=document.getElementById('amsSelect_'+id);
+  const val=sel.value;
+  let amsSlot=null, printerSlot=null;
+  if(val==='ext'){printerSlot='p1s_ext';}
+  else if(val){amsSlot=parseInt(val);printerSlot='p1s';}
+
+  await fetch(`/api/spools/${id}/assign-slot`,{
+    method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({amsSlot,printerSlot})
+  });
+  await loadSpools();
+  showToast(val?`Assegnata a ${val==='ext'?'Bobina Esterna':'AMS Slot '+val}`:'Slot rimosso','success');
+}
+
+// ── View tabs ─────────────────────────────────────────────
+document.getElementById('viewTabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.vtab');if(!btn)return;
+  document.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=btn.dataset.mat;
+  loadSpools();
+});
+
+// ── Detail ────────────────────────────────────────────────
+function findSpool(id){return spools.find(sp=>sp.id===id)||storageSpools.find(sp=>sp.id===id)}
+async function openDetail(id){
+  const s=findSpool(id);if(!s)return;
+  const pct=s.totalWeight>0?s.remainingWeight/s.totalWeight:0;
+  const slotInfo=s.amsSlot?`<div style="background:#dbeafe;color:#1d4ed8;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:13px;font-weight:600">🖨️ Assegnata ad <strong>AMS Slot ${s.amsSlot}</strong></div>`:'';
+  document.getElementById('detailContent').innerHTML=`
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div class="modal-subtitle">Filament Details</div><div class="modal-title">${s.name||s.material}</div></div>
+      <button onclick="openEdit('${s.id}')" style="background:var(--surface2);border:none;border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2)">Edit</button>
+    </div>
+    <div style="display:flex;justify-content:center;padding:16px 0 8px">${spoolSVG(s.colorHex,pct,120)}</div>
+    <div style="text-align:center;font-size:19px;font-weight:800;margin-bottom:3px">${wLabel(s.remainingWeight)}</div>
+    <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:14px">Estimated remaining</div>
+    ${slotInfo}
+    <button class="seal-toggle" onclick="toggleSealed('${s.id}')">
+      ${s.sealed?'🔒 Sigillata':'📭 Aperta'}<span class="hint">tocca per segnare come ${s.sealed?'aperta':'sigillata'}</span>
+    </button>
+    ${s.nfcUid ? `
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+      <div style="flex:1;font-size:13px"><strong>🏷️ Tag abbinato</strong><br><span style="color:var(--text3);font-size:11px">UID ${s.nfcUid}</span></div>
+      <button class="btn-secondary" style="width:auto;padding:8px 14px;font-size:13px" onclick="removeNFCTag('${s.id}')">Rimuovi</button>
+    </div>` : ''}
+    <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px">📡 Scrivi tag NFC (OpenTag3D)</div>
+    <button class="btn-outline need-nfc" style="width:100%;margin-bottom:8px" onclick="queueNFCWrite('${s.id}')">
+      📟 Scrivi via lettore fisico (PN532)
+    </button>
+    <button class="btn-outline" style="width:100%;margin-bottom:14px" onclick="downloadNFCBin('${s.id}')">
+      📱 Scarica .bin per telefono + NFC Tools Pro
+    </button>
+    <div class="detail-grid">
+      <div class="detail-cell"><div class="detail-cell-value">${s.material}</div><div class="detail-cell-label">Material</div></div>
+      <div class="detail-cell"><div class="detail-cell-value">${s.nozzleMin}–${s.nozzleMax}°C</div><div class="detail-cell-label">Nozzle</div></div>
+      <div class="detail-cell"><div class="detail-cell-value">${s.bedTemp}°C</div><div class="detail-cell-label">Bed</div></div>
+      <div class="detail-cell"><div class="detail-cell-value" style="color:${s.status==='available'?'var(--green)':s.status==='low'?'var(--yellow)':'var(--red)'}">
+        ${s.status.charAt(0).toUpperCase()+s.status.slice(1)}</div><div class="detail-cell-label">Status</div></div>
+    </div>
+    ${s.notes?`<div style="background:var(--surface2);border-radius:var(--rs);padding:13px;margin-bottom:14px"><div style="font-size:13px;font-weight:700;margin-bottom:5px">📝 Notes</div><div style="font-size:14px;color:var(--text2)">${s.notes}</div></div>`:''}
+    <div class="log-section">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:10px">🖨️ Log print manually</h3>
+      <div class="form-group">
+        <label class="form-label">Print name (optional)</label>
+        <input class="form-input" id="logName" placeholder="e.g. Benchy...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Used: <strong id="logVal">${Math.min(50,Math.max(1,s.remainingWeight))}</strong> g</label>
+        <input type="range" class="weight-slider" id="logSlider" min="1" max="${Math.max(2,Math.min(s.remainingWeight,500))}" value="${Math.min(50,Math.max(1,s.remainingWeight))}"
+          oninput="document.getElementById('logVal').textContent=this.value">
+      </div>
+      <button class="btn-primary" onclick="logPrint('${s.id}')">🖨️ Log print</button>
+    </div>
+    <button class="btn-secondary" onclick="closeModal('detailModal')" style="margin-top:8px">Close</button>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+async function logPrint(id){
+  const used=parseInt(document.getElementById('logSlider').value);
+  const name=document.getElementById('logName').value;
+  await fetch(`/api/spools/${id}/log`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usedWeight:used,printName:name})});
+  closeModal('detailModal');loadSpools();refreshStorageIfOpen();showToast(`−${used}g logged`,'success');
+}
+
+// ── Edit / Delete ─────────────────────────────────────────
+function openEdit(id){
+  const s=findSpool(id);if(!s)return;
+  closeModal('detailModal');
+  document.getElementById('editId').value=s.id;
+  document.getElementById('editBrand').value=s.brand;
+  document.getElementById('editName').value=s.name;
+  document.getElementById('editColorHex').value=s.colorHex;
+  document.getElementById('editColorName').value=s.colorName;
+  document.getElementById('editTotal').value=s.totalWeight;
+  document.getElementById('editRemaining').value=s.remainingWeight;
+  document.getElementById('editNozzMin').value=s.nozzleMin;
+  document.getElementById('editNozzMax').value=s.nozzleMax;
+  document.getElementById('editBed').value=s.bedTemp;
+  document.getElementById('editLocation').value=s.location||'';
+  document.getElementById('editNotes').value=s.notes;
+  document.getElementById('editSealed').checked=!!s.sealed;
+  setupChips('editMatChips',s.material);
+  document.getElementById('editModal').classList.add('open');
+}
+
+async function updateSpool(){
+  const id=document.getElementById('editId').value;
+  const mat=document.querySelector('#editMatChips .chip.active')?.dataset.val||'PLA';
+  await fetch(`/api/spools/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    material:mat,brand:document.getElementById('editBrand').value,name:document.getElementById('editName').value,
+    colorHex:document.getElementById('editColorHex').value,colorName:document.getElementById('editColorName').value,
+    totalWeight:+document.getElementById('editTotal').value,remainingWeight:+document.getElementById('editRemaining').value,
+    nozzleMin:+document.getElementById('editNozzMin').value,nozzleMax:+document.getElementById('editNozzMax').value,
+    bedTemp:+document.getElementById('editBed').value,notes:document.getElementById('editNotes').value,
+    location:document.getElementById('editLocation').value,
+    sealed:document.getElementById('editSealed').checked
+  })});
+  closeModal('editModal');loadSpools();refreshStorageIfOpen();showToast('Spool updated','success');
+}
+
+async function deleteSpool(){
+  if(!confirm('Delete this spool?'))return;
+  const id=document.getElementById('editId').value;
+  await fetch(`/api/spools/${id}`,{method:'DELETE'});
+  closeModal('editModal');loadSpools();showToast('Spool deleted');
+}
+
+// ── Add ───────────────────────────────────────────────────
+
+async function saveSpool(){
+  const mat=document.querySelector('#addMatChips .chip.active')?.dataset.val||'PLA';
+  await fetch('/api/spools',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    material:mat,brand:document.getElementById('addBrand').value,name:document.getElementById('addName').value,
+    colorHex:document.getElementById('addColorHex').value,colorName:document.getElementById('addColorName').value,
+    totalWeight:+document.getElementById('addTotal').value||1000,remainingWeight:+document.getElementById('addRemaining').value||1000,
+    nozzleMin:+document.getElementById('addNozzMin').value||190,nozzleMax:+document.getElementById('addNozzMax').value||220,
+    bedTemp:+document.getElementById('addBed').value||60,notes:document.getElementById('addNotes').value,
+    location:document.getElementById('addLocation').value,
+    sealed:document.getElementById('addSealed').checked
+  })});
+  closeModal('addModal');loadSpools();showToast('Spool added!','success');
+  ['addBrand','addName','addColorName','addNotes','addLocation'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('addSealed').checked=false;
+  document.getElementById('addTotal').value=1000;document.getElementById('addRemaining').value=1000;
+  setupChips('addMatChips','PLA');
+}
+
+// ── Scaffali (v1.5.0) ────────────────────────────────────
+let storageSpools=[], storageLocations=[];
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function refreshStorageIfOpen(){
+  if(document.getElementById('viewStorage').classList.contains('active')) loadStorage();
+}
+
+async function loadStorage(){
+  const el=document.getElementById('storageContent');
+  try{
+    const [locs,sp]=await Promise.all([
+      fetch('/api/locations').then(r=>r.json()),
+      fetch('/api/spools').then(r=>r.json())
+    ]);
+    storageLocations=locs; storageSpools=sp;
+  }catch(e){
+    el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><p>Errore di caricamento.</p></div>';return;
+  }
+  const unplaced=storageSpools.filter(s=>!(s.location||'').trim());
+  const placed=storageSpools.length-unplaced.length;
+  document.getElementById('storageSub').textContent=
+    `${storageLocations.length} posizioni · ${placed} riposte${unplaced.length?` · ${unplaced.length} senza posizione`:''}`;
+
+  if(!storageLocations.length && !unplaced.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">🗄️</div><p>Nessuna posizione. Tocca “+ Posizione” o assegna una posizione alle bobine.</p></div>';
+    return;
+  }
+  let html=storageLocations.map(l=>{
+    const list=storageSpools.filter(s=>(s.location||'').trim()===l.name);
+    const cap=l.capacity;
+    const full=cap&&list.length>=cap;
+    return shelfHTML({
+      title:l.name, style:l.style, list, cap,
+      sub:`Sigillate: ${l.sealed} · Aperte: ${l.opened}`,
+      count:cap?`${list.length} / ${cap}`:`${list.length}`, full,
+      editName:l.name
+    });
+  }).join('');
+  if(unplaced.length){
+    html+=shelfHTML({
+      title:'Senza posizione', style:'box', list:unplaced, cap:null,
+      sub:`Sigillate: ${unplaced.filter(s=>s.sealed).length} · Aperte: ${unplaced.filter(s=>!s.sealed).length}`,
+      count:`${unplaced.length}`, full:false, editName:null
+    });
+  }
+  el.innerHTML=html;
+}
+
+function shelfHTML({title,style,list,cap,sub,count,full,editName}){
+  const spoolsHtml=list.map(s=>{
+    const pct=s.totalWeight>0?Math.max(0,Math.min(1,s.remainingWeight/s.totalWeight)):0;
+    const h=Math.round(28+pct*72);  // altezza = residuo; il 28% basso è coperto dal frontale
+    const tip=`${s.brand} ${s.name||s.material} — ${s.colorName||''} — ${wLabel(s.remainingWeight)}${s.sealed?' — sigillata':''}`;
+    return `<button class="sp${s.sealed?' sealed':''}" title="${esc(tip)}" onclick="openDetail('${s.id}')">
+      <div class="sp-flange"></div>
+      <div class="sp-body" style="height:${h}%;background-color:${esc(s.colorHex||'#888')}"></div>
+      <div class="sp-flange"></div>
+      ${s.sealed?'<span class="sp-lock">🔒</span>':''}
+    </button>`;
+  }).join('');
+  const empties=cap&&cap>list.length?'<div class="sp-empty"></div>'.repeat(Math.min(cap-list.length,20)):'';
+  return `<div class="loc-section">
+    <div class="loc-head">
+      <div><div class="loc-title">${esc(title)}</div><div class="loc-sub">${sub}</div></div>
+      <div class="loc-count${full?' full':''}">${count}</div>
+      ${editName!==null?`<button class="loc-edit" onclick="openLocationEdit(decodeURIComponent('${encodeURIComponent(editName)}'))" aria-label="Modifica">✏️</button>`:''}
+    </div>
+    <div class="shelf st-${style||'shelf'}">
+      <div class="shelf-row">${spoolsHtml}${empties}</div>
+      <div class="shelf-front"></div>
+    </div>
+  </div>`;
+}
+
+function openLocationEdit(name){
+  const l=storageLocations.find(x=>x.name===name);
+  document.getElementById('locOldName').value=name||'';
+  document.getElementById('locName').value=name||'';
+  document.getElementById('locCapacity').value=l&&l.capacity?l.capacity:'';
+  document.getElementById('locModalTitle').textContent=name?'Modifica posizione':'Nuova posizione';
+  document.getElementById('locDeleteBtn').style.display=name?'block':'none';
+  setupChips('locStyleChips',l?l.style:'shelf');
+  document.getElementById('locationModal').classList.add('open');
+}
+
+async function saveLocation(){
+  const oldName=document.getElementById('locOldName').value;
+  const newName=document.getElementById('locName').value.trim();
+  if(!newName){showToast('Inserisci un nome','error');return;}
+  const style=document.querySelector('#locStyleChips .chip.active')?.dataset.val||'shelf';
+  await fetch('/api/locations',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    name:oldName||newName,newName,capacity:document.getElementById('locCapacity').value,style
+  })});
+  closeModal('locationModal');loadStorage();loadSpools();showToast('Posizione salvata','success');
+}
+
+async function deleteLocation(){
+  const name=document.getElementById('locOldName').value;
+  if(!name||!confirm(`Eliminare "${name}"? Le bobine resteranno senza posizione.`))return;
+  await fetch('/api/locations/'+encodeURIComponent(name),{method:'DELETE'});
+  closeModal('locationModal');loadStorage();loadSpools();showToast('Posizione eliminata');
+}
+
+async function toggleSealed(id){
+  const s=findSpool(id);if(!s)return;
+  await fetch(`/api/spools/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({sealed:!s.sealed})});
+  s.sealed=!s.sealed;
+  await loadSpools();refreshStorageIfOpen();
+  openDetail(id);
+  showToast(s.sealed?'Segnata come sigillata':'Segnata come aperta','success');
+}
+
+// ── AMS view ──────────────────────────────────────────────
+let amsSpoolsCache=[];
+
+async function syncRemainFromHA(){
+  showToast('🔄 Sincronizzazione in corso...','');
+  try{
+    const res=await fetch('/api/sync-remain-from-ha',{method:'POST'});
+    const data=await res.json();
+    if(data.error){
+      showToast('❌ '+data.error,'error');
+      return;
+    }
+    if(data.updated===0){
+      showToast('✅ Già tutto sincronizzato, nessuna differenza','success');
+    } else {
+      const details=data.details.map(d=>`${d.spoolName}: ${d.oldWeight}g → ${d.newWeight}g`).join(', ');
+      showToast(`✅ Aggiornate ${data.updated} bobine: ${details}`,'success');
+    }
+    loadAMSView();
+  }catch(e){
+    showToast('❌ Errore di connessione','error');
+  }
+}
+
+async function loadAMSView(){
+  const content=document.getElementById('amsContent');
+  content.innerHTML='<p style="color:var(--text3);text-align:center;padding:30px">Lettura stato AMS da Home Assistant...</p>';
+
+  const [amsRes,spRes]=await Promise.all([fetch('/api/ha-ams-slots'),fetch('/api/spools')]);
+  const amsData=await amsRes.json();
+  amsSpoolsCache=await spRes.json();
+
+  if(amsData.error){
+    content.innerHTML=`
+      <div style="text-align:center;padding:30px">
+        <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+        <div style="font-size:14px;font-weight:600;color:var(--red);margin-bottom:8px">${amsData.error}</div>
+        <div style="font-size:13px;color:var(--text3)">Vai in Settings e configura URL e token di Home Assistant.</div>
+      </div>`;
+    document.getElementById('amsHeaderSub').textContent='Home Assistant non connesso';
+    return;
+  }
+
+  document.getElementById('amsHeaderSub').textContent=FB_HAS('ha')?'Stato live da Home Assistant':'Slot assegnati a mano (senza Home Assistant)';
+  const slots=amsData.slots||[];
+
+  content.innerHTML=[1,2,3,4].map(slotNum=>{
+    const liveSlot=slots.find(s=>s.slot===slotNum);
+    const isEmpty=!liveSlot||liveSlot.empty;
+    // Trova la bobina in libreria bindata a questo slot (se esiste)
+    const bound=amsSpoolsCache.find(sp=>sp.amsSlot===slotNum);
+
+    if(isEmpty){
+      return `<div class="ams-slot-card empty" onclick="openAMSPicker(${slotNum})">
+        <div class="ams-slot-card-header">
+          <div class="ams-slot-num">${slotNum}</div>
+          <div class="ams-slot-empty-label">Slot vuoto</div>
+        </div>
+        <div class="ams-slot-tap-hint">Tocca per assegnare una bobina</div>
+      </div>`;
+    }
+
+    const color=bound?bound.colorHex:((liveSlot.color||'#888888').slice(0,7));
+    const name=bound?(bound.name||bound.material):liveSlot.name;
+    const brand=bound?bound.brand:'';
+    const pct=liveSlot.remain>=0?liveSlot.remain:(bound&&bound.totalWeight>0?Math.round(bound.remainingWeight/bound.totalWeight*100):null);
+    const pctLabel=pct!==null?pct+'%':'—';
+    const barColor=pct!==null&&pct<20?'var(--red)':(pct!==null&&pct<50?'var(--accent2)':'var(--green)');
+
+    return `<div class="ams-slot-card" onclick="openAMSPicker(${slotNum})">
+      <div class="ams-slot-card-header">
+        <div class="ams-slot-num">${slotNum}</div>
+        <div class="ams-slot-title">${brand?brand+' · ':''}${liveSlot.type||''}</div>
+      </div>
+      <div class="ams-slot-body">
+        <div class="ams-slot-dot" style="background:${color}"></div>
+        <div class="ams-slot-info">
+          <div class="ams-slot-name">${name}</div>
+          <div class="ams-slot-sub">${bound?'In libreria':'Non associata a una bobina'}</div>
+        </div>
+        <div class="ams-slot-pct">${pctLabel}</div>
+      </div>
+      ${pct!==null?`<div class="ams-slot-bar"><div class="ams-slot-bar-fill" style="width:${pct}%;background:${barColor}"></div></div>`:''}
+      <div class="ams-slot-tap-hint">Tocca per cambiare bobina associata</div>
+    </div>`;
+  }).join('');
+}
+
+function openAMSPicker(slotNum){
+  const modal=document.getElementById('amsPickerModal');
+  document.getElementById('amsPickerTitle').textContent=`Assegna bobina — AMS Slot ${slotNum}`;
+  document.getElementById('amsPickerSearch').value='';
+  document.getElementById('amsPickerSearch').dataset.slot=slotNum;
+  renderAMSPickerList('',slotNum);
+  modal.classList.add('open');
+  setTimeout(()=>document.getElementById('amsPickerSearch').focus(),300);
+}
+
+function renderAMSPickerList(query,slotNum){
+  const q=query.trim().toLowerCase();
+  const list=amsSpoolsCache.filter(sp=>{
+    if(!q) return true;
+    return (sp.name||'').toLowerCase().includes(q)
+      || (sp.brand||'').toLowerCase().includes(q)
+      || (sp.material||'').toLowerCase().includes(q)
+      || (sp.colorName||'').toLowerCase().includes(q);
+  }).sort((a,b)=>(a.brand||'').localeCompare(b.brand||''));
+
+  const container=document.getElementById('amsPickerList');
+  if(!list.length){
+    container.innerHTML='<div class="sync-none">Nessuna bobina trovata</div>';
+    return;
+  }
+
+  container.innerHTML=list.map(sp=>{
+    const isCurrentSlot=sp.amsSlot===slotNum;
+    const otherSlotBadge=sp.amsSlot&&!isCurrentSlot?`<span class="sync-cand-badge">Slot ${sp.amsSlot}</span>`:'';
+    return `<div class="sync-candidate ${isCurrentSlot?'selected':''}" onclick="assignAMSSlot('${sp.id}',${slotNum})">
+      <div class="sync-cand-dot" style="background:${sp.colorHex||'#888'}"></div>
+      <div style="flex:1">
+        <div class="sync-cand-info">${sp.brand||''} ${sp.name||sp.material}</div>
+        <div class="sync-cand-sub">${sp.material} · ${wLabel(sp.remainingWeight)}</div>
+      </div>
+      ${isCurrentSlot?'<span class="sync-cand-badge bound">✓ Qui</span>':otherSlotBadge}
+    </div>`;
+  }).join('');
+}
+
+async function assignAMSSlot(spoolId,slotNum){
+  // Libera eventuali altre bobine già assegnate a questo slot, per evitare doppi binding.
+  const previousOccupant=amsSpoolsCache.find(sp=>sp.amsSlot===slotNum&&sp.id!==spoolId);
+  if(previousOccupant){
+    await fetch(`/api/spools/${previousOccupant.id}/assign-slot`,{
+      method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({amsSlot:null,printerSlot:null})
+    });
+  }
+  await fetch(`/api/spools/${spoolId}/assign-slot`,{
+    method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({amsSlot:slotNum,printerSlot:'p1s'})
+  });
+  closeModal('amsPickerModal');
+  showToast('Bobina assegnata allo slot '+slotNum,'success');
+  loadAMSView();
+}
+
+document.getElementById('amsPickerSearch')?.addEventListener('input',function(){
+  renderAMSPickerList(this.value,parseInt(this.dataset.slot));
+});
+
+// ── Stats ─────────────────────────────────────────────────
+// ── Assegna log di stampa non identificato a una bobina ───
+let assignLogSpoolsCache=[];
+let currentAssignLogId=null;
+
+async function openAssignLogPicker(logId){
+  currentAssignLogId=logId;
+  document.getElementById('assignLogSearch').value='';
+  const res=await fetch('/api/spools');
+  assignLogSpoolsCache=await res.json();
+  renderAssignLogList('');
+  document.getElementById('assignLogModal').classList.add('open');
+  setTimeout(()=>document.getElementById('assignLogSearch').focus(),300);
+}
+
+function renderAssignLogList(query){
+  const q=query.trim().toLowerCase();
+  const list=assignLogSpoolsCache.filter(sp=>{
+    if(!q) return true;
+    return (sp.name||'').toLowerCase().includes(q)
+      || (sp.brand||'').toLowerCase().includes(q)
+      || (sp.material||'').toLowerCase().includes(q)
+      || (sp.colorName||'').toLowerCase().includes(q);
+  }).sort((a,b)=>(a.brand||'').localeCompare(b.brand||''));
+
+  const container=document.getElementById('assignLogList');
+  if(!list.length){
+    container.innerHTML='<div class="sync-none">Nessuna bobina trovata</div>';
+    return;
+  }
+  container.innerHTML=list.map(sp=>`
+    <div class="sync-candidate" onclick="assignLogToSpool('${sp.id}')">
+      <div class="sync-cand-dot" style="background:${sp.colorHex||'#888'}"></div>
+      <div style="flex:1">
+        <div class="sync-cand-info">${sp.brand||''} ${sp.name||sp.material}</div>
+        <div class="sync-cand-sub">${sp.material} · ${wLabel(sp.remainingWeight)}</div>
+      </div>
+    </div>`).join('');
+}
+
+document.getElementById('assignLogSearch')?.addEventListener('input',function(){
+  renderAssignLogList(this.value);
+});
+
+async function assignLogToSpool(spoolId){
+  if(!currentAssignLogId) return;
+  try{
+    const res=await fetch(`/api/print-logs/${currentAssignLogId}/assign`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({spoolId})
+    });
+    const data=await res.json();
+    if(data.ok){
+      showToast(`✅ Log assegnato — ${data.usedWeight}g sottratti da ${data.spoolName}`,'success');
+      closeModal('assignLogModal');
+      loadStats();
+      loadSpools();
+    } else {
+      showToast('❌ '+(data.error||'Errore durante l\'assegnazione'),'error');
+    }
+  }catch(e){
+    showToast('❌ Errore di connessione','error');
+  }
+}
+
+async function loadStats(){
+  const [sRes,lRes,spRes]=await Promise.all([fetch('/api/stats'),fetch('/api/logs'),fetch('/api/spools')]);
+  const stats=await sRes.json(),logs=await lRes.json(),all=await spRes.json();
+  const matB={};all.forEach(s=>{matB[s.material]=(matB[s.material]||0)+s.remainingWeight});
+  const maxM=Math.max(...Object.values(matB),1);
+  const barsHtml=Object.entries(matB).sort((a,b)=>b[1]-a[1]).map(([m,g])=>{
+    return `<div class="bar-item"><div class="bar-label"><span>${m}</span><span>${wLabel(g)}</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${(g/maxM*100).toFixed(1)}%;background:${MAT_COLORS[m]||'#888'}"></div></div></div>`;
+  }).join('');
+  const logsHtml=logs.length?logs.map(l=>{
+    const d=new Date(l.date).toLocaleDateString('it-IT');
+    const tag=l.source==='ha_webhook_rfid'?'<span class="tag tag-rfid">📡 RFID</span>':
+              l.source==='ha_webhook'?'<span class="tag tag-ha">🏠 HA</span>':'';
+    const unassigned=!l.spoolId;
+    return `<div class="log-item">
+      <div><div class="log-name">${l.printName||'Unnamed'} ${tag}${unassigned?' <span class="status-badge" style="position:static;display:inline-block;background:#f59e0b;color:#fff">Non assegnato</span>':''}</div>
+        <div class="log-sub">${l.spoolName}${l.amsSlot?` · AMS ${l.amsSlot}`:''} · ${d}</div>
+        ${unassigned?`<button class="btn-outline" style="width:auto;padding:5px 12px;font-size:12px;margin-top:6px" onclick="openAssignLogPicker('${l.id}')">🔗 Assegna a bobina</button>`:''}
+      </div>
+      <div class="log-used">−${l.usedWeight}g${l.meters?`<br><small style="font-size:10px;color:var(--text3)">${l.meters}m</small>`:''}</div>
+    </div>`;
+  }).join(''):'<p style="color:var(--text3);font-size:14px;text-align:center;padding:16px">No prints logged yet.</p>';
+
+  document.getElementById('statsContent').innerHTML=`
+    <div class="stats-strip" style="margin-bottom:14px">
+      <div class="stat-card"><div class="stat-value">${all.length}</div><div class="stat-label">Total spools</div></div>
+      <div class="stat-card"><div class="stat-value">${stats.totalWeight>=1000?(stats.totalWeight/1000).toFixed(1)+'kg':stats.totalWeight+'g'}</div><div class="stat-label">Total weight</div></div>
+      <div class="stat-card"><div class="stat-value">${logs.length}</div><div class="stat-label">Prints logged</div></div>
+    </div>
+    <div class="section-card"><h3>By material</h3>${barsHtml||'<p style="color:var(--text3);font-size:13px">No data</p>'}</div>
+    <div class="section-card"><h3>Recent prints</h3>${logsHtml}</div>`;
+}
+
+// ── Settings ──────────────────────────────────────────────
+function haConfigChanged(){ document.getElementById('haTestResult').textContent=''; }
+
+async function saveHaConfig(){
+  const url=document.getElementById('haUrl').value.trim().replace(/\/$/,'');
+  const token=document.getElementById('haToken').value.trim();
+  const entities={}; document.querySelectorAll('.ha-ent').forEach(i=>{ if(i.value.trim()) entities[i.dataset.key]=i.value.trim(); });
+  await fetch('/api/ha-config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,token,entities})});
+  document.getElementById('haToken').value='';
+  showToast('Configurazione HA salvata','success'); loadSettings();
+}
+
+async function testHaConnection(){
+  const el=document.getElementById('haTestResult');
+  el.textContent='🔌 Test in corso...'; el.style.color='var(--text3)';
+  const res=await fetch('/api/ha-test');
+  const d=await res.json();
+  if(d.ok){ el.textContent='✅ Connesso — '+d.name; el.style.color='var(--green)'; }
+  else{ el.textContent='❌ '+d.error; el.style.color='var(--red)'; }
+}
+
+async function loadSettings(){
+  loadClaudeConfig();
+  if(!FB_HAS('ha')) { if(FB_HAS('nfc')) loadReaderStatus(); return; }
+  const [tokenRes, haRes]=await Promise.all([fetch('/api/webhook-token'), fetch('/api/ha-config')]);
+  const {token}=await tokenRes.json();
+  const haCfg=await haRes.json();
+  haEntitiesCache=haCfg.entities||{};
+  document.getElementById('webhookUrl').textContent=`${location.origin}/api/webhook/print-done?token=${token}`;
+  document.getElementById('haYaml').textContent=buildYaml(token);
+  if(haCfg.url) document.getElementById('haUrl').value=haCfg.url;
+  if(haCfg.hasToken) document.getElementById('haToken').placeholder='Token salvato — incolla per aggiornare';
+  const labels={slot1:'Slot AMS 1',slot2:'Slot AMS 2',slot3:'Slot AMS 3',slot4:'Slot AMS 4',external:'Bobina esterna',printStatus:'Stato di stampa',printWeight:'Grammi della stampa',printLength:'Metri della stampa',taskName:'Nome del lavoro'};
+  document.getElementById('haEntities').innerHTML=Object.keys(labels).map(k=>`<div class="form-group"><label class="form-label">${labels[k]}</label><input class="form-input ha-ent" data-key="${k}" value="${(haCfg.entities||{})[k]||''}" placeholder="${(haCfg.defaults||{})[k]||''}" oninput="haConfigChanged()"></div>`).join('');
+  if(FB_HAS('nfc')) loadReaderStatus();
+}
+let haEntitiesCache={};
+
+// ── Claude AI (v2.0.0) ───────────────────────────────────
+async function loadClaudeConfig(){
+  const el=document.getElementById('claudeStatus');
+  try{
+    const c=await (await fetch('/api/claude-config')).json();
+    const sel=document.getElementById('claudeModel');
+    sel.innerHTML=(c.models||[c.model]).map(m=>`<option value="${m}" ${m===c.model?'selected':''}>${m}</option>`).join('');
+    el.innerHTML=c.hasKey?`🟢 <strong>Chiave attiva</strong> ${c.keyHint||''} · ${c.source==='env'?'da variabile d\'ambiente':(c.source==='browser'?'salvata in questo browser':'salvata sul server')} · modello <code>${c.model}</code>`:'⚪ <strong>Nessuna chiave</strong>: la scansione con Claude è disattivata. Barcode e inserimento manuale funzionano comunque.';
+    el.style.color=c.hasKey?'var(--green)':'';
+    document.getElementById('claudeKey').placeholder=c.hasKey?'Chiave salvata — incolla per sostituirla':'Incolla la chiave da console.anthropic.com';
+    const vb=document.getElementById('versionBadge'); if(vb) vb.textContent=`v${FB_EDITION.version} · ${FB_EDITION.name[0].toUpperCase()+FB_EDITION.name.slice(1)} · ${c.model}`;
+  }catch(e){ el.textContent='❌ Impossibile leggere la configurazione'; }
+}
+async function saveClaudeConfig(){
+  const key=document.getElementById('claudeKey').value.trim(), model=document.getElementById('claudeModel').value;
+  const body={model}; if(key) body.key=key;
+  await fetch('/api/claude-config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  document.getElementById('claudeKey').value=''; showToast('Impostazioni Claude salvate','success'); loadClaudeConfig();
+}
+async function removeClaudeKey(){
+  if(!confirm('Rimuovere la chiave Claude salvata?'))return;
+  await fetch('/api/claude-config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:''})});
+  showToast('Chiave rimossa',''); loadClaudeConfig();
+}
+async function testClaude(){
+  const out=document.getElementById('claudeTestResult'); out.textContent='Provo la chiave...'; out.style.color='';
+  try{ const d=await (await fetch('/api/claude-test',{method:'POST'})).json();
+    out.textContent=d.ok?`✅ Funziona (${d.model})`:'❌ '+d.error; out.style.color=d.ok?'var(--green)':'var(--red)';
+  }catch(e){ out.textContent='❌ '+e.message; out.style.color='var(--red)'; }
+}
+
+// ── Backup (v2.0.0) ──────────────────────────────────────
+async function exportBackup(){
+  const data=await (await fetch('/api/backup')).json();
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`filamentbox-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);
+  showToast(`Backup esportato: ${data.spools.length} bobine`,'success');
+}
+async function importBackup(input){
+  const f=input.files[0]; input.value=''; if(!f)return;
+  try{
+    const data=JSON.parse(await f.text());
+    if(!Array.isArray(data.spools)) throw new Error('non è un backup di FilamentBox');
+    if(!confirm(`Ripristinare ${data.spools.length} bobine? I dati attuali verranno sostituiti.`))return;
+    const r=await fetch('/api/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error((await r.json()).error||'errore');
+    showToast('Backup ripristinato','success'); loadSpools();
+  }catch(e){ showToast('❌ Backup non valido: '+e.message,'error'); }
+}
+
+async function loadReaderStatus(){
+  const el=document.getElementById('readerStatus');
+  el.textContent='Caricamento...';
+  el.style.color='';
+  try{
+    const res=await fetch('/api/reader-status');
+    const d=await res.json();
+    if(!d.connected){
+      el.innerHTML=`🔴 <strong>Non raggiungibile</strong><br>${d.message||('Ultimo contatto '+d.secondsAgo+'s fa — verifica alimentazione e collegamenti')}`;
+      el.style.color='var(--red)';
+      return;
+    }
+    const pn=d.pn532Ok===true?'✅ OK':(d.pn532Ok===false?'⚠️ Non risponde':'—');
+    el.innerHTML=`🟢 <strong>Connesso</strong> — ultimo contatto ${d.secondsAgo}s fa<br>
+      PN532: ${pn} · WiFi: ${d.rssi} dBm · IP: ${d.ip||'—'}`;
+    el.style.color='var(--green)';
+  }catch(e){
+    el.textContent='❌ Errore di connessione al server';
+    el.style.color='var(--red)';
+  }
+}
+
+function buildYaml(token){
+  const E={slot1:'sensor.p1s_ams_slot_1',slot2:'sensor.p1s_ams_slot_2',slot3:'sensor.p1s_ams_slot_3',slot4:'sensor.p1s_ams_slot_4',printStatus:'sensor.p1s_stato_di_stampa',printWeight:'sensor.p1s_grammatura_stampa',printLength:'sensor.p1s_lunghezza_stampa',taskName:'sensor.p1s_nome_attivita',...haEntitiesCache};
+  const slot=(n)=>`{'name': states('${E['slot'+n]}'), 'active': state_attr('${E['slot'+n]}','active'), 'remain': state_attr('${E['slot'+n]}','remain'), 'num': ${n}}`;
+  return `# ── configuration.yaml ──────────────────────────────
+rest_command:
+  filamentbox_log_print:
+    url: "${location.origin}/api/webhook/print-done?token=${token}"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    payload: >
+      {% set slots = [
+        ${[1,2,3,4].map(slot).join(',\n        ')}
+      ] %}
+      {% set active_slots = slots | selectattr('active', 'eq', true) | list %}
+      {% set chosen = active_slots[0] if active_slots | length > 0 else None %}
+      {
+        "grams": {{ states('${E.printWeight}') | float(0) | round(1) }},
+        "meters": {{ states('${E.printLength}') | float(0) | round(2) }},
+        "print_name": "{{ states('${E.taskName}') }}",
+        "active_slot": {{ chosen.num if chosen else 0 }},
+        "slot_remain_pct": {{ chosen.remain | default(-1) if chosen else -1 }},
+        "slot_name": "{{ chosen.name if chosen else 'external' }}"
+      }
+
+# ── automation ──────────────────────────────────────────
+alias: "FilamentBox - Registra stampa"
+trigger:
+  - platform: state
+    entity_id: ${E.printStatus}
+    to: "finish"
+condition:
+  - condition: template
+    value_template: >
+      {{ states('${E.printWeight}') | float(0) > 0 }}
+action:
+  - delay: "00:00:05"
+  - service: rest_command.filamentbox_log_print
+mode: single`;
+}
+
+async function regenerateToken(){
+  if(!confirm('Rigenerare il token? Aggiorna anche configuration.yaml in HA.'))return;
+  await fetch('/api/webhook-token/regenerate',{method:'POST'});
+  loadSettings();showToast('Token rigenerato','success');
+}
+function copyWebhookUrl(){
+  navigator.clipboard.writeText(document.getElementById('webhookUrl').textContent).then(()=>{
+    const b=document.getElementById('copyUrlBtn');b.textContent='✅ Copied!';b.classList.add('copied');
+    setTimeout(()=>{b.textContent='📋 Copy URL';b.classList.remove('copied')},2000);
+  });
+}
+function copyYaml(){
+  navigator.clipboard.writeText(document.getElementById('haYaml').textContent).then(()=>{
+    const b=document.getElementById('copyYamlBtn');b.textContent='✅ Copied!';b.classList.add('copied');
+    setTimeout(()=>{b.textContent='📋 Copy YAML';b.classList.remove('copied')},2000);
+  });
+}
+
+// ── AMS Sync ──────────────────────────────────────────────
+async function openAmsSync(){
+  document.getElementById('syncContent').innerHTML='<p style="color:var(--text3);text-align:center;padding:20px">Lettura sensori HA...</p>';
+  document.getElementById('syncSaveBtn').style.display='none';
+  document.getElementById('syncModal').classList.add('open');
+  syncSelections={};
+
+  // Fetch real AMS slot data from HA via server proxy
+  const amsRes=await fetch('/api/ha-ams-slots');
+  const amsData=await amsRes.json();
+
+  if(amsData.error){
+    document.getElementById('syncContent').innerHTML=`
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+        <div style="font-size:14px;font-weight:600;color:var(--red);margin-bottom:8px">${amsData.error}</div>
+        <div style="font-size:13px;color:var(--text3)">Vai in Settings e configura URL e token di Home Assistant.</div>
+      </div>`;
+    return;
+  }
+
+  const res=await fetch('/api/ams-sync',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({slots: amsData.slots||[]})
+  });
+  const {suggestions}=await res.json();
+  syncSuggestions=suggestions;
+
+  if(!suggestions.length){
+    document.getElementById('syncContent').innerHTML='<p style="color:var(--text3);text-align:center;padding:20px">Nessuno slot AMS attivo rilevato.</p>';
+    return;
+  }
+
+  document.getElementById('syncContent').innerHTML=suggestions.map(sg=>{
+    const color=(sg.amsColor||'#888888').slice(0,7);
+    const bound=sg.currentBinding;
+    const candHtml=sg.candidates.length?sg.candidates.map(c=>{
+      const isCurrentBound=bound&&bound.id===c.id;
+      return `<div class="sync-candidate ${isCurrentBound?'selected':''}" id="cand_${sg.slot}_${c.id}"
+        onclick="selectCandidate(${sg.slot},'${c.id}')">
+        <div class="sync-cand-dot" style="background:${c.colorHex}"></div>
+        <div>
+          <div class="sync-cand-info">${c.brand} ${c.name}</div>
+          <div class="sync-cand-sub">${c.material} · ${wLabel(c.remainingWeight)}</div>
+        </div>
+        ${isCurrentBound?'<span class="sync-cand-badge bound">✓ Bound</span>':
+          c.amsSlot?'<span class="sync-cand-badge">Slot '+c.amsSlot+'</span>':''}
+      </div>`;
+    }).join(''):'<div class="sync-none">Nessuna bobina in libreria — aggiungila prima.</div>';
+
+    if(bound) syncSelections[sg.slot]=bound.id;
+
+    return `<div class="sync-slot">
+      <div class="sync-slot-header">
+        <div class="sync-dot" style="background:${color}"></div>
+        <div>
+          <div class="sync-slot-title">AMS Slot ${sg.slot} — ${sg.amsName}</div>
+          <div class="sync-slot-sub">${sg.amsType||''}${sg.amsRemain>=0?' · '+sg.amsRemain+'% remaining':''}</div>
+        </div>
+      </div>
+      <div class="sync-candidates">${candHtml}</div>
+      <div style="margin-top:8px">
+        <div class="sync-candidate" id="cand_${sg.slot}_none" onclick="selectCandidate(${sg.slot},null)"
+          style="${!bound?'border-color:var(--accent);background:#eff6ff':''}">
+          <div style="font-size:18px">❌</div>
+          <div class="sync-cand-info" style="color:var(--text3)">Nessun binding</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('syncSaveBtn').style.display='block';
+}
+
+function selectCandidate(slot, spoolId){
+  syncSelections[slot]=spoolId;
+  // Update UI
+  document.querySelectorAll(`[id^="cand_${slot}_"]`).forEach(el=>{
+    el.classList.remove('selected');
+  });
+  const target=document.getElementById(`cand_${slot}_${spoolId||'none'}`);
+  if(target) target.classList.add('selected');
+}
+
+async function saveSyncBindings(){
+  const allSpools=await(await fetch('/api/spools')).json();
+
+  // First clear all existing AMS slots
+  for(const s of allSpools){
+    if(s.amsSlot!==null||s.printerSlot){
+      await fetch(`/api/spools/${s.id}/assign-slot`,{
+        method:'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({amsSlot:null,printerSlot:null})
+      });
+    }
+  }
+
+  // Apply new bindings
+  for(const [slot,spoolId] of Object.entries(syncSelections)){
+    if(!spoolId) continue;
+    await fetch(`/api/spools/${spoolId}/assign-slot`,{
+      method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({amsSlot:parseInt(slot),printerSlot:'p1s'})
+    });
+  }
+
+  closeModal('syncModal');
+  await loadSpools();
+  showToast('Bindings salvati!','success');
+}
+
+// ── Chips & modal helpers ─────────────────────────────────
+function setupChips(containerId,activeVal){
+  const c=document.getElementById(containerId);
+  c.querySelectorAll('.chip').forEach(ch=>{
+    ch.classList.toggle('active',ch.dataset.val===activeVal);
+    ch.onclick=()=>{c.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));ch.classList.add('active')};
+  });
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')});
+});
+
+// ── Import da fattura (v1.7.0) ───────────────────────────
+let invParsed=null;
+function loadScriptOnce(src){
+  return new Promise((ok,ko)=>{
+    if(document.querySelector(`script[data-src="${src}"]`)) return ok();
+    const s=document.createElement('script');s.src=src;s.dataset.src=src;s.onload=ok;s.onerror=()=>ko(new Error('Impossibile caricare '+src));
+    document.head.appendChild(s);
+  });
+}
+function openInvoiceImport(e){
+  if(e) e.stopPropagation();
+  fabOpen=false;
+  document.getElementById('fabBtn').classList.remove('open');
+  document.querySelectorAll('.fab-item').forEach(x=>x.classList.remove('show'));
+  invParsed=null;
+  document.getElementById('invFile').value='';
+  document.getElementById('invResult').innerHTML='';
+  document.getElementById('invOptions').style.display='none';
+  document.getElementById('invDropText').innerHTML='📄 Scegli il PDF della fattura<br><span style="font-size:12px;font-weight:500;color:var(--text3)">Bambu Lab Store (EU)</span>';
+  fetch('/api/locations').then(r=>r.json()).then(l=>{
+    document.getElementById('invLocList').innerHTML=l.map(x=>`<option value="${esc(x.name)}">`).join('');
+  }).catch(()=>{});
+  document.getElementById('invoiceModal').classList.add('open');
+}
+async function onInvoiceFile(file){
+  if(!file) return;
+  const out=document.getElementById('invResult');
+  document.getElementById('invDropText').textContent='📄 '+file.name;
+  out.innerHTML='<p style="color:var(--text3);font-size:13px;padding:8px 0">Lettura fattura...</p>';
+  document.getElementById('invOptions').style.display='none';
+  try{
+    await Promise.all([loadScriptOnce('vendor/pdfjs/pdf.min.js'),loadScriptOnce('vendor/invoice-parser.js'),loadScriptOnce('vendor/bambu-colors.js')]);
+    pdfjsLib.GlobalWorkerOptions.workerSrc='vendor/pdfjs/pdf.worker.min.js';
+    const doc=await pdfjsLib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+    let lines=[];
+    for(let i=1;i<=doc.numPages;i++){
+      const tc=await (await doc.getPage(i)).getTextContent();
+      lines=lines.concat(InvoiceParser.itemsToLines(tc.items));
+    }
+    invParsed=InvoiceParser.parseInvoice(lines,window.BAMBU_COLORS||{});
+  }catch(err){
+    out.innerHTML=`<p style="color:var(--red);font-size:13px;padding:8px 0">❌ ${esc(err.message)}</p>`;return;
+  }
+  if(!invParsed.items.length){
+    out.innerHTML='<p style="color:var(--red);font-size:13px;padding:8px 0">Nessun filamento riconosciuto. Per ora il formato supportato è la fattura del Bambu Lab Store.</p>';return;
+  }
+  let warn='';
+  try{
+    const done=await (await fetch('/api/invoices')).json();
+    const prev=invParsed.meta.invoice&&done.find(i=>i.invoice===invParsed.meta.invoice);
+    if(prev) warn=`<div style="background:#fef3c7;color:#92400e;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;margin-bottom:10px">⚠️ Questa fattura è già stata importata il ${new Date(prev.at).toLocaleDateString('it-IT')} (${prev.count} bobine).</div>`;
+  }catch(e){}
+  const m=invParsed.meta;
+  out.innerHTML=warn+`<div class="inv-meta">${esc(m.vendor||'Fornitore sconosciuto')}${m.invoice?' · Fattura '+esc(m.invoice):''}${m.date?' · '+esc(m.date):''}</div>`
+    +invParsed.items.map((it,i)=>`<div class="inv-row" id="invRow${i}">
+      <input type="checkbox" checked onchange="document.getElementById('invRow${i}').classList.toggle('off',!this.checked);updateInvCount()">
+      <input type="color" value="${esc(it.colorHex)}" onchange="invParsed.items[${i}].colorHex=this.value">
+      <div>
+        <div class="inv-name">${esc(it.name)}${it.gift?'<span class="inv-gift">OMAGGIO</span>':''}</div>
+        <input class="inv-color" value="${esc(it.colorName)}" onchange="invParsed.items[${i}].colorName=this.value">
+        <div class="inv-sub">${esc(it.material)} · ${wLabel(it.totalWeight)}${it.kind?' · '+esc(it.kind):''}${it.unitPrice!=null?' · €'+it.unitPrice.toFixed(2):''}</div>
+      </div>
+      <input class="inv-qty" type="number" min="0" max="50" value="${it.qty}" oninput="invParsed.items[${i}].qty=+this.value;updateInvCount()">
+    </div>`).join('');
+  document.getElementById('invOptions').style.display='block';
+  updateInvCount();
+}
+function invSelected(){
+  return invParsed?invParsed.items.filter((it,i)=>document.querySelector(`#invRow${i} input[type=checkbox]`).checked&&it.qty>0):[];
+}
+function updateInvCount(){
+  const n=invSelected().reduce((a,b)=>a+b.qty,0);
+  const btn=document.getElementById('invSaveBtn');
+  btn.textContent=n?`Aggiungi ${n} bobin${n===1?'a':'e'}`:'Nessuna bobina selezionata';
+  btn.disabled=!n;
+}
+async function saveInvoiceImport(force){
+  const rows=invSelected();if(!rows.length)return;
+  const m=invParsed.meta;
+  const body={
+    invoice:m, location:document.getElementById('invLocation').value.trim(),
+    sealed:document.getElementById('invSealed').checked, force:!!force,
+    spools:rows.map(it=>({...it, brand:m.vendor||'',
+      notes:[it.kind, it.gift?'Omaggio':'', m.invoice?'Fattura '+m.invoice:''].filter(Boolean).join(' · ')}))
+  };
+  const r=await fetch('/api/spools/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(r.status===409){
+    if(confirm(`Fattura già importata (${d.count} bobine). Importare di nuovo?`)) return saveInvoiceImport(true);
+    return;
+  }
+  if(!r.ok){showToast('❌ '+(d.error||'Errore'),'error');return;}
+  closeModal('invoiceModal');loadSpools();refreshStorageIfOpen();
+  showToast(`✅ Aggiunte ${d.created} bobine`,'success');
+}
+
+// ── FAB menu ──────────────────────────────────────────────
+let fabOpen=false;
+function toggleFab(e){
+  if(e) e.stopPropagation();
+  fabOpen=!fabOpen;
+  document.getElementById('fabBtn').classList.toggle('open',fabOpen);
+  document.getElementById('fabScanItem').classList.toggle('show',fabOpen);
+  document.getElementById('fabManualItem').classList.toggle('show',fabOpen);
+  document.getElementById('fabInvoiceItem').classList.toggle('show',fabOpen);
+}
+function openManual(e){
+  if(e) e.stopPropagation();
+  fabOpen=false;
+  document.getElementById('fabBtn').classList.remove('open');
+  document.getElementById('fabScanItem').classList.remove('show');
+  document.getElementById('fabManualItem').classList.remove('show');
+  document.getElementById('fabInvoiceItem').classList.remove('show');
+  document.getElementById('addModal').classList.add('open');
+}
+function openScanner(e){
+  if(e) e.stopPropagation();
+  fabOpen=false;
+  document.getElementById('fabBtn').classList.remove('open');
+  document.getElementById('fabScanItem').classList.remove('show');
+  document.getElementById('fabManualItem').classList.remove('show');
+  document.getElementById('fabInvoiceItem').classList.remove('show');
+  _openScanner();
+}
+document.addEventListener('click',e=>{
+  if(fabOpen && !e.target.closest('#fabMenu') && !e.target.closest('#fabBtn')){
+    fabOpen=false;
+    document.getElementById('fabBtn').classList.remove('open');
+    document.getElementById('fabScanItem').classList.remove('show');
+    document.getElementById('fabManualItem').classList.remove('show');
+    document.getElementById('fabInvoiceItem').classList.remove('show');
+  document.getElementById('fabInvoiceItem').classList.remove('show');
+  }
+});
+
+// ── Scanner ───────────────────────────────────────────────
+let codeReader=null, scanResult=null, visionResult=null, scanStream=null;
+
+function switchScanTab(tab, btn){
+  document.querySelectorAll('.scan-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.scan-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('scan'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+}
+
+async function _openScanner(){
+  if(fabOpen) toggleFab();
+  scanResult=null; visionResult=null;
+  document.getElementById('scanStatus').textContent='Punta la fotocamera sul barcode della confezione';
+  document.getElementById('scanStatus').className='scan-status';
+  document.getElementById('scanResultCard').style.display='none';
+  document.getElementById('scanUseBtn').style.display='none';
+  document.getElementById('visionResultCard').style.display='none';
+  document.getElementById('visionUseBtn').style.display='none';
+  document.getElementById('visionPreview').style.display='none';
+  document.getElementById('visionStatus').textContent='';
+  document.getElementById('scanModal').classList.add('open');
+  // Switch to barcode tab
+  document.querySelectorAll('.scan-tab')[0].click();
+  await startCamera();
+}
+
+async function startCamera(){
+  try{
+    // Load ZXing lazily if not already loaded
+    if(typeof ZXingBrowser === 'undefined'){
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'vendor/zxing-browser.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    codeReader = new ZXingBrowser.BrowserMultiFormatReader();
+    const video = document.getElementById('scanVideo');
+    const constraints = { video: { facingMode: 'environment' } };
+    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = scanStream;
+
+    codeReader.decodeFromStream(scanStream, video, (result, err) => {
+      if(result){
+        const code = result.getText();
+        document.getElementById('scanStatus').textContent = `✅ Barcode: ${code}`;
+        document.getElementById('scanStatus').className='scan-status found';
+        stopCamera();
+        lookupBarcode(code);
+      }
+    });
+  }catch(e){
+    document.getElementById('scanStatus').textContent = e.name==='NotAllowedError'
+      ? '🚫 Accesso fotocamera negato — controlla i permessi'
+      : '⚠️ Fotocamera non disponibile: '+e.message;
+    document.getElementById('scanStatus').className='scan-status error';
+  }
+}
+
+function stopCamera(){
+  try{ if(codeReader) codeReader.reset(); }catch(e){}
+  try{ if(scanStream) scanStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  scanStream=null;
+}
+
+function closeScanner(){
+  stopCamera();
+  document.getElementById('scanModal').classList.remove('open');
+}
+
+async function lookupBarcode(code){
+  document.getElementById('scanStatus').textContent = `🔍 Cerco "${code}" nel database...`;
+  document.getElementById('scanStatus').className='scan-status';
+
+  // 1. Try UPC Item DB (free tier)
+  try{
+    const res = await fetch(`/api/barcode-lookup?code=${encodeURIComponent(code)}`);
+    const data = await res.json();
+    if(data && data.brand){
+      showScanResult(data);
+      return;
+    }
+  }catch(e){}
+
+  // 2. Not found — prompt Claude Vision fallback
+  document.getElementById('scanStatus').textContent = `⚠️ Barcode non trovato nel database. Prova AI Label Scan per leggere l'etichetta.`;
+  document.getElementById('scanStatus').className='scan-status error';
+  document.getElementById('scanResultCard').innerHTML=`
+    <div style="color:rgba(255,255,255,.6);font-size:13px;padding:10px 0">
+      Barcode <strong style="color:#fff">${code}</strong> non presente nei database pubblici.<br>
+      Usa la tab <strong style="color:#a855f7">🤖 AI Label Scan</strong> per fotografare l'etichetta.
+    </div>`;
+  document.getElementById('scanResultCard').style.display='block';
+}
+
+function showScanResult(data, containerId='scanResultCard', useBtnId='scanUseBtn'){
+  scanResult=data;
+  const card=document.getElementById(containerId);
+  const rows=[
+    ['Brand', data.brand],
+    ['Nome', data.name],
+    ['Materiale', data.material],
+    ['Colore', data.colorName ? `<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:50%;background:${data.colorHex||'#888'};display:inline-block"></span>${data.colorName}</span>` : '—'],
+    ['Peso', data.totalWeight ? data.totalWeight+'g' : '—'],
+    ['Ugello', data.nozzleMin ? `${data.nozzleMin}–${data.nozzleMax}°C` : '—'],
+    ['Piatto', data.bedTemp ? data.bedTemp+'°C' : '—'],
+  ].filter(r=>r[1]&&r[1]!=='—').map(([k,v])=>
+    `<div class="scan-result-row"><span class="scan-result-key">${k}</span><span class="scan-result-val">${v}</span></div>`
+  ).join('');
+  card.innerHTML=`<div class="scan-result-card">${rows}</div>`;
+  card.style.display='block';
+  document.getElementById(useBtnId).style.display='block';
+
+  if(containerId==='scanResultCard'){
+    document.getElementById('scanStatus').textContent='✅ Dati trovati — controlla e aggiungi';
+    document.getElementById('scanStatus').className='scan-status found';
+  }
+}
+
+function rescan(){
+  scanResult=null;
+  document.getElementById('scanResultCard').style.display='none';
+  document.getElementById('scanUseBtn').style.display='none';
+  document.getElementById('scanStatus').textContent='Punta la fotocamera sul barcode';
+  document.getElementById('scanStatus').className='scan-status';
+  startCamera();
+}
+
+function useScanResult(){ prefillAddForm(scanResult||visionResult); closeScanner(); document.getElementById('addModal').classList.add('open'); }
+function useVisionResult(){ prefillAddForm(visionResult); closeScanner(); document.getElementById('addModal').classList.add('open'); }
+
+function prefillAddForm(data){
+  if(!data)return;
+  if(data.brand) document.getElementById('addBrand').value=data.brand;
+  if(data.name) document.getElementById('addName').value=data.name;
+  if(data.colorName) document.getElementById('addColorName').value=data.colorName;
+  if(data.colorHex) document.getElementById('addColorHex').value=data.colorHex;
+  if(data.totalWeight) document.getElementById('addTotal').value=data.totalWeight;
+  if(data.remainingWeight) document.getElementById('addRemaining').value=data.remainingWeight;
+  else if(data.totalWeight) document.getElementById('addRemaining').value=data.totalWeight;
+  if(data.nozzleMin) document.getElementById('addNozzMin').value=data.nozzleMin;
+  if(data.nozzleMax) document.getElementById('addNozzMax').value=data.nozzleMax;
+  if(data.bedTemp) document.getElementById('addBed').value=data.bedTemp;
+  if(data.material) setupChips('addMatChips', data.material);
+}
+
+// ── Claude Vision (label scan) ────────────────────────────
+async function handleVisionPhoto(input){
+  const file=input.files[0]; if(!file)return;
+  visionResult=null;
+  document.getElementById('visionUseBtn').style.display='none';
+  document.getElementById('visionResultCard').style.display='none';
+
+  // Preview
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById('visionPreview');
+    img.src=e.target.result; img.style.display='block';
+  };
+  reader.readAsDataURL(file);
+
+  document.getElementById('visionStatus').textContent='🤖 Claude sta leggendo l\'etichetta...';
+  document.getElementById('visionStatus').className='scan-status';
+
+  try{
+    // Compress image client-side
+    const base64=await resizeAndEncode(file,900,0.7);
+
+    const res=await fetch('/api/vision-scan',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({image:base64})
+    });
+    const data=await res.json();
+
+    if(data.error){
+      document.getElementById('visionStatus').textContent='❌ '+data.error;
+      document.getElementById('visionStatus').className='scan-status error';
+      return;
+    }
+
+    visionResult=data;
+    document.getElementById('visionStatus').textContent='✅ Dati estratti dall\'etichetta';
+    document.getElementById('visionStatus').className='scan-status found';
+    showScanResult(data,'visionResultCard','visionUseBtn');
+  }catch(e){
+    document.getElementById('visionStatus').textContent='❌ Errore: '+e.message;
+    document.getElementById('visionStatus').className='scan-status error';
+  }
+  input.value='';
+}
+
+function resizeAndEncode(file, maxSize, quality){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      URL.revokeObjectURL(url);
+      let w=img.width, h=img.height;
+      if(w>maxSize||h>maxSize){ const r=Math.min(maxSize/w,maxSize/h); w=Math.round(w*r); h=Math.round(h*r); }
+      const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const b64=canvas.toDataURL('image/jpeg',quality).split(',')[1];
+      resolve(b64);
+    };
+    img.onerror=reject; img.src=url;
+  });
+}
+
+setupChips('addMatChips','PLA');
+loadSpools();
+
+async function removeNFCTag(spoolId){
+  try{
+    const res=await fetch(`/api/spools/${spoolId}/nfc-uid`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:''})
+    });
+    const data=await res.json();
+    if(data.ok){
+      showToast('🏷️ Tag rimosso — pronto per essere riutilizzato su un\'altra bobina','success');
+      openDetail(spoolId);
+      loadSpools();
+    } else {
+      showToast('❌ Errore durante la rimozione','error');
+    }
+  }catch(e){
+    showToast('❌ Errore di connessione','error');
+  }
+}
+
+function downloadNFCBin(spoolId){
+  // Scarica il file binario OpenTag3D pronto per NFC Tools Pro → Write Dump.
+  // Funziona da QUALSIASI browser (Safari, Brave, desktop) — non richiede
+  // l'app nativa, perché qui generiamo solo un file, non scriviamo NFC noi.
+  window.location.href = `/api/spools/${spoolId}/nfc-tag.bin`;
+  showToast('📥 Scaricamento tag binario...','');
+}
+
+let nfcWritePollInterval=null;
+
+function setNfcWriteState(icon, iconClass, title, subtitle, actionsHtml){
+  document.getElementById('nfcWriteIcon').textContent=icon;
+  document.getElementById('nfcWriteIcon').className=iconClass||'';
+  document.getElementById('nfcWriteTitle').textContent=title;
+  document.getElementById('nfcWriteSubtitle').textContent=subtitle;
+  document.getElementById('nfcWriteActions').innerHTML=actionsHtml;
+}
+
+async function queueNFCWrite(spoolId){
+  document.getElementById('nfcWriteModal').classList.add('open');
+  setNfcWriteState('📟','','Invio comando al lettore...','Attendere...',
+    '<button class="btn-secondary" onclick="cancelNfcWrite()">Annulla</button>');
+
+  try{
+    const res=await fetch(`/api/spools/${spoolId}/queue-nfc-write`,{method:'POST'});
+    const data=await res.json();
+    if(data.error){
+      setNfcWriteState('❌','','Errore',data.error,
+        '<button class="btn-secondary" onclick="closeModal(\'nfcWriteModal\')">Chiudi</button>');
+      return;
+    }
+    setNfcWriteState('📡','nfc-pulse','Lettore pronto','Avvicina un tag NFC vuoto al lettore fisico entro 2 minuti',
+      '<button class="btn-secondary" onclick="cancelNfcWrite()">Annulla</button>');
+    pollNFCWriteStatus(spoolId);
+  }catch(e){
+    setNfcWriteState('❌','','Errore di connessione','Verifica che FilamentBox sia raggiungibile',
+      '<button class="btn-secondary" onclick="closeModal(\'nfcWriteModal\')">Chiudi</button>');
+  }
+}
+
+function cancelNfcWrite(){
+  if(nfcWritePollInterval) clearInterval(nfcWritePollInterval);
+  closeModal('nfcWriteModal');
+}
+
+function pollNFCWriteStatus(spoolId){
+  if(nfcWritePollInterval) clearInterval(nfcWritePollInterval);
+  nfcWritePollInterval=setInterval(async()=>{
+    try{
+      const res=await fetch('/api/nfc-write-job/status');
+      const data=await res.json();
+
+      if(data.pending){
+        const secondsLeft=Math.max(0,120-data.secondsAgo);
+        setNfcWriteState('📡','nfc-pulse','Lettore pronto',
+          `Avvicina un tag NFC vuoto al lettore fisico — scade tra ${secondsLeft}s`,
+          '<button class="btn-secondary" onclick="cancelNfcWrite()">Annulla</button>');
+        return;
+      }
+
+      clearInterval(nfcWritePollInterval);
+      const r=data.lastResult;
+
+      if(r && r.spoolId===spoolId && r.success){
+        setNfcWriteState('✅','','Tag scritto!',`${r.spoolName} è stata associata al tag (UID ${r.uid||'—'})`,
+          '<button class="btn-primary" onclick="closeModal(\'nfcWriteModal\');loadSpools()">Fatto</button>');
+      } else if(r && r.spoolId===spoolId && r.timedOut){
+        setNfcWriteState('⏱️','','Tempo scaduto','Nessun tag presentato al lettore entro 2 minuti',
+          `<button class="btn-primary" onclick="closeModal('nfcWriteModal');queueNFCWrite('${spoolId}')">Riprova</button>
+           <button class="btn-secondary" style="margin-top:8px" onclick="closeModal('nfcWriteModal')">Chiudi</button>`);
+      } else if(r && r.spoolId===spoolId){
+        setNfcWriteState('❌','','Tag non scritto','La scrittura è fallita — verifica che il tag sia vuoto e riprova',
+          `<button class="btn-primary" onclick="closeModal('nfcWriteModal');queueNFCWrite('${spoolId}')">Riprova</button>
+           <button class="btn-secondary" style="margin-top:8px" onclick="closeModal('nfcWriteModal')">Chiudi</button>`);
+      } else {
+        setNfcWriteState('❓','','Stato sconosciuto','Controlla il Serial Monitor del lettore per dettagli',
+          '<button class="btn-secondary" onclick="closeModal(\'nfcWriteModal\')">Chiudi</button>');
+      }
+    }catch(e){
+      clearInterval(nfcWritePollInterval);
+      setNfcWriteState('❌','','Connessione persa','Impossibile controllare lo stato del lettore',
+        '<button class="btn-secondary" onclick="closeModal(\'nfcWriteModal\')">Chiudi</button>');
+    }
+  },2000);
+
+  setTimeout(()=>{ if(nfcWritePollInterval) clearInterval(nfcWritePollInterval); },130000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prismatica wall art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Mondo unico: tavolo da laboratorio chiaro, accento corallo dei pezzi, ciano del telaio.
+     Layout: pannello comandi a sinistra, viewer 3D a destra; su telefono viewer sopra e comandi sotto. */
+  --paper:#EDF0F1;
+  --panel:#F8FAFA;
+  --ink:#172126;
+  --muted:#5B6A71;
+  --line:#D3DADD;
+  --accent:#E2484F;
+  --accent-ink:#FFFFFF;
+  --cyan:#2FA9BA;
+  --warn:#B86A00;
+  --ok:#1E8A55;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font:14px/1.45 var(--body);display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:8px}
+.back{font:600 13px var(--body);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 9px;background:#fff}
+.back:hover{border-color:var(--ink)}
+.brand h1{font:800 20px/1 var(--display);letter-spacing:-.01em;margin:0}
+.ver{font:500 11px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.stats{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.chip{font:500 12px var(--mono);font-variant-numeric:tabular-nums;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.chip b{font-weight:600}
+.chip.warn{border-color:#E7C38A;background:#FFF5E5;color:var(--warn)}
+.chip.ok{border-color:#9FD3B6;background:#EAF7EF;color:var(--ok)}
+main{flex:1;min-height:0;display:grid;grid-template-columns:340px 1fr}
+aside{overflow:auto;border-right:1px solid var(--line);background:var(--panel);padding:6px 0 0}
+details{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:12px 16px;display:flex;align-items:center;gap:10px;font:700 13px var(--display);letter-spacing:.02em;text-transform:uppercase}
+summary::-webkit-details-marker{display:none}
+summary .n{font:500 11px var(--mono);color:var(--accent);width:18px}
+summary .hint{margin-left:auto;font:400 12px var(--body);text-transform:none;letter-spacing:0;color:var(--muted)}
+summary:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,label.card:focus-within{outline:2px solid var(--cyan);outline-offset:2px}
+.sec{padding:2px 16px 16px;display:grid;gap:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:grid;gap:4px}
+.field>span{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:6px}
+.field>span output{font:500 12px var(--mono);color:var(--ink)}
+input[type=number],select{width:100%;font:500 14px var(--mono);padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.check{display:flex;align-items:center;gap:8px;font-size:13px}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:10px;display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;background:#fff;cursor:pointer}
+.drop.over{border-color:var(--accent)}
+.drop canvas{width:96px;height:64px;border-radius:4px;background:var(--paper);object-fit:cover}
+.drop p{margin:0;font-size:12px;color:var(--muted)}
+.drop strong{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+.shapes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+label.card{position:relative;border:1px solid var(--line);border-radius:8px;padding:6px 4px 5px;display:grid;justify-items:center;gap:2px;cursor:pointer;background:#fff;font-size:12px}
+label.card input{position:absolute;opacity:0;pointer-events:none}
+label.card svg{width:52px;height:30px}
+label.card:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.pal{display:grid;gap:6px}
+.sw{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.sw input[type=color]{width:34px;height:26px;border:none;padding:0;background:none;cursor:pointer}
+.sw .nm{font-weight:600;font-size:13px}
+.sw .ct{font:500 12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.sw .ct.short{color:var(--warn)}
+.sw.f{grid-template-columns:34px 1fr;row-gap:4px}
+.sw.f .ct{grid-column:2;text-align:left}
+.sw select{font:500 12px var(--body);padding:5px 6px;min-width:0}
+.sw .dot{width:34px;height:26px;border-radius:5px;border:1px solid var(--line)}
+.inv .note.live{color:var(--ok)}
+.mixrow{grid-column:1 / -1;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;border-top:1px dashed var(--line);padding-top:6px;margin-top:2px}
+.mixrow.rec{border-top-color:#E7C38A}
+.mixrow .mixnote{grid-column:1 / -1;margin:0;font-size:12px;color:var(--muted);line-height:1.4}
+.mixrow.rec .mixnote,.mixrow.on .mixnote{color:var(--warn)}
+.mixsw{display:flex;gap:3px;justify-self:end}.mixsw i{width:22px;height:14px;border-radius:3px;border:1px solid var(--line);display:block}
+.switch{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);cursor:pointer}
+.switch input{appearance:none;width:30px;height:17px;border-radius:9px;background:var(--line);position:relative;cursor:pointer;margin:0;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:left .15s}
+.switch input:checked{background:var(--accent)}.switch input:checked::after{left:15px}
+.inv{display:grid;gap:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.invbtns{display:flex;gap:6px;flex-wrap:wrap}
+label.btn{display:inline-block;text-align:center}
+.btn{font:600 14px var(--body);border-radius:8px;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(.95)}
+.btn:disabled{opacity:.55;cursor:progress}
+.btn.small{padding:6px 10px;font-size:12px}
+.note{font-size:12px;color:var(--muted);margin:0}
+.export{position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:12px 16px;display:grid;gap:8px}
+.prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--cyan);transition:width .15s}
+#status{font-size:12px;color:var(--muted);min-height:1.2em;margin:0}
+.viewer{position:relative;min-height:0;background:#D8DCDE}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.vbar{position:absolute;left:12px;top:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;pointer-events:none}
+.vbar>*{pointer-events:auto}
+.seg{display:inline-flex;background:rgba(248,250,250,.92);border:1px solid var(--line);border-radius:8px;padding:2px}
+.seg button{font:600 12px var(--body);border:0;background:none;padding:6px 10px;border-radius:6px;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.vbar select{width:auto;font-size:12px;padding:6px 8px;background:rgba(255,255,255,.95)}
+.legend{position:absolute;left:12px;bottom:12px;font:500 11px var(--mono);color:var(--ink);background:rgba(248,250,250,.9);border:1px solid var(--line);border-radius:6px;padding:5px 8px;max-width:calc(100% - 24px)}
+.busy{position:absolute;right:12px;bottom:12px;font:500 11px var(--mono);color:var(--muted)}
+@media (max-width:820px){
+  main{grid-template-columns:1fr;grid-template-rows:52vh auto;overflow:auto}
+  .viewer{order:-1;min-height:52vh}
+  aside{border-right:0;overflow:visible;padding-bottom:0}
+  .stats{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){.prog i{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.6</span></div>
+  <div class="stats" id="stats"></div>
+</header>
+<main>
+<aside>
+  <details open>
+    <summary><span class="n">01</span>Immagine<span class="hint" id="imgHint">esempio</span></summary>
+    <div class="sec">
+      <label class="drop" id="drop" for="imgFile">
+        <canvas id="thumb" width="192" height="128"></canvas>
+        <div><strong>Carica un'immagine</strong><p>JPG o PNG, anche trascinata qui. Viene ritagliata alle proporzioni dell'opera.</p></div>
+      </label>
+      <input type="file" id="imgFile" accept="image/*" hidden>
+    </div>
+  </details>
+  <details open>
+    <summary><span class="n">02</span>Dimensioni e pezzi</summary>
+    <div class="sec">
+      <div class="row">
+        <label class="field"><span>Larghezza opera (mm)</span><input type="number" id="W" value="600" min="100" max="4000" step="10"></label>
+        <label class="field"><span>Altezza opera (mm)</span><input type="number" id="H" value="300" min="100" max="4000" step="10"></label>
+      </div>
+      <button class="btn small" id="fitAspect" type="button">Altezza in proporzione all'immagine</button>
+      <div class="row">
+        <label class="field"><span>Definisci per</span>
+          <select id="sizeMode"><option value="count">Numero di pezzi</option><option value="side">Lato triangolo</option></select></label>
+        <label class="field" id="countF"><span>Pezzi (circa)</span><input type="number" id="count" value="600" min="20" max="4000" step="10"></label>
+        <label class="field" id="sideF" hidden><span>Lato (mm)</span><input type="number" id="side" value="25" min="10" max="120" step="0.5"></label>
+      </div>
+      <label class="field"><span>Cornice piena <output id="borderO">6 mm</output></span><input type="range" id="border" min="2" max="40" step="1" value="6"></label>
+      <p class="note" id="sizeNote"></p>
+    </div>
+  </details>
+  <details open>
+    <summary><span class="n">03</span>Colori<span class="hint">un piatto per colore</span></summary>
+    <div class="sec">
+      <label class="field"><span>Colori da usare</span>
+        <select id="palSrc"><option value="inv">Solo i miei filamenti (FilamentBox)</option><option value="img">Liberi, presi dall'immagine</option></select></label>
+      <div class="inv" id="invBox">
+        <p class="note" id="invStatus">Carico l'inventario…</p>
+        <div class="row">
+          <label class="field"><span>Materiale</span><select id="matFilter"><option value="">Tutti</option></select></label>
+          <label class="field"><span>Minimo residuo (g)</span><input type="number" id="minG" value="50" min="0" max="5000" step="10"></label>
+        </div>
+        <div class="invbtns"><button class="btn small" id="invReload" type="button">Aggiorna inventario</button><label class="btn small" for="invFile">Carica elenco JSON</label><input type="file" id="invFile" accept=".json,application/json" hidden></div>
+      </div>
+      <label class="field"><span>Numero di colori <output id="kO">3</output></span><input type="range" id="k" min="2" max="8" step="1" value="3"></label>
+      <div class="pal" id="pal"></div>
+      <button class="btn small" id="repal" type="button">Ricalcola i colori dall'immagine</button>
+    </div>
+  </details>
+  <details open>
+    <summary><span class="n">04</span>Forma del pezzo</summary>
+    <div class="sec">
+      <div class="shapes" id="shapes"></div>
+      <div class="row">
+        <label class="field"><span>Altezza min (mm)</span><input type="number" id="hMin" value="8" min="0" max="150" step="1"></label>
+        <label class="field"><span>Altezza max (mm)</span><input type="number" id="hMax" value="22" min="0" max="150" step="1"></label>
+      </div>
+      <label class="field"><span>Altezza guidata da</span>
+        <select id="hMode">
+          <option value="lum">Luminosità (chiaro = alto)</option>
+          <option value="ilum">Luminosità (scuro = alto)</option>
+          <option value="center">Distanza dal centro (centro alto)</option>
+          <option value="edge">Distanza dal centro (bordo alto)</option>
+          <option value="color">Colore (un'altezza per colore)</option>
+          <option value="rand">Casuale</option>
+          <option value="const">Costante (max)</option>
+        </select></label>
+      <label class="field"><span>Spostamento della punta <output id="offO">70%</output></span><input type="range" id="offset" min="0" max="95" step="1" value="70"></label>
+    </div>
+  </details>
+  <details open>
+    <summary><span class="n">05</span>Orientamento punte</summary>
+    <div class="sec">
+      <label class="field"><span>Direzione</span>
+        <select id="dirMode">
+          <option value="vortex">Vortice attorno a un centro</option>
+          <option value="contour">Lungo i contorni dell'immagine</option>
+          <option value="light">Verso le zone chiare</option>
+          <option value="fixed">Angolo fisso</option>
+          <option value="rand">Casuale</option>
+        </select></label>
+      <label class="field" id="twistF"><span>Torsione del vortice <output id="twistO">70°</output></span><input type="range" id="twist" min="-180" max="180" step="5" value="70"></label>
+      <div class="row" id="centerF">
+        <label class="field"><span>Centro X <output id="cxO">50%</output></span><input type="range" id="cx" min="0" max="100" value="50"></label>
+        <label class="field"><span>Centro Y <output id="cyO">50%</output></span><input type="range" id="cy" min="0" max="100" value="50"></label>
+      </div>
+      <label class="field" id="angleF" hidden><span>Angolo <output id="angleO">90°</output></span><input type="range" id="angle" min="0" max="355" step="5" value="90"></label>
+      <label class="field"><span>Variazione casuale <output id="jitO">0°</output></span><input type="range" id="jitter" min="0" max="90" step="1" value="0"></label>
+    </div>
+  </details>
+  <details>
+    <summary><span class="n">06</span>Stampa e telaio<span class="hint">piano, tolleranze</span></summary>
+    <div class="sec">
+      <label class="field"><span>Piano di stampa</span>
+        <select id="bed">
+          <option value="180x180">180 × 180 (Bambu A1 mini)</option>
+          <option value="220x220">220 × 220 (Ender 3, MK3)</option>
+          <option value="250x210">250 × 210 (Prusa MK4)</option>
+          <option value="256x256" selected>256 × 256 (Bambu X1, P1, A1)</option>
+          <option value="300x300">300 × 300</option>
+          <option value="350x350">350 × 350 (Voron 350)</option>
+        </select></label>
+      <div class="row">
+        <label class="field"><span>Margine piatto (mm)</span><input type="number" id="margin" value="6" min="0" max="40" step="1"></label>
+        <label class="field"><span>Distanza pezzi (mm)</span><input type="number" id="gap" value="3" min="1" max="20" step="0.5"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Carta per la dima</span>
+          <select id="paper"><option value="A4" selected>A4 (210 × 297)</option><option value="A3">A3 (297 × 420)</option><option value="Letter">Letter (216 × 279)</option></select></label>
+        <label class="check" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="inkSave"> Risparmio inchiostro</label>
+      </div>
+      <label class="check"><input type="checkbox" id="frameOn" checked> Telaio a incastro (griglia con fori)</label>
+      <div class="row">
+        <label class="field"><span>Spessore telaio (mm)</span><input type="number" id="frameT" value="3" min="1.2" max="10" step="0.2"></label>
+        <label class="field"><span>Larghezza costole (mm)</span><input type="number" id="rib" value="1.6" min="0.8" max="5" step="0.1"></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Gioco incastro (mm)</span><input type="number" id="tol" value="0.15" min="0" max="0.6" step="0.05"></label>
+        <label class="field"><span>Spessore base (mm)</span><input type="number" id="flangeT" value="1.2" min="0.6" max="5" step="0.1"></label>
+      </div>
+      <label class="field"><span>Colore telaio</span><input type="color" id="frameColor" value="#5CC3D0"></label>
+      <label class="check"><input type="checkbox" id="engrave" checked> Numero inciso sotto ogni pezzo</label>
+      <label class="field"><span>Dettaglio curve <output id="segO">14</output></span><input type="range" id="segs" min="4" max="32" step="1" value="14"></label>
+    </div>
+  </details>
+  <div class="export">
+    <button class="btn primary" id="btnZip" type="button">Scarica pacchetto di stampa (.zip)</button>
+    <button class="btn" id="btnPdf" type="button">Scarica solo la dima 1:1 (.pdf)</button>
+    <div class="prog"><i id="progBar"></i></div>
+    <p id="status">Il pacchetto contiene 3MF e STL per ogni piatto, la dima 1:1 e la mappa dei piatti.</p>
+  </div>
+</aside>
+<section class="viewer">
+  <canvas id="gl"></canvas>
+  <div class="vbar">
+    <div class="seg" role="group" aria-label="Vista">
+      <button type="button" id="vArt" aria-pressed="true">Opera</button>
+      <button type="button" id="vPlate" aria-pressed="false">Piatti</button>
+      <button type="button" id="vMap" aria-pressed="false">Colori 2D</button>
+    </div>
+    <select id="plateSel" aria-label="Piatto" hidden></select>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div class="busy" id="busy"></div>
+</section>
+</main>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ===== Prismatica core: geometria pura (nessuna dipendenza dal DOM) =====
+// triangolazione iniettata: TRI(contour:[[x,y]], holes:[[[x,y]]]) -> [[i,j,k]]
+const SQ3 = Math.sqrt(3);
+
+function mulberry(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function sideFromCount(W, H, border, count) {
+  const A = Math.max(1, (W - 2 * border) * (H - 2 * border));
+  return Math.sqrt(A / (count * SQ3 / 4));
+}
+
+const keyOf = (p) => p[0].toFixed(4) + ',' + p[1].toFixed(4);
+const centroidOf = (pts) => { let x = 0, y = 0; for (const p of pts) { x += p[0]; y += p[1]; } return [x / pts.length, y / pts.length]; };
+function areaOf(pts) { let a = 0; for (let i = 0; i < pts.length; i++) { const p = pts[i], q = pts[(i + 1) % pts.length]; a += p[0] * q[1] - q[0] * p[1]; } return a / 2; }
+
+// ---------- reticolo ----------
+function buildLayout({ W, H, s, border }) {
+  const hrow = s * SQ3 / 2;
+  const innerW = W - 2 * border, innerH = H - 2 * border;
+  const nRows = Math.max(1, Math.floor(innerH / hrow + 1e-9));
+  const nPer = Math.max(1, Math.floor(2 * innerW / s + 1e-9) - 1);
+  const imax = nPer + 1;
+  const Lw = imax * s / 2, Lh = nRows * hrow;
+  const ox = (W - Lw) / 2, oy = (H - Lh) / 2;
+  const P = (i, r) => [ox + i * s / 2, oy + r * hrow];
+  const cells = [], fillers = [];
+  for (let r = 0; r < nRows; r++) {
+    for (let j = 0; j < nPer; j++) {
+      const up = (j + r) % 2 === 0;
+      const verts = up ? [P(j, r), P(j + 2, r), P(j + 1, r + 1)] : [P(j + 1, r), P(j + 2, r + 1), P(j, r + 1)];
+      cells.push({ row: r, j, up, verts, c: centroidOf(verts) });
+    }
+    if (r % 2 === 0) fillers.push([P(0, r), P(1, r + 1), P(0, r + 1)]);
+    else fillers.push([P(0, r), P(1, r), P(0, r + 1)]);
+    const jl = nPer - 1;
+    if ((jl + r) % 2 === 0) fillers.push([P(imax, r), P(imax, r + 1), P(imax - 1, r + 1)]);
+    else fillers.push([P(imax - 1, r), P(imax, r), P(imax, r + 1)]);
+  }
+  // numerazione: dall'alto a sinistra, riga per riga
+  cells.sort((a, b) => (b.row - a.row) || (a.j - b.j));
+  cells.forEach((c, i) => { c.id = i + 1; c.rowTop = nRows - 1 - c.row; });
+
+  // bordo
+  const borders = [];
+  const eps = 1e-6;
+  const latLoops = unionBoundary([...cells.map(c => c.verts), ...fillers], false);
+  const top = oy + Lh, right = ox + Lw;
+  if (ox > 0.05 || oy > 0.05) {
+    for (const loop of latLoops) for (let i = 0; i < loop.length; i++) {
+      const a = loop[i], b = loop[(i + 1) % loop.length];
+      let a2, b2;
+      if (Math.abs(a[1] - oy) < eps && Math.abs(b[1] - oy) < eps) { if (oy < 0.05) continue; a2 = [a[0], 0]; b2 = [b[0], 0]; }
+      else if (Math.abs(a[1] - top) < eps && Math.abs(b[1] - top) < eps) { if (oy < 0.05) continue; a2 = [a[0], H]; b2 = [b[0], H]; }
+      else if (Math.abs(a[0] - ox) < eps && Math.abs(b[0] - ox) < eps) { if (ox < 0.05) continue; a2 = [0, a[1]]; b2 = [0, b[1]]; }
+      else if (Math.abs(a[0] - right) < eps && Math.abs(b[0] - right) < eps) { if (ox < 0.05) continue; a2 = [W, a[1]]; b2 = [W, b[1]]; }
+      else continue;
+      borders.push([a2, b2, b, a]);
+    }
+    if (ox > 0.05 && oy > 0.05) {
+      borders.push([[0, 0], [ox, 0], [ox, oy], [0, oy]]);
+      borders.push([[right, 0], [W, 0], [W, oy], [right, oy]]);
+      borders.push([[right, top], [W, top], [W, H], [right, H]]);
+      borders.push([[0, top], [ox, top], [ox, H], [0, H]]);
+    }
+  }
+  return { W, H, s, hrow, nRows, nPer, ox, oy, Lw, Lh, cells, fillers, borders };
+}
+
+// contorno dell'unione di poligoni CCW che condividono i lati
+function unionBoundary(polys, simplify = true) {
+  const pts = new Map(), edges = new Map();
+  for (const poly of polys) for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const ka = keyOf(a), kb = keyOf(b);
+    if (ka === kb) continue;
+    pts.set(ka, a); pts.set(kb, b);
+    const rev = kb + '|' + ka;
+    if (edges.has(rev)) edges.delete(rev); else edges.set(ka + '|' + kb, [ka, kb]);
+  }
+  const next = new Map();
+  for (const [, [ka, kb]] of edges) { if (!next.has(ka)) next.set(ka, []); next.get(ka).push(kb); }
+  const loops = [];
+  for (;;) {
+    let start = null;
+    for (const [k, arr] of next) if (arr.length) { start = k; break; }
+    if (start === null) break;
+    const loop = []; let cur = start, guard = 0;
+    for (;;) {
+      loop.push(pts.get(cur));
+      const arr = next.get(cur);
+      if (!arr || !arr.length) break;
+      cur = arr.pop();
+      if (cur === start || ++guard > 1e6) break;
+    }
+    loops.push(simplify ? removeCollinear(loop) : loop);
+  }
+  return loops.filter(l => l.length >= 3);
+}
+
+function removeCollinear(loop) {
+  let out = loop.slice(), changed = true;
+  while (changed && out.length > 3) {
+    changed = false;
+    for (let i = 0; i < out.length; i++) {
+      const p = out[(i - 1 + out.length) % out.length], q = out[i], r = out[(i + 1) % out.length];
+      const cr = (q[0] - p[0]) * (r[1] - q[1]) - (q[1] - p[1]) * (r[0] - q[0]);
+      const dot = (q[0] - p[0]) * (r[0] - q[0]) + (q[1] - p[1]) * (r[1] - q[1]);
+      if (Math.abs(cr) < 1e-7 && dot > 0) { out.splice(i, 1); changed = true; break; }
+    }
+  }
+  return out;
+}
+
+// ---------- utilità poligoni ----------
+function insetConvex(poly, d) { // poligono regolare/convesso centrato: inset approssimato via scala sul centro (esatto per triangolo equilatero)
+  const c = centroidOf(poly);
+  const rin = Math.min(...poly.map((p, i) => distToLine(c, p, poly[(i + 1) % poly.length])));
+  const k = (rin - d) / rin;
+  return poly.map(p => [c[0] + (p[0] - c[0]) * k, c[1] + (p[1] - c[1]) * k]);
+}
+function distToLine(c, a, b) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy);
+  return Math.abs((c[0] - a[0]) * dy - (c[1] - a[1]) * dx) / L;
+}
+function chamferPoly(poly, c) {
+  const n = poly.length, out = [];
+  for (let i = 0; i < n; i++) {
+    const v = poly[i], p = poly[(i - 1 + n) % n], q = poly[(i + 1) % n];
+    const dp = [p[0] - v[0], p[1] - v[1]], lp = Math.hypot(...dp);
+    const dq = [q[0] - v[0], q[1] - v[1]], lq = Math.hypot(...dq);
+    out.push([v[0] + dp[0] / lp * c, v[1] + dp[1] / lp * c]);
+    out.push([v[0] + dq[0] / lq * c, v[1] + dq[1] / lq * c]);
+  }
+  return out;
+}
+function rayDist(poly, d) {
+  let best = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    const p = poly[i], q = poly[(i + 1) % poly.length];
+    const ex = q[0] - p[0], ey = q[1] - p[1];
+    const den = d[0] * ey - d[1] * ex;
+    if (Math.abs(den) < 1e-12) continue;
+    const t = (p[0] * ey - p[1] * ex) / den;
+    const u = (p[0] * d[1] - p[1] * d[0]) / den;
+    if (t > 0 && u >= -1e-9 && u <= 1 + 1e-9) best = Math.min(best, t);
+  }
+  return best === Infinity ? 0 : best;
+}
+function insideConvex(poly, pt, margin) { // poly CCW
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length];
+    const ex = b[0] - a[0], ey = b[1] - a[1], L = Math.hypot(ex, ey);
+    const cr = (ex * (pt[1] - a[1]) - ey * (pt[0] - a[0])) / L;
+    if (cr < margin) return false;
+  }
+  return true;
+}
+
+// ---------- scrittura triangoli ----------
+function T(out, a, b, c) { out.push(a[0], a[1], a[2], b[0], b[1], b[2], c[0], c[1], c[2]); }
+function face(out, contour, holes, z, up, TRI) {
+  const all = contour.concat(...holes);
+  const tris = TRI(contour, holes);
+  let tot = 0;
+  for (const [i, j, k] of tris) { const a = all[i], b = all[j], c = all[k]; tot += (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
+  const flip = (tot > 0) !== up; // earcut produce triangoli con verso coerente: si gira tutto insieme
+  for (const [i, j, k] of tris) {
+    if (i === j || j === k || i === k) continue;
+    const a = all[i], b = all[j], c = all[k];
+    if (!flip) T(out, [a[0], a[1], z], [b[0], b[1], z], [c[0], c[1], z]);
+    else T(out, [a[0], a[1], z], [c[0], c[1], z], [b[0], b[1], z]);
+  }
+}
+function walls(out, loop, z0, z1) { // normale a destra del verso del loop
+  for (let i = 0; i < loop.length; i++) {
+    const a = loop[i], b = loop[(i + 1) % loop.length];
+    const a0 = [a[0], a[1], z0], b0 = [b[0], b[1], z0], b1 = [b[0], b[1], z1], a1 = [a[0], a[1], z1];
+    T(out, a0, b0, b1); T(out, a0, b1, a1);
+  }
+}
+function prism(out, outer, holes, z0, z1, TRI) { // outer CCW, holes CW
+  face(out, outer, holes, z0, false, TRI);
+  face(out, outer, holes, z1, true, TRI);
+  walls(out, outer, z0, z1);
+  for (const h of holes) walls(out, h, z0, z1);
+}
+
+// ---------- cifre a 7 segmenti (incise, specchiate) ----------
+const SEG = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg' };
+function digitRects(str, poly, minH) {
+  const n = str.length;
+  const fits = (Hh) => {
+    const Wd = 0.62 * Hh, gp = 0.28 * Hh, Wt = n * Wd + (n - 1) * gp, m = 0.7;
+    const bx = Wt / 2, by = Hh / 2;
+    return [[-bx, -by], [bx, -by], [bx, by], [-bx, by]].every(p => insideConvex(poly, p, m));
+  };
+  let lo = 0, hi = 30;
+  for (let it = 0; it < 30; it++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
+  const Hh = Math.min(lo, 7);
+  if (Hh < minH) return null;
+  const Wd = 0.62 * Hh, gp = 0.28 * Hh, Wt = n * Wd + (n - 1) * gp;
+  const t = Math.max(0.5, 0.15 * Hh), sg = Math.max(0.3, 0.06 * Hh);
+  const rects = [];
+  for (let k = 0; k < n; k++) {
+    const cx = -Wt / 2 + Wd / 2 + k * (Wd + gp);
+    const w2 = Wd / 2, h2 = Hh / 2;
+    const R = {
+      a: [-w2 + t + sg, h2 - t, w2 - t - sg, h2],
+      g: [-w2 + t + sg, -t / 2, w2 - t - sg, t / 2],
+      d: [-w2 + t + sg, -h2, w2 - t - sg, -h2 + t],
+      f: [-w2, sg / 2, -w2 + t, h2 - 0.35 * t],
+      b: [w2 - t, sg / 2, w2, h2 - 0.35 * t],
+      e: [-w2, -h2 + 0.35 * t, -w2 + t, -sg / 2],
+      c: [w2 - t, -h2 + 0.35 * t, w2, -sg / 2],
+    };
+    for (const ch of SEG[str[k]] || '') {
+      let [x0, y0, x1, y1] = R[ch];
+      const jx = ('abcdefg'.indexOf(ch) + 1) * 0.009, jy = (k * 7 + 'abcdefg'.indexOf(ch) + 1) * 0.006; // evita lati collineari
+      x0 += jx; x1 += jx; y0 += jy; y1 += jy;
+      if (x1 - x0 < 0.2 || y1 - y0 < 0.2) continue;
+      // specchio in X: leggibile guardando il pezzo da sotto
+      const X0 = -(cx + x1), X1 = -(cx + x0);
+      rects.push([[X0, y0], [X0, y1], [X1, y1], [X1, y0]]); // CW
+    }
+  }
+  return rects;
+}
+
+// ---------- profili ----------
+const PROFILES = {
+  corno: { g: v => v, f: v => Math.pow(v, 2.2) },
+  piramide: { g: v => v, f: v => v },
+  cupola: { g: v => v, f: v => 1 - Math.pow(1 - v, 2.2) },
+  spillo: { g: v => 1 - Math.pow(1 - v, 3), f: v => v },
+  pinna: { g: v => Math.sin(v * Math.PI / 2), f: v => Math.pow(v, 1.6) },
+  piatto: null,
+};
+
+// ---------- pezzo ----------
+// cell: {verts, c}; o: parametri
+function buildPiece(cell, o, TRI) {
+  const out = [];
+  const c = cell.c;
+  const V = cell.verts.map(v => [v[0] - c[0], v[1] - c[1]]);
+  const F = insetConvex(V, o.gapF / 2);
+  let bottom, zPlugTop = 0;
+  const Z0 = (o.plug ? o.plugH : 0) + o.flangeT;
+  if (o.plug) {
+    const Pt = insetConvex(V, o.rib / 2 + o.tol);
+    bottom = chamferPoly(Pt, o.chamfer);
+    zPlugTop = o.plugH;
+  } else bottom = F;
+  let holes = [];
+  if (o.engrave && o.number != null) {
+    const r = digitRects(String(o.number), bottom, o.minDigit || 2.4);
+    if (r) holes = r;
+  }
+  face(out, bottom, holes, 0, false, TRI);
+  for (const h of holes) {
+    walls(out, h, 0, o.engraveDepth);
+    face(out, h, [], o.engraveDepth, false, TRI);
+  }
+  if (o.plug) {
+    walls(out, bottom, 0, zPlugTop);
+    face(out, F, [bottom.slice().reverse()], zPlugTop, false, TRI);
+    walls(out, F, zPlugTop, Z0);
+  } else {
+    walls(out, F, 0, Z0);
+  }
+  // sommità
+  const prof = PROFILES[o.shape];
+  if (!prof || o.h < 0.05) {
+    face(out, F, [], Z0, true, TRI);
+  } else {
+    let d = o.dir || [0, 0];
+    const L = Math.hypot(d[0], d[1]);
+    let apex = [0, 0];
+    if (L > 1e-9 && o.offset > 0) { d = [d[0] / L, d[1] / L]; const k = Math.min(0.97, o.offset) * rayDist(F, d); apex = [d[0] * k, d[1] * k]; }
+    const m = o.segs || 14;
+    for (let i = 0; i < 3; i++) {
+      const A = F[i], B = F[(i + 1) % 3];
+      let prevL = null, prevR = null;
+      for (let l = 0; l <= m; l++) {
+        const v = l / m, gv = l === m ? 1 : prof.g(v), fv = l === m ? 1 : prof.f(v);
+        const z = Z0 + o.h * fv;
+        const Lp = [A[0] + (apex[0] - A[0]) * gv, A[1] + (apex[1] - A[1]) * gv, z];
+        const Rp = [B[0] + (apex[0] - B[0]) * gv, B[1] + (apex[1] - B[1]) * gv, z];
+        if (prevL) {
+          T(out, prevL, prevR, Rp);
+          if (l < m) T(out, prevL, Rp, Lp);
+        }
+        prevL = Lp; prevR = Rp;
+      }
+    }
+  }
+  return out;
+}
+
+function transformTris(src, dx, dy, dz, rot, dst) {
+  const cs = Math.cos(rot), sn = Math.sin(rot);
+  for (let i = 0; i < src.length; i += 3) {
+    const x = src[i], y = src[i + 1];
+    dst.push(x * cs - y * sn + dx, x * sn + y * cs + dy, src[i + 2] + dz);
+  }
+  return dst;
+}
+
+// ---------- telaio ----------
+function tileFrame(L, bedU, bedV) {
+  const elems = [];
+  for (const c of L.cells) elems.push({ poly: c.verts, c: c.c, cell: c });
+  for (const f of L.fillers) elems.push({ poly: f, c: centroidOf(f) });
+  for (const b of L.borders) elems.push({ poly: b, c: centroidOf(b) });
+  for (const e of elems) { let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity; for (const p of e.poly) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); } e.bb = [x0, y0, x1, y1]; }
+  const half = L.s / 2;
+  function cutsX(n) { const cs = []; for (let k = 1; k < n; k++) { let m = Math.round((k * L.W / n - L.ox) / half); m = Math.max(1, Math.min(L.nPer - 1, m)); cs.push(L.ox + (m + 0.5) * half); } return [...new Set(cs)].sort((a, b) => a - b); }
+  function cutsY(n) { const cs = []; for (let k = 1; k < n; k++) { let m = Math.round((k * L.H / n - L.oy) / L.hrow); m = Math.max(1, Math.min(L.nRows - 1, m)); cs.push(L.oy + m * L.hrow); } return [...new Set(cs)].sort((a, b) => a - b); }
+  const idx = (cs, v) => { let i = 0; while (i < cs.length && v > cs[i]) i++; return i; };
+  function extents(cs, axis) {
+    const ext = cs.map(() => [Infinity, -Infinity]); ext.push([Infinity, -Infinity]);
+    for (const e of elems) { const i = idx(cs, e.c[axis]); ext[i][0] = Math.min(ext[i][0], e.bb[axis]); ext[i][1] = Math.max(ext[i][1], e.bb[axis + 2]); }
+    return Math.max(...ext.map(x => x[1] - x[0]));
+  }
+  let cx = [], cy = [];
+  for (let n = 1; n <= 80; n++) { cx = cutsX(n); if (extents(cx, 0) <= bedU || n === 80) break; }
+  for (let n = 1; n <= 80; n++) { cy = cutsY(n); if (extents(cy, 1) <= bedV || n === 80) break; }
+  const nc = cx.length + 1, nr = cy.length + 1;
+  const tiles = [];
+  for (let r = 0; r < nr; r++) for (let c = 0; c < nc; c++) tiles.push({ col: c, row: r, elems: [] });
+  for (const e of elems) { const c = idx(cx, e.c[0]), r = idx(cy, e.c[1]); tiles[r * nc + c].elems.push(e); }
+  const res = tiles.filter(t => t.elems.length);
+  // etichette: riga dall'alto
+  for (const t of res) { t.label = 'T' + String.fromCharCode(65 + (nr - 1 - t.row)) + (t.col + 1); }
+  return { tiles: res, nc, nr, fits: extents(cx, 0) <= bedU && extents(cy, 1) <= bedV };
+}
+
+function buildFrameTile(tile, o, TRI) {
+  const out = [], z0 = 0, z1 = o.frameT;
+  const fan = (poly, z, up) => { for (let i = 1; i < poly.length - 1; i++) { const a = [poly[0][0], poly[0][1], z], b = [poly[i][0], poly[i][1], z], c = [poly[i + 1][0], poly[i + 1][1], z]; if (up) T(out, a, b, c); else T(out, a, c, b); } };
+  for (const e of tile.elems) {
+    if (e.cell) {
+      const O = e.cell.verts, I = insetConvex(O, o.rib / 2);
+      for (let i = 0; i < 3; i++) {
+        const j = (i + 1) % 3;
+        for (const [z, up] of [[z1, true], [z0, false]]) {
+          const Oi = [O[i][0], O[i][1], z], Oj = [O[j][0], O[j][1], z], Ij = [I[j][0], I[j][1], z], Ii = [I[i][0], I[i][1], z];
+          if (up) { T(out, Oi, Oj, Ij); T(out, Oi, Ij, Ii); } else { T(out, Oi, Ij, Oj); T(out, Oi, Ii, Ij); }
+        }
+      }
+      walls(out, I.slice().reverse(), z0, z1);
+    } else { fan(e.poly, z1, true); fan(e.poly, z0, false); }
+  }
+  const loops = unionBoundary(tile.elems.map(e => e.poly), false);
+  for (const l of loops) walls(out, l, z0, z1);
+  return { tris: out, loops: loops.filter(l => areaOf(l) > 0).map(removeCollinear) };
+}
+function insideConvexLoose(poly, pt) { // punto in poligono (ray casting)
+  let ins = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i], b = poly[j];
+    if (((a[1] > pt[1]) !== (b[1] > pt[1])) && (pt[0] < (b[0] - a[0]) * (pt[1] - a[1]) / (b[1] - a[1]) + a[0])) ins = !ins;
+  }
+  return ins;
+}
+
+// ---------- piatti ----------
+function plateSlots(sF, gap, bedW, bedD, margin) {
+  const S = sF + SQ3 * gap, hS = S * SQ3 / 2;
+  const uW = bedW - 2 * margin, uD = bedD - 2 * margin;
+  const nPer = Math.max(1, Math.floor(2 * uW / S) - 1), nRows = Math.max(1, Math.floor(uD / hS));
+  const totW = (nPer + 1) * S / 2, totD = nRows * hS;
+  const ox = (bedW - totW) / 2, oy = (bedD - totD) / 2;
+  const slots = [];
+  for (let r = nRows - 1; r >= 0; r--) for (let j = 0; j < nPer; j++) {
+    const up = (j + r) % 2 === 0;
+    slots.push({ up, x: ox + (j + 1) * S / 2, y: oy + r * hS + (up ? hS / 3 : 2 * hS / 3) });
+  }
+  return slots;
+}
+
+function meshVolume(t) {
+  let v = 0;
+  for (let i = 0; i < t.length; i += 9) {
+    const ax = t[i], ay = t[i + 1], az = t[i + 2], bx = t[i + 3], by = t[i + 4], bz = t[i + 5], cx = t[i + 6], cy = t[i + 7], cz = t[i + 8];
+    v += ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx);
+  }
+  return v / 6;
+}
+
+if (typeof module !== 'undefined') module.exports = { SQ3, mulberry, sideFromCount, buildLayout, unionBoundary, buildPiece, transformTris, tileFrame, buildFrameTile, plateSlots, meshVolume, PROFILES, insetConvex, areaOf };
+
+
+const VERSION = 'v1.6'; // v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
+const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
+const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
+const $ = (id) => document.getElementById(id);
+const TRI = (c, h) => THREE.ShapeUtils.triangulateShape(c.map(p => new THREE.Vector2(p[0], p[1])), h.map(hh => hh.map(p => new THREE.Vector2(p[0], p[1]))));
+
+// ---------- colore ----------
+function hexToRgb(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+function rgbToHex([r, g, b]) { return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
+function srgbLin(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function linSrgb(c) { const v = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; return v * 255; }
+function rgbToLab([r, g, b]) {
+  const R = srgbLin(r), G = srgbLin(g), B = srgbLin(b);
+  let x = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047, y = R * 0.2126 + G * 0.7152 + B * 0.0722, z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+  const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  x = f(x); y = f(y); z = f(z);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+}
+function labToRgb([L, a, b]) {
+  let y = (L + 16) / 116, x = a / 500 + y, z = y - b / 200;
+  const fi = t => t ** 3 > 0.008856 ? t ** 3 : (t - 16 / 116) / 7.787;
+  x = fi(x) * 0.95047; y = fi(y); z = fi(z) * 1.08883;
+  const R = x * 3.2406 + y * -1.5372 + z * -0.4986, G = x * -0.9689 + y * 1.8758 + z * 0.0415, B = x * 0.0557 + y * -0.2040 + z * 1.0570;
+  return [linSrgb(R), linSrgb(G), linSrgb(B)];
+}
+const d2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+const NAMES = [['Bianco', '#F2F2F0'], ['Nero', '#1C1C1C'], ['Grigio', '#8C8F91'], ['Grigio chiaro', '#C4C7C9'], ['Rosso', '#C8102E'], ['Corallo', '#F0605D'], ['Arancione', '#F28C28'], ['Giallo', '#F5D000'], ['Verde', '#2E9E44'], ['Verde menta', '#93D6B5'], ['Verde scuro', '#1F5135'], ['Azzurro', '#4AB3E6'], ['Turchese', '#1FB5AD'], ['Blu', '#1F4FA3'], ['Blu notte', '#1B2A4A'], ['Viola', '#6A3FB5'], ['Lilla', '#B49CE0'], ['Rosa', '#F29BBF'], ['Fucsia', '#D6338A'], ['Marrone', '#6B4226'], ['Beige', '#D9C3A0'], ['Oro', '#C9A227']].map(([n, h]) => [n, rgbToLab(hexToRgb(h))]);
+function colorName(lab) { let best = NAMES[0], bd = Infinity; for (const n of NAMES) { const d = d2(lab, n[1]); if (d < bd) { bd = d; best = n; } } return best[0]; }
+
+function kmeans(samples, k, seed) {
+  const rnd = mulberry(seed), n = samples.length;
+  const cent = [samples[Math.floor(rnd() * n)].slice()];
+  const dist = new Float64Array(n).fill(Infinity);
+  while (cent.length < k) {
+    let sum = 0;
+    for (let i = 0; i < n; i++) { dist[i] = Math.min(dist[i], d2(samples[i], cent[cent.length - 1])); sum += dist[i]; }
+    let r = rnd() * sum, i = 0;
+    for (; i < n - 1; i++) { r -= dist[i]; if (r <= 0) break; }
+    cent.push(samples[i].slice());
+  }
+  const asg = new Int32Array(n);
+  for (let it = 0; it < 16; it++) {
+    const acc = cent.map(() => [0, 0, 0, 0]);
+    for (let i = 0; i < n; i++) { let b = 0, bd = Infinity; for (let c = 0; c < k; c++) { const d = d2(samples[i], cent[c]); if (d < bd) { bd = d; b = c; } } asg[i] = b; const a = acc[b]; a[0] += samples[i][0]; a[1] += samples[i][1]; a[2] += samples[i][2]; a[3]++; }
+    for (let c = 0; c < k; c++) if (acc[c][3]) cent[c] = [acc[c][0] / acc[c][3], acc[c][1] / acc[c][3], acc[c][2] / acc[c][3]];
+  }
+  return cent.sort((a, b) => b[0] - a[0]);
+}
+
+// ---------- stato ----------
+const S = { src: null, isDemo: true, palette: [], img: null, cells: [], layout: null, plates: [], tiles: null, view: 'art', plate: 0 };
+
+// immagine di esempio: vortice bianco, corallo e viola
+function demoImage() {
+  const c = document.createElement('canvas'); c.width = 600; c.height = 300;
+  const g = c.getContext('2d'), id = g.createImageData(600, 300);
+  for (let y = 0; y < 300; y++) for (let x = 0; x < 600; x++) {
+    const u = (x - 300) / 300, v = (y - 150) / 300, r = Math.hypot(u, v), th = Math.atan2(v, u);
+    const t = ((th / (2 * Math.PI) + r * 1.7) % 1 + 1) % 1;
+    let col = [104, 72, 196];
+    if (t < 0.22 || Math.abs(u) > 0.86) col = [238, 88, 96];
+    if (r < 0.14 || Math.abs(u) > 0.95) col = [244, 242, 238];
+    const o = (y * 600 + x) * 4; id.data[o] = col[0]; id.data[o + 1] = col[1]; id.data[o + 2] = col[2]; id.data[o + 3] = 255;
+  }
+  g.putImageData(id, 0, 0); return c;
+}
+
+function P() {
+  const num = (id, d) => { const v = parseFloat($(id).value); return isFinite(v) ? v : d; };
+  const [bw, bd] = $('bed').value.split('x').map(Number);
+  const W = Math.max(100, num('W', 600)), H = Math.max(100, num('H', 300)), border = num('border', 6);
+  const side = $('sizeMode').value === 'count' ? sideFromCount(W, H, border, Math.max(10, num('count', 600))) : Math.max(8, num('side', 25));
+  return {
+    W, H, border, s: side, k: num('k', 3), shape: document.querySelector('input[name=shape]:checked').value,
+    hMin: num('hMin', 8), hMax: num('hMax', 22), hMode: $('hMode').value, offset: num('offset', 70) / 100,
+    dirMode: $('dirMode').value, twist: num('twist', 70), cx: num('cx', 50) / 100, cy: num('cy', 50) / 100, angle: num('angle', 90), jitter: num('jitter', 0),
+    bedW: bw, bedD: bd, margin: num('margin', 6), gap: num('gap', 3), frameOn: $('frameOn').checked, frameT: num('frameT', 3), rib: num('rib', 1.6), tol: num('tol', 0.15), flangeT: num('flangeT', 1.2),
+    frameColor: $('frameColor').value, engrave: $('engrave').checked, segs: num('segs', 14),
+    palSrc: $('palSrc').value, mat: $('matFilter').value, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
+  };
+}
+function pieceOpts(p) {
+  return { plug: p.frameOn, rib: p.rib, tol: p.tol, chamfer: 0.8, plugH: Math.max(0.6, p.frameT - 0.2), gapF: 0.3, flangeT: p.flangeT, engraveDepth: 0.4, segs: p.segs, offset: p.offset, shape: p.shape, minDigit: 2.4 };
+}
+
+// ---------- campionamento immagine ----------
+function sampleImage(p) {
+  const src = S.src, maxS = 320;
+  const gw = p.W >= p.H ? maxS : Math.round(maxS * p.W / p.H), gh = p.W >= p.H ? Math.round(maxS * p.H / p.W) : maxS;
+  const cv = document.createElement('canvas'); cv.width = gw; cv.height = gh;
+  const g = cv.getContext('2d', { willReadFrequently: true });
+  const sw = src.width, sh = src.height, ar = gw / gh;
+  let cw = sw, ch = sw / ar; if (ch > sh) { ch = sh; cw = sh * ar; }
+  g.drawImage(src, (sw - cw) / 2, (sh - ch) / 2, cw, ch, 0, 0, gw, gh);
+  const data = g.getImageData(0, 0, gw, gh).data;
+  const lab = new Float32Array(gw * gh * 3);
+  for (let i = 0; i < gw * gh; i++) { const L = rgbToLab([data[i * 4], data[i * 4 + 1], data[i * 4 + 2]]); lab[i * 3] = L[0]; lab[i * 3 + 1] = L[1]; lab[i * 3 + 2] = L[2]; }
+  // luminanza sfocata per il gradiente
+  const bw = Math.max(8, Math.round(p.W / p.s * 1.2)), bh = Math.max(4, Math.round(bw * gh / gw));
+  const bc = document.createElement('canvas'); bc.width = bw; bc.height = bh;
+  const bg = bc.getContext('2d', { willReadFrequently: true }); bg.imageSmoothingQuality = 'high'; bg.drawImage(cv, 0, 0, bw, bh);
+  const bd = bg.getImageData(0, 0, bw, bh).data, blum = new Float32Array(bw * bh);
+  for (let i = 0; i < bw * bh; i++) blum[i] = rgbToLab([bd[i * 4], bd[i * 4 + 1], bd[i * 4 + 2]])[0];
+  S.img = { gw, gh, lab, bw, bh, blum, canvas: cv };
+  // thumb
+  const th = $('thumb'), tg = th.getContext('2d'); tg.fillStyle = '#EDF0F1'; tg.fillRect(0, 0, th.width, th.height);
+  const sc = Math.min(th.width / gw, th.height / gh); tg.drawImage(cv, (th.width - gw * sc) / 2, (th.height - gh * sc) / 2, gw * sc, gh * sc);
+}
+function labAt(x, y, p) { const I = S.img; const px = Math.min(I.gw - 1, Math.max(0, Math.floor(x / p.W * I.gw))), py = Math.min(I.gh - 1, Math.max(0, Math.floor((1 - y / p.H) * I.gh))); const o = (py * I.gw + px) * 3; return [I.lab[o], I.lab[o + 1], I.lab[o + 2]]; }
+function blumAt(x, y, p) {
+  const I = S.img; const fx = Math.min(I.bw - 1.001, Math.max(0, x / p.W * I.bw - 0.5)), fy = Math.min(I.bh - 1.001, Math.max(0, (1 - y / p.H) * I.bh - 0.5));
+  const x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0, w = I.bw;
+  const a = I.blum[y0 * w + x0], b = I.blum[y0 * w + x0 + 1], c = I.blum[(y0 + 1) * w + x0], d = I.blum[(y0 + 1) * w + x0 + 1];
+  return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty;
+}
+function invCandidates(p) {
+  return S.inv.filter(f => f.grams == null || f.grams >= p.minG).filter(f => !p.mat || f.material === p.mat);
+}
+function computePalette(p) {
+  const I = S.img, n = I.gw * I.gh, step = Math.max(1, Math.floor(n / 7000)), smp = [];
+  for (let i = 0; i < n; i += step) smp.push([I.lab[i * 3], I.lab[i * 3 + 1], I.lab[i * 3 + 2]]);
+  S.palFromInv = false;
+  const cand = p.palSrc === 'inv' ? invCandidates(p) : [];
+  if (p.palSrc === 'inv' && cand.length >= 2) {
+    // scelta greedy dei k filamenti che rappresentano meglio l'immagine
+    const k = Math.min(p.k, cand.length), best = new Float64Array(smp.length).fill(Infinity), chosen = [];
+    for (let step2 = 0; step2 < k; step2++) {
+      let bi = -1, bt = Infinity;
+      for (let c = 0; c < cand.length; c++) {
+        if (chosen.includes(c)) continue;
+        let t = 0; const L = cand[c].lab;
+        for (let i = 0; i < smp.length; i++) t += Math.min(best[i], d2(smp[i], L));
+        if (t < bt) { bt = t; bi = c; }
+      }
+      chosen.push(bi); for (let i = 0; i < smp.length; i++) best[i] = Math.min(best[i], d2(smp[i], cand[bi].lab));
+    }
+    S.palette = chosen.map(c => cand[c]).sort((a, b) => b.lab[0] - a.lab[0]).map(f => ({ lab: f.lab, hex: f.hex, name: f.name, inv: f }));
+    S.palFromInv = true; S.paletteKey = ''; dedupeNames(); return;
+  }
+  const cents = kmeans(smp, p.k, 7);
+  S.palette = cents.map(l => ({ lab: l, hex: rgbToHex(labToRgb(l)), name: colorName(l) }));
+  S.paletteKey = ''; dedupeNames();
+}
+function dedupeNames() { const seen = {}; for (const c of S.palette) { const b = c.name; seen[b] = (seen[b] || 0) + 1; c.label = seen[b] > 1 ? b + ' ' + seen[b] : b; } }
+
+// ---------- calcolo celle ----------
+function computeCells(p) {
+  const L = buildLayout({ W: p.W, H: p.H, s: p.s, border: p.border });
+  S.layout = L;
+  const pal = S.palette.map(c => rgbToLab(hexToRgb(c.hex)));
+  const cxm = p.cx * p.W, cym = p.cy * p.H, dmax = Math.hypot(Math.max(cxm, p.W - cxm), Math.max(cym, p.H - cym));
+  const counts = new Array(pal.length).fill(0);
+  for (const c of L.cells) {
+    const votes = new Array(pal.length).fill(0); let Lsum = 0;
+    const pts = [c.c]; for (const v of c.verts) { pts.push([c.c[0] + (v[0] - c.c[0]) * 0.55, c.c[1] + (v[1] - c.c[1]) * 0.55]); }
+    for (let i = 0; i < 3; i++) { const a = c.verts[i], b = c.verts[(i + 1) % 3]; pts.push([c.c[0] + ((a[0] + b[0]) / 2 - c.c[0]) * 0.6, c.c[1] + ((a[1] + b[1]) / 2 - c.c[1]) * 0.6]); }
+    const la = [0, 0, 0];
+    for (const q of pts) { const l = labAt(q[0], q[1], p); Lsum += l[0]; la[0] += l[0]; la[1] += l[1]; la[2] += l[2]; let b = 0, bd = Infinity; for (let k = 0; k < pal.length; k++) { const d = d2(l, pal[k]); if (d < bd) { bd = d; b = k; } } votes[b] += (q === c.c ? 1.5 : 1); }
+    c.color = votes.indexOf(Math.max(...votes)); counts[c.color]++;
+    c.lum = Lsum / pts.length / 100; c.labAvg = la.map(v => v / pts.length);
+    const rnd = mulberry(c.id * 7919 + 13);
+    // direzione
+    let ang;
+    const dx = c.c[0] - cxm, dy = c.c[1] - cym;
+    if (p.dirMode === 'vortex') ang = Math.atan2(dy, dx) + p.twist * Math.PI / 180;
+    else if (p.dirMode === 'fixed') ang = p.angle * Math.PI / 180;
+    else if (p.dirMode === 'rand') ang = rnd() * Math.PI * 2;
+    else {
+      const e = p.s * 0.6, gx = (blumAt(c.c[0] + e, c.c[1], p) - blumAt(c.c[0] - e, c.c[1], p)), gy = (blumAt(c.c[0], c.c[1] + e, p) - blumAt(c.c[0], c.c[1] - e, p));
+      if (Math.hypot(gx, gy) < 0.4) ang = p.angle * Math.PI / 180;
+      else ang = p.dirMode === 'light' ? Math.atan2(gy, gx) : Math.atan2(gx, -gy);
+    }
+    ang += (rnd() * 2 - 1) * p.jitter * Math.PI / 180;
+    c.dir = [Math.cos(ang), Math.sin(ang)];
+    // altezza
+    let t = 1; const rr = Math.hypot(dx, dy) / dmax;
+    if (p.hMode === 'lum') t = c.lum; else if (p.hMode === 'ilum') t = 1 - c.lum; else if (p.hMode === 'center') t = 1 - rr; else if (p.hMode === 'edge') t = rr; else if (p.hMode === 'rand') t = rnd(); else if (p.hMode === 'color') t = pal.length > 1 ? c.color / (pal.length - 1) : 1;
+    c.h = p.shape === 'piatto' ? 0 : p.hMin + (p.hMax - p.hMin) * Math.max(0, Math.min(1, t));
+  }
+  S.counts = counts;
+  return L;
+}
+
+// ---------- color mixing (alternanza di strati, Bambu Studio 2.5.3+) ----------
+const LAYER_H = 0.2, FLUSH_G = 0.6, SWAP_S = 75; // stime per P1S + AMS (ugello singolo)
+const RATIOS2 = [[1, 1], [1, 2], [2, 1], [1, 3], [3, 1], [1, 4], [4, 1], [2, 3], [3, 2]];
+const RATIOS3 = [[1, 1, 1], [2, 1, 1], [1, 2, 1], [1, 1, 2], [3, 1, 1], [1, 3, 1], [1, 1, 3], [2, 2, 1], [2, 1, 2], [1, 2, 2]];
+function linOf(hex) { return hexToRgb(hex).map(srgbLin); }
+function mixColor(lins, w) { const t = w.reduce((a, b) => a + b, 0), out = [0, 0, 0]; lins.forEach((l, i) => { for (let k = 0; k < 3; k++) out[k] += l[k] * w[i] / t; }); return rgbToHex(out.map(linSrgb)); }
+function computeMixes(p) {
+  const prev = new Map(S.palette.map((c, i) => [i, c.mixOn]));
+  const cand = p.palSrc === 'inv' ? invCandidates(p) : [];
+  const lins = cand.map(f => linOf(f.hex));
+  S.palette.forEach((c, i) => {
+    const cells = S.layout.cells.filter(x => x.color === i);
+    c.mix = null; c.pureDE = null;
+    if (!cells.length) { c.target = null; return; }
+    const tg = [0, 0, 0]; for (const x of cells) for (let k = 0; k < 3; k++) tg[k] += x.labAvg[k] / cells.length;
+    c.target = tg; c.pureDE = Math.sqrt(d2(tg, c.lab));
+    if (!S.palFromInv || cand.length < 2) return;
+    let best = null;
+    const tryMix = (idx, w) => { const hex = mixColor(idx.map(j => lins[j]), w), lab = rgbToLab(hexToRgb(hex)), de = Math.sqrt(d2(tg, lab)); if (!best || de < best.de) best = { idx, w, hex, lab, de }; };
+    for (let a = 0; a < cand.length; a++) for (let b = a + 1; b < cand.length; b++) {
+      for (const w of RATIOS2) tryMix([a, b], w);
+      if (cand.length <= 40) for (let d = b + 1; d < cand.length; d++) for (const w of RATIOS3) tryMix([a, b, d], w);
+    }
+    if (best && best.de < c.pureDE - 1.5) {
+      const tot = best.w.reduce((x, y) => x + y, 0);
+      c.mix = { parts: best.idx.map((j, k) => ({ f: cand[j], w: best.w[k], pct: Math.round(best.w[k] / tot * 100) })), hex: best.hex, lab: best.lab, de: best.de, ratio: best.w.join(':') };
+    }
+    c.mixOn = !!(c.mix && prev.get(i) && c.mixOn);
+  });
+}
+function mixCost(i, p) {
+  const c = S.palette[i]; if (!c.mix) return null;
+  const L = c.mix.parts.reduce((a, x) => a + x.w, 0), swapsPerLayer = c.mix.parts.length / L;
+  let swaps = 0;
+  for (const pl of S.plates) if (pl.kind === 'pieces' && pl.color === i) {
+    const zTop = Math.max(...pl.items.map(it => it.cell.h)) + (p.frameOn ? Math.max(0.6, p.frameT - 0.2) : 0) + p.flangeT;
+    swaps += Math.ceil(zTop / LAYER_H) * swapsPerLayer;
+  }
+  return { swaps: Math.round(swaps), grams: Math.round(swaps * FLUSH_G), hours: swaps * SWAP_S / 3600 };
+}
+
+// ---------- piatti ----------
+function computePlates(p) {
+  const L = S.layout, sF = p.s - SQ3 * 0.3;
+  const slots = plateSlots(sF, p.gap, p.bedW, p.bedD, p.margin);
+  const plates = [];
+  S.palette.forEach((col, ci) => {
+    const cells = L.cells.filter(c => c.color === ci);
+    const n = Math.ceil(cells.length / slots.length);
+    for (let k = 0; k < n; k++) {
+      const part = cells.slice(k * slots.length, (k + 1) * slots.length);
+      plates.push({ kind: 'pieces', color: ci, idx: k + 1, of: n, items: part.map((c, i) => ({ cell: c, slot: slots[i], rot: slots[i].up === c.up ? 0 : Math.PI })) });
+    }
+  });
+  if (p.frameOn) {
+    const tf = tileFrame(L, p.bedW - 2 * p.margin, p.bedD - 2 * p.margin);
+    S.tiles = tf;
+    for (const t of tf.tiles) plates.push({ kind: 'frame', tile: t });
+  } else S.tiles = null;
+  plates.forEach((pl, i) => { pl.n = i + 1; pl.name = 'P' + String(i + 1).padStart(2, '0') + (pl.kind === 'frame' ? ' Telaio ' + pl.tile.label : ' ' + dispLabel(S.palette[pl.color]) + ' ' + pl.idx + 'di' + pl.of); });
+  S.plates = plates; S.slotsPer = slots.length;
+}
+function plateTris(pl, p, engrave) {
+  const out = [];
+  if (pl.kind === 'frame') {
+    const r = buildFrameTile(pl.tile, { rib: p.rib, frameT: p.frameT }, TRI);
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < r.tris.length; i += 3) { x0 = Math.min(x0, r.tris[i]); x1 = Math.max(x1, r.tris[i]); y0 = Math.min(y0, r.tris[i + 1]); y1 = Math.max(y1, r.tris[i + 1]); }
+    const dx = p.bedW / 2 - (x0 + x1) / 2, dy = p.bedD / 2 - (y0 + y1) / 2;
+    return { objects: [{ name: 'Telaio ' + pl.tile.label, tris: transformTris(r.tris, dx, dy, 0, 0, []) }], color: p.frameColor };
+  }
+  const o = pieceOpts(p), objects = [];
+  for (const it of pl.items) {
+    const t = buildPiece(it.cell, { ...o, engrave, number: it.cell.id, h: it.cell.h, dir: it.cell.dir }, TRI);
+    objects.push({ name: '#' + it.cell.id, tris: transformTris(t, it.slot.x, it.slot.y, 0, it.rot, []) });
+  }
+  return { objects, color: dispHex(S.palette[pl.color]) };
+}
+
+// ---------- three.js ----------
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#D8DCDE');
+const camera = new THREE.PerspectiveCamera(32, 1, 1, 50000);
+const controls = new OrbitControls(camera, canvas); controls.addEventListener('change', () => render());
+scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8a92, 1.05));
+const sun = new THREE.DirectionalLight(0xffffff, 2.1); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.4;
+scene.add(sun, sun.target);
+const group = new THREE.Group(); scene.add(group);
+function clearGroup() { for (const ch of [...group.children]) { group.remove(ch); ch.geometry && ch.geometry.dispose(); if (ch.material) { ch.material.map && ch.material.map.dispose(); ch.material.dispose(); } } }
+function meshFrom(arr, color, opts = {}) {
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(arr instanceof Float32Array ? arr : new Float32Array(arr), 3)); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: new THREE.Color(color), roughness: 0.62, metalness: 0, ...opts }));
+  m.castShadow = true; m.receiveShadow = true; return m;
+}
+function resize() { const r = canvas.parentElement.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix(); render(); }
+new ResizeObserver(resize).observe(canvas.parentElement);
+let raf = 0; function render() { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; renderer.render(scene, camera); }); }
+function frameCamera(w, h, zTop, front) {
+  const cx = w / 2, cy = h / 2, R = Math.hypot(w, h) / 2;
+  const dist = Math.max(w / camera.aspect, h) / 2 / Math.tan(camera.fov * Math.PI / 360) * (front ? 1.18 : 1.35);
+  controls.target.set(cx, cy, zTop * 0.3);
+  if (front) camera.position.set(cx + dist * 0.30, cy - dist * 0.22, dist * 0.93);
+  else camera.position.set(cx, cy - dist * 0.75, dist * 0.68);
+  camera.near = dist / 100; camera.far = dist * 20; camera.updateProjectionMatrix(); controls.update();
+  sun.position.set(cx - R * 0.9, cy + R * 1.1, R * 1.4); sun.target.position.set(cx, cy, 0);
+  const sc = sun.shadow.camera; sc.left = -R * 1.3; sc.right = R * 1.3; sc.top = R * 1.3; sc.bottom = -R * 1.3; sc.near = 1; sc.far = R * 5; sc.updateProjectionMatrix();
+}
+let lastCamKey = '';
+
+function buildArtView(p) {
+  clearGroup();
+  const L = S.layout, o = pieceOpts(p);
+  const zoff = p.frameOn ? p.frameT - o.plugH : 0;
+  const per = S.palette.map(() => []);
+  let vol = 0; S.volByColor = S.palette.map(() => 0);
+  for (const c of L.cells) {
+    const t = buildPiece(c, { ...o, engrave: false, h: c.h, dir: c.dir }, TRI);
+    const v = meshVolume(t); vol += v; S.volByColor[c.color] += v;
+    transformTris(t, c.c[0], c.c[1], zoff, 0, per[c.color]);
+  }
+  S.volPieces = vol;
+  per.forEach((arr, i) => { if (arr.length) group.add(meshFrom(arr, dispHex(S.palette[i]))); });
+  let fvol = 0;
+  if (p.frameOn && S.tiles) {
+    const all = [];
+    for (const t of S.tiles.tiles) { const r = buildFrameTile(t, { rib: p.rib, frameT: p.frameT }, TRI); fvol += meshVolume(r.tris); for (const v of r.tris) all.push(v); }
+    group.add(meshFrom(all, p.frameColor));
+  }
+  S.volFrame = fvol;
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(p.W * 12, p.H * 12), new THREE.MeshStandardMaterial({ color: '#C9CED1', roughness: 1 }));
+  wall.position.set(p.W / 2, p.H / 2, -0.6); wall.receiveShadow = true; group.add(wall);
+  const key = 'art' + p.W + 'x' + p.H; if (key !== lastCamKey) { frameCamera(p.W, p.H, p.hMax, true); lastCamKey = key; }
+  render();
+}
+function buildPlateView(p) {
+  clearGroup();
+  const pl = S.plates[S.plate]; if (!pl) return;
+  const r = plateTris(pl, p, false);
+  const all = []; for (const ob of r.objects) for (const v of ob.tris) all.push(v);
+  group.add(meshFrom(all, r.color));
+  const bedG = new THREE.BoxGeometry(p.bedW, p.bedD, 2); const bed = new THREE.Mesh(bedG, new THREE.MeshStandardMaterial({ color: '#2E3438', roughness: 0.85 }));
+  bed.position.set(p.bedW / 2, p.bedD / 2, -1); bed.receiveShadow = true; group.add(bed);
+  const grid = new THREE.GridHelper(Math.max(p.bedW, p.bedD), Math.round(Math.max(p.bedW, p.bedD) / 20), 0x55606a, 0x434b52);
+  grid.rotation.x = Math.PI / 2; grid.position.set(p.bedW / 2, p.bedD / 2, 0.02); group.add(grid);
+  const key = 'plate' + p.bedW + 'x' + p.bedD; if (key !== lastCamKey) { frameCamera(p.bedW, p.bedD, p.hMax, false); lastCamKey = key; }
+  render();
+}
+function buildMapView(p) {
+  clearGroup();
+  const L = S.layout, cv = document.createElement('canvas'), sc = Math.min(4, 2400 / Math.max(p.W, p.H));
+  cv.width = Math.round(p.W * sc); cv.height = Math.round(p.H * sc);
+  const g = cv.getContext('2d'); g.fillStyle = p.frameOn ? p.frameColor : '#FFFFFF'; g.fillRect(0, 0, cv.width, cv.height);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  const fs = Math.max(6, p.s * 0.2 * sc);
+  for (const c of L.cells) {
+    g.beginPath(); c.verts.forEach((v, i) => { const x = v[0] * sc, y = (p.H - v[1]) * sc; i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath();
+    g.fillStyle = dispHex(S.palette[c.color]); g.fill(); g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1; g.stroke();
+    const lab = rgbToLab(hexToRgb(dispHex(S.palette[c.color]))); g.fillStyle = lab[0] > 60 ? 'rgba(0,0,0,.6)' : 'rgba(255,255,255,.8)';
+    g.font = `500 ${fs}px "IBM Plex Mono", monospace`; g.fillText(String(c.id), c.c[0] * sc, (p.H - c.c[1]) * sc);
+  }
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(p.W, p.H), new THREE.MeshBasicMaterial({ map: tex }));
+  m.position.set(p.W / 2, p.H / 2, 0); group.add(m);
+  const key = 'map' + p.W + 'x' + p.H; if (key !== lastCamKey) { controls.target.set(p.W / 2, p.H / 2, 0); const dist = Math.max(p.W / camera.aspect, p.H) / 2 / Math.tan(camera.fov * Math.PI / 360) * 1.1; camera.position.set(p.W / 2, p.H / 2, dist); camera.near = dist / 100; camera.far = dist * 10; camera.updateProjectionMatrix(); controls.update(); lastCamKey = key; }
+  render();
+}
+
+// ---------- UI ----------
+const SHAPES = [
+  ['corno', 'Corno', 'M2 28 L50 28 Q30 26 26 3 Q22 20 2 28Z'],
+  ['piramide', 'Piramide', 'M2 28 L50 28 L30 4 Z'],
+  ['cupola', 'Cupola', 'M2 28 L50 28 Q48 8 30 5 Q8 6 2 28Z'],
+  ['spillo', 'Spillo', 'M2 28 L50 28 Q31 25 29 3 Q27 25 2 28Z'],
+  ['pinna', 'Pinna', 'M2 28 L50 28 Q44 22 36 3 Q20 14 2 28Z'],
+  ['piatto', 'Piatto', 'M2 28 L50 28 L50 23 L2 23 Z'],
+];
+$('shapes').innerHTML = SHAPES.map(([v, n, d], i) => `<label class="card"><input type="radio" name="shape" value="${v}" id="shape-${v}" ${i === 0 ? 'checked' : ''}><svg viewBox="0 0 52 30" aria-hidden="true"><path d="${d}" fill="${'#E2484F'}"/><path d="M0 28.5H52" stroke="#5CC3D0" stroke-width="2"/></svg>${n}</label>`).join('');
+
+const gramsNeeded = (i) => S.volByColor && S.volByColor[i] != null ? S.volByColor[i] / 1000 * 1.24 * 0.6 * 1.1 : null; // ~60% del pieno + 10% scarto
+function renderPalette() {
+  const p = P();
+  const key = (S.palFromInv ? 'inv' : 'img') + S.palette.length + '|' + S.inv.length;
+  const box = $('pal');
+  if (S.paletteKey !== key) {
+    S.paletteKey = key;
+    const opts = invCandidates(p);
+    box.innerHTML = S.palette.map((c, i) => S.palFromInv
+      ? `<div class="sw f"><span class="dot" id="pd${i}"></span><select id="ps${i}" aria-label="Filamento ${i + 1}">${opts.map((f, j) => `<option value="${j}">${escH(f.name)}${f.material ? ' · ' + escH(f.material) : ''}${f.grams != null ? ' · ' + Math.round(f.grams) + ' g' : ''}</option>`).join('')}</select><span class="ct" id="pt${i}"></span><div class="mixrow" id="pm${i}" hidden><label class="switch"><input type="checkbox" id="px${i}"><span>Mix Bambu</span></label><span class="mixsw" id="pmc${i}"></span><p class="mixnote" id="pmn${i}"></p></div></div>`
+      : `<div class="sw"><input type="color" id="pc${i}" value="${c.hex}" aria-label="Colore ${i + 1}"><span class="nm" id="pn${i}"></span><span class="ct" id="pt${i}"></span></div>`).join('');
+    S.palette.forEach((c, i) => {
+      if (S.palFromInv) {
+        const sel = $('ps' + i); sel.value = String(opts.indexOf(c.inv));
+        sel.addEventListener('change', () => { const f = opts[+sel.value]; c.inv = f; c.hex = f.hex; c.lab = f.lab; c.name = f.name; dedupeNames(); schedule('cells'); });
+        $('px' + i).addEventListener('change', (e) => { c.mixOn = e.target.checked; S.paletteKey = S.paletteKey; schedule('cells'); });
+      } else $('pc' + i).addEventListener('input', (e) => { c.hex = e.target.value; c.lab = rgbToLab(hexToRgb(c.hex)); c.name = colorName(c.lab); dedupeNames(); schedule('cells'); });
+    });
+  }
+  S.palette.forEach((c, i) => {
+    const n = S.counts ? S.counts[i] : 0, g = gramsNeeded(i), ct = $('pt' + i); if (!ct) return;
+    const have = c.inv && c.inv.grams != null ? c.inv.grams : null;
+    if (c.mixOn && c.mix && g != null) {
+      const parts = c.mix.parts.map(x => ({ x, need: g * x.pct / 100 }));
+      ct.textContent = `${n} pz · ` + parts.map(({ x, need }) => `${x.f.name.split(' ').slice(-1)[0]} ≈${Math.round(need)}${x.f.grams != null ? '/' + Math.round(x.f.grams) : ''} g`).join(' · ');
+      ct.classList.toggle('short', parts.some(({ x, need }) => x.f.grams != null && need > x.f.grams));
+    } else {
+      ct.textContent = `${n} pz` + (g != null ? ` · ≈${Math.round(g)} g` : '') + (have != null ? ` / ${Math.round(have)} g` : '');
+      ct.classList.toggle('short', have != null && g != null && g > have);
+    }
+    ct.title = have != null && g != null && g > have ? 'Filamento insufficiente per questo colore' : '';
+    if ($('pd' + i)) $('pd' + i).style.background = c.hex;
+    const mr = $('pm' + i);
+    if (mr) {
+      mr.hidden = !c.mix;
+      if (c.mix) {
+        const cost = mixCost(i, p), rec = c.pureDE > 8 && c.mix.de < c.pureDE - 4;
+        $('px' + i).checked = !!c.mixOn;
+        $('pmc' + i).innerHTML = `<i style="background:${rgbToHex(labToRgb(c.target))}" title="Colore dell'immagine"></i><i style="background:${c.mix.hex}" title="Risultato del mix"></i>`;
+        const load = c.mix.parts.map(x => `${escH(x.f.name)}${x.f.ams && x.f.ams.length ? ' <b>(già in AMS ' + x.f.ams.join(', ') + ')</b>' : ''} ${x.pct}%`).join(' + ');
+        $('pmn' + i).innerHTML = c.mixOn
+          ? `<b>Carica nell'AMS:</b> ${load} (rapporto ${c.mix.ratio}). In Bambu Studio crea il filamento misto e assegnalo ai piatti di questo colore. Spurgo ≈ ${cost.grams} g, +${cost.hours.toFixed(1)} h di stampa.`
+          : (rec ? `<b>Ti consiglio il mix</b> per la miglior resa cromatica (scarto ΔE da ${Math.round(c.pureDE)} a ${Math.round(c.mix.de)}). Attenzione al consumo: ≈ ${cost.grams} g di spurgo e +${cost.hours.toFixed(1)} h con AMS.` : `Il mix avvicina il colore (ΔE ${Math.round(c.pureDE)} → ${Math.round(c.mix.de)}) ma il filamento singolo è già vicino. Spurgo ≈ ${cost.grams} g.`);
+        mr.classList.toggle('rec', rec && !c.mixOn); mr.classList.toggle('on', !!c.mixOn);
+        if (c.mixOn && $('pd' + i)) $('pd' + i).style.background = `linear-gradient(135deg, ${c.mix.parts.map((x, k, a) => x.f.hex + ' ' + Math.round(k / a.length * 100) + '% ' + Math.round((k + 1) / a.length * 100) + '%').join(', ')})`;
+      }
+    }
+    if ($('pn' + i)) $('pn' + i).textContent = c.label;
+  });
+}
+const dispHex = (c) => (c.mixOn && c.mix ? c.mix.hex : c.hex);
+const dispLabel = (c) => (c.mixOn && c.mix ? 'Mix ' + c.mix.parts.map(x => x.f.name).join(' + ') + ' ' + c.mix.ratio : c.label);
+const escH = (s) => String(s).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+
+// ---------- inventario FilamentBox ----------
+S.inv = [];
+const pick = (o, keys) => { for (const k of keys) { const hit = Object.keys(o).find(x => x.toLowerCase() === k); if (hit && o[hit] != null && o[hit] !== '') return o[hit]; } return null; };
+function normHex(v) {
+  if (v == null) return null; let h = String(v).trim().replace(/^#|^0x/i, '');
+  if (/^[0-9a-f]{3}$/i.test(h)) h = h.split('').map(c => c + c).join('');
+  if (/^[0-9a-f]{8}$/i.test(h)) h = h.slice(0, 6);
+  return /^[0-9a-f]{6}$/i.test(h) ? '#' + h.toUpperCase() : null;
+}
+function normalizeInventory(data) {
+  let arr = Array.isArray(data) ? data : (data && (data.filaments || data.filamenti || data.spools || data.bobine || data.items || data.data)) || [];
+  if (!Array.isArray(arr)) arr = Object.values(arr);
+  const out = [];
+  for (const o of arr) {
+    if (!o || typeof o !== 'object') continue;
+    const hex = normHex(pick(o, ['colorhex', 'hex', 'color_hex', 'colore_hex', 'color', 'colore', 'rgb', 'tray_color']));
+    if (!hex) continue;
+    const st = String(pick(o, ['status', 'stato']) || '').toLowerCase();
+    if (/(finit|esaurit|empty|archiv)/.test(st)) continue;
+    let g = pick(o, ['remainingweight', 'remaining', 'remaining_weight', 'residuo', 'peso_residuo', 'grammi', 'grams', 'weight', 'peso', 'remain']);
+    g = g == null ? null : parseFloat(g);
+    const words = [];
+    for (const part of [pick(o, ['brand', 'marca', 'vendor', 'produttore']), pick(o, ['name', 'nome']), pick(o, ['colorname', 'color_name', 'nome_colore', 'colore_nome'])]) {
+      if (!part) continue; const t = String(part).trim(); if (t && !words.some(w => w.toLowerCase().includes(t.toLowerCase()))) words.push(t);
+    }
+    const name = words.join(' ') || hex;
+    const slot = pick(o, ['amsslot', 'ams_slot', 'slot']);
+    out.push({ id: pick(o, ['id', 'uid', 'tag', 'nfc']), name, material: String(pick(o, ['material', 'materiale', 'type', 'tipo']) || '').toUpperCase(), hex, grams: isFinite(g) ? g : null, lab: rgbToLab(hexToRgb(hex)), ams: slot != null && slot !== '' ? [Number(slot)] : [] });
+  }
+  // stesso colore e materiale su più bobine: si sommano i grammi
+  const m = new Map();
+  for (const f of out) { const k = f.hex + '|' + f.material; const e = m.get(k); if (e) { if (e.grams != null || f.grams != null) e.grams = (e.grams || 0) + (f.grams || 0); e.spools++; e.ams = e.ams.concat(f.ams); } else m.set(k, { ...f, spools: 1 }); }
+  return [...m.values()];
+}
+const invKey = (f) => f.hex + '|' + f.material;
+function setInventory(list, source, live) {
+  const sig = JSON.stringify(list.map(f => [f.hex, f.material, f.name, f.grams]));
+  const t = new Date(), hh = `${t.getHours()}:${String(t.getMinutes()).padStart(2, '0')}:${String(t.getSeconds()).padStart(2, '0')}`;
+  S.invSource = source;
+  $('invStatus').textContent = list.length ? `● ${list.length} filamenti da ${source} · aggiornato ${hh}${live ? ' · in tempo reale' : ''}` : `Nessun filamento con colore trovato in ${source}.`;
+  $('invStatus').classList.toggle('live', !!live && list.length > 0);
+  if (sig === S.invSig) return; // nessun cambiamento
+  const first = !S.invSig; S.invSig = sig;
+  S.inv = list;
+  const mats = [...new Set(list.map(f => f.material).filter(Boolean))].sort();
+  const ms = $('matFilter'), cur = ms.value;
+  ms.innerHTML = '<option value="">Tutti</option>' + mats.map(m => `<option>${escH(m)}</option>`).join('');
+  if (mats.includes(cur)) ms.value = cur; else if (first && mats.includes('PLA')) ms.value = 'PLA';
+  if (first || !S.palFromInv) { schedule('palette'); return; }
+  // aggiornamento dal vivo: si tengono i filamenti scelti e si aggiornano solo i grammi
+  const byKey = new Map(list.map(f => [invKey(f), f]));
+  const p = P(); let lost = false;
+  for (const c of S.palette) {
+    const f = c.inv && byKey.get(invKey(c.inv));
+    if (!f || (f.grams != null && f.grams < p.minG)) lost = true; else c.inv = f;
+  }
+  S.paletteKey = '';
+  if (lost) { $('invStatus').textContent += ' · un filamento scelto è finito: ricalcolo i colori'; schedule('palette'); }
+  else renderPalette();
+}
+let invTimer = 0, invBusy = false;
+async function loadInventory(manual) {
+  if (invBusy) return; invBusy = true;
+  if (manual === true || !S.invSig) $('invStatus').textContent = 'Carico l\'inventario…';
+  try {
+    const r = await fetch(INVENTORY_URL, { credentials: 'include', headers: { Accept: 'application/json' }, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    setInventory(normalizeInventory(await r.json()), 'FilamentBox', true);
+    $('fbBack').hidden = false;
+    startEvents();
+    clearTimeout(invTimer); invTimer = setTimeout(pollInventory, S.sse ? INVENTORY_POLL_MS * 4 : INVENTORY_POLL_MS);
+  } catch (e) {
+    if (S.invSource === 'FilamentBox' && S.invSig) { $('invStatus').textContent = 'FilamentBox momentaneamente non raggiungibile: riprovo…'; $('invStatus').classList.remove('live'); clearTimeout(invTimer); invTimer = setTimeout(pollInventory, INVENTORY_POLL_MS * 2); }
+    else {
+      $('invStatus').textContent = 'FilamentBox non raggiungibile da qui: uso i colori dell\'immagine. Apri Prismatica da FilamentBox o carica un elenco JSON.';
+      if (!S.inv.length) { $('palSrc').value = 'img'; updateOutputs(P()); schedule('palette'); }
+    }
+  } finally { invBusy = false; }
+}
+function startEvents() {
+  if (S.es) return;
+  // Edizione Lite: l'inventario è nel browser, FilamentBox avvisa con BroadcastChannel / evento storage
+  if (window.FB_LOCAL_CHANNEL) {
+    S.es = true; S.sse = true;
+    try { new BroadcastChannel(window.FB_LOCAL_CHANNEL).onmessage = () => loadInventory(); } catch (e) {}
+    window.addEventListener('storage', (e) => { if (!e.key || e.key.startsWith('filamentbox')) loadInventory(); });
+    return;
+  }
+  if (typeof EventSource === 'undefined') return;
+  try {
+    const es = new EventSource(EVENTS_URL); S.es = es;
+    es.addEventListener('spools', () => loadInventory());
+    es.onopen = () => { S.sse = true; };
+    es.onerror = () => { S.sse = false; };
+  } catch (e) { S.es = null; }
+}
+function pollInventory() { if (document.visibilityState === 'visible') loadInventory(); else { clearTimeout(invTimer); invTimer = setTimeout(pollInventory, INVENTORY_POLL_MS); } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.invSource === 'FilamentBox') loadInventory(); });
+function updateOutputs(p) {
+  $('borderO').textContent = p.border + ' mm'; $('kO').textContent = p.k; $('offO').textContent = Math.round(p.offset * 100) + '%';
+  $('twistO').textContent = p.twist + '°'; $('cxO').textContent = Math.round(p.cx * 100) + '%'; $('cyO').textContent = Math.round(p.cy * 100) + '%';
+  $('angleO').textContent = p.angle + '°'; $('jitO').textContent = p.jitter + '°'; $('segO').textContent = p.segs;
+  const dm = p.dirMode; $('twistF').hidden = dm !== 'vortex'; $('centerF').hidden = !(dm === 'vortex' || p.hMode === 'center' || p.hMode === 'edge'); $('angleF').hidden = !(dm === 'fixed' || dm === 'contour' || dm === 'light');
+  $('invBox').hidden = p.palSrc !== 'inv'; $('repal').textContent = p.palSrc === 'inv' ? 'Ricalcola la scelta dei filamenti' : 'Ricalcola i colori dall\'immagine';
+  $('countF').hidden = $('sizeMode').value !== 'count'; $('sideF').hidden = $('sizeMode').value === 'count';
+}
+function updateStats(p) {
+  const L = S.layout, nPiecePl = S.plates.filter(x => x.kind === 'pieces').length, nFr = S.plates.length - nPiecePl;
+  const g = (S.volPieces + (S.volFrame || 0)) / 1000 * 1.24;
+  const chips = [
+    `<span class="chip"><b>${L.cells.length}</b> pezzi</span>`,
+    `<span class="chip">lato <b>${p.s.toFixed(1)}</b> mm</span>`,
+    `<span class="chip"><b>${S.palette.length}</b> colori</span>`,
+    `<span class="chip"><b>${nPiecePl}</b> piatti pezzi${p.frameOn ? ` · <b>${nFr}</b> telaio` : ''}</span>`,
+    `<span class="chip" title="Peso a riempimento 100%: con 15% di infill è circa un terzo">≤ <b>${Math.round(g)}</b> g PLA</span>`,
+  ];
+  const o = pieceOpts(p);
+  if (p.engrave) {
+    const probe = buildLayout({ W: 200, H: 200, s: p.s, border: 2 }).cells[0];
+    const V = probe.verts.map(v => [v[0] - probe.c[0], v[1] - probe.c[1]]);
+    const poly = p.frameOn ? insetConvex(V, p.rib / 2 + p.tol) : insetConvex(V, 0.15);
+    const fits = digitRects(String(L.cells.length), poly, 2.4);
+    if (!fits) chips.push(`<span class="chip warn">numeri troppo piccoli da incidere: vale la mappa piatti</span>`);
+  }
+  if (S.tiles && !S.tiles.fits) chips.push(`<span class="chip warn">telaio più grande del piano</span>`);
+  if (p.hMax > p.s * 2.2 && p.shape !== 'piatto') chips.push(`<span class="chip warn">punte molto alte rispetto al lato</span>`);
+  $('stats').innerHTML = chips.join('');
+  const sp = sheetPlan(p);
+  $('sizeNote').textContent = `Opera finita ${p.W} × ${p.H} mm · ${L.nRows} righe × ${L.nPer} triangoli · ${S.slotsPer} pezzi per piatto · dima su ${sp.nx * sp.ny} fogli ${p.paper} ${sp.pw > sp.ph ? 'orizzontali' : 'verticali'}.`;
+  $('legend').textContent = S.view === 'plate' && S.plates[S.plate] ? `${S.plates[S.plate].name} · ${S.plates[S.plate].kind === 'pieces' ? S.plates[S.plate].items.length + ' pezzi' : 'tassello telaio'} · piano ${p.bedW}×${p.bedD} mm` : S.palette.map(c => `${dispLabel(c)} ${S.counts[S.palette.indexOf(c)]}`).join(' · ');
+}
+function fillPlateSel() {
+  const sel = $('plateSel'), prev = S.plate;
+  sel.innerHTML = S.plates.map((pl, i) => `<option value="${i}">${pl.name}</option>`).join('');
+  S.plate = Math.min(prev, S.plates.length - 1); sel.value = S.plate;
+}
+
+let timer = 0, pending = 'all';
+const LEV = { all: 3, palette: 2, cells: 1, view: 0 };
+function schedule(level) { if (LEV[level] > LEV[pending] || pending === null) pending = level; clearTimeout(timer); $('busy').textContent = 'aggiorno…'; timer = setTimeout(run, 140); }
+function run() {
+  const lvl = pending; pending = 'view';
+  const p = P(); updateOutputs(p);
+  try {
+    if (LEV[lvl] >= 3) sampleImage(p);
+    const wantK = p.palSrc === 'inv' && S.inv.length ? Math.min(p.k, Math.max(2, invCandidates(p).length)) : p.k;
+    if (LEV[lvl] >= 2 || S.palette.length !== wantK || (p.palSrc === 'inv') !== !!S.palFromInv && (p.palSrc !== 'inv' || invCandidates(p).length >= 2)) computePalette(p);
+    if (LEV[lvl] >= 1) { computeCells(p); computeMixes(p); computePlates(p); fillPlateSel(); }
+    if (S.view === 'art') buildArtView(p); else if (S.view === 'plate') buildPlateView(p); else buildMapView(p);
+    if (S.view !== 'art' && S.volPieces == null) S.volPieces = 0;
+    renderPalette();
+    updateStats(p);
+    $('busy').textContent = '';
+  } catch (e) { console.error(e); $('busy').textContent = 'errore: ' + e.message; }
+}
+
+// eventi
+const lvlFor = { W: 'all', H: 'all', k: 'palette', frameColor: 'view', paper: 'view', inkSave: 'view', palSrc: 'palette', matFilter: 'palette', minG: 'palette' };
+document.querySelectorAll('aside input, aside select').forEach(el => {
+  if (el.id === 'imgFile' || el.id === 'invFile' || /^p[cs]\d/.test(el.id)) return;
+  el.addEventListener('input', () => schedule(lvlFor[el.id] || 'cells'));
+});
+$('repal').addEventListener('click', () => schedule('palette'));
+$('invReload').addEventListener('click', () => loadInventory(true));
+$('invFile').addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; try { clearTimeout(invTimer); S.invSig = null; setInventory(normalizeInventory(JSON.parse(await f.text())), f.name, false); $('palSrc').value = 'inv'; } catch (err) { $('invStatus').textContent = 'File non valido: serve un JSON con un elenco di filamenti (colore esadecimale, nome, materiale, grammi).'; } });
+$('imgFile').addEventListener('change', (e) => e.target.files[0] && loadFile(e.target.files[0]));
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (e) => { const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
+async function loadFile(f) {
+  try {
+    const bmp = await createImageBitmap(f);
+    const c = document.createElement('canvas'); const sc = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    S.src = c; S.isDemo = false; $('imgHint').textContent = f.name.length > 22 ? f.name.slice(0, 20) + '…' : f.name;
+    schedule('all');
+  } catch (e) { $('status').textContent = 'Immagine non leggibile: prova con un JPG o PNG.'; }
+}
+$('fitAspect').addEventListener('click', () => { const W = parseFloat($('W').value) || 600; $('H').value = Math.round(W * S.src.height / S.src.width); schedule('all'); });
+function setView(v) { S.view = v; $('vArt').setAttribute('aria-pressed', v === 'art'); $('vPlate').setAttribute('aria-pressed', v === 'plate'); $('vMap').setAttribute('aria-pressed', v === 'map'); $('plateSel').hidden = v !== 'plate'; lastCamKey = ''; schedule('view'); }
+$('vArt').addEventListener('click', () => setView('art'));
+$('vPlate').addEventListener('click', () => setView('plate'));
+$('vMap').addEventListener('click', () => setView('map'));
+$('plateSel').addEventListener('change', (e) => { S.plate = +e.target.value; schedule('view'); });
+
+// ---------- export: STL, 3MF, ZIP, PDF ----------
+function stlBinary(objects) {
+  let n = 0; for (const o of objects) n += o.tris.length / 9;
+  const buf = new ArrayBuffer(84 + n * 50), dv = new DataView(buf);
+  const hdr = 'Prismatica ' + VERSION; for (let i = 0; i < hdr.length; i++) dv.setUint8(i, hdr.charCodeAt(i));
+  dv.setUint32(80, n, true); let off = 84;
+  for (const o of objects) { const t = o.tris; for (let i = 0; i < t.length; i += 9) {
+    const ux = t[i + 3] - t[i], uy = t[i + 4] - t[i + 1], uz = t[i + 5] - t[i + 2], vx = t[i + 6] - t[i], vy = t[i + 7] - t[i + 1], vz = t[i + 8] - t[i + 2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const l = Math.hypot(nx, ny, nz) || 1;
+    dv.setFloat32(off, nx / l, true); dv.setFloat32(off + 4, ny / l, true); dv.setFloat32(off + 8, nz / l, true); off += 12;
+    for (let j = 0; j < 9; j++) { dv.setFloat32(off, t[i + j], true); off += 4; }
+    dv.setUint16(off, 0, true); off += 2; } }
+  return new Uint8Array(buf);
+}
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+function model3MF(objects, colorHex, colorName, title) {
+  const parts = [`<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:lang="it-IT" xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02">\n<metadata name="Title">${esc(title)}</metadata>\n<metadata name="Application">Prismatica ${VERSION}</metadata>\n<resources>\n<basematerials id="1"><base name="${esc(colorName)}" displaycolor="${colorHex.toUpperCase()}FF"/></basematerials>\n`];
+  const items = [];
+  objects.forEach((o, oi) => {
+    const id = oi + 2, map = new Map(), vs = [], ts = [], t = o.tris;
+    const vid = (x, y, z) => { const k = x.toFixed(4) + ',' + y.toFixed(4) + ',' + z.toFixed(4); let i = map.get(k); if (i === undefined) { i = vs.length; map.set(k, i); vs.push(`<vertex x="${x.toFixed(4)}" y="${y.toFixed(4)}" z="${z.toFixed(4)}"/>`); } return i; };
+    for (let i = 0; i < t.length; i += 9) { const a = vid(t[i], t[i + 1], t[i + 2]), b = vid(t[i + 3], t[i + 4], t[i + 5]), c = vid(t[i + 6], t[i + 7], t[i + 8]); if (a !== b && b !== c && a !== c) ts.push(`<triangle v1="${a}" v2="${b}" v3="${c}"/>`); }
+    parts.push(`<object id="${id}" type="model" name="${esc(o.name)}" pid="1" pindex="0"><mesh><vertices>${vs.join('')}</vertices><triangles>${ts.join('')}</triangles></mesh></object>\n`);
+    items.push(`<item objectid="${id}"/>`);
+  });
+  parts.push(`</resources>\n<build>${items.join('')}</build>\n</model>`);
+  return parts.join('');
+}
+async function make3MF(objects, colorHex, colorName, title) {
+  const enc = new TextEncoder();
+  return zipFiles([
+    { name: '[Content_Types].xml', data: enc.encode('<?xml version="1.0" encoding="UTF-8"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>') },
+    { name: '_rels/.rels', data: enc.encode('<?xml version="1.0" encoding="UTF-8"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>') },
+    { name: '3D/3dmodel.model', data: enc.encode(model3MF(objects, colorHex, colorName, title)) },
+  ]);
+}
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(d) { let c = 0xFFFFFFFF; for (let i = 0; i < d.length; i++) c = CRC[(c ^ d[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+async function deflate(data, fmt) {
+  if (typeof CompressionStream === 'undefined') return null;
+  try { const cs = new CompressionStream(fmt); const out = new Response(new Blob([data]).stream().pipeThrough(cs)); return new Uint8Array(await out.arrayBuffer()); } catch (e) { return null; }
+}
+async function zipFiles(files) {
+  const chunks = [], central = []; let off = 0; const enc = new TextEncoder();
+  const now = new Date(), dtime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1), ddate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  for (const f of files) {
+    const name = enc.encode(f.name), crc = crc32(f.data);
+    let comp = f.data.length > 200 && f.compress !== false ? await deflate(f.data, 'deflate-raw') : null; let method = 8;
+    if (!comp || comp.length >= f.data.length) { comp = f.data; method = 0; }
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, method, true); lh.setUint16(10, dtime, true); lh.setUint16(12, ddate, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, comp.length, true); lh.setUint32(22, f.data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(lh.buffer), name, comp);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, method, true); ch.setUint16(12, dtime, true); ch.setUint16(14, ddate, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, comp.length, true); ch.setUint32(24, f.data.length, true); ch.setUint16(28, name.length, true); ch.setUint32(42, off, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    off += 30 + name.length + comp.length;
+  }
+  const csize = central.reduce((a, b) => a + b.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, csize, true); end.setUint32(16, off, true);
+  const all = [...chunks, ...central, new Uint8Array(end.buffer)];
+  const total = all.reduce((a, b) => a + b.length, 0), outb = new Uint8Array(total); let o = 0; for (const a of all) { outb.set(a, o); o += a.length; }
+  return outb;
+}
+
+// PDF minimale (vettoriale, Helvetica)
+const MM = 72 / 25.4;
+function pdfStr(s) { let o = ''; for (const ch of String(s)) { const c = ch.charCodeAt(0); if (ch === '(' || ch === ')' || ch === '\\') o += '\\' + ch; else if (c >= 32 && c < 127) o += ch; else if (c >= 160 && c < 256) o += '\\' + c.toString(8).padStart(3, '0'); else if (ch === '·') o += '\\267'; else if (ch === '×') o += '\\327'; else if (ch === '–' || ch === '—') o += '-'; else o += '?'; } return '(' + o + ')'; }
+const f2 = (v) => (Math.round(v * 100) / 100).toString();
+class Page {
+  constructor(wmm, hmm) { this.w = wmm; this.h = hmm; this.o = []; }
+  rgb(hex, stroke) { const [r, g, b] = hexToRgb(hex).map(v => (v / 255).toFixed(3)); this.o.push(`${r} ${g} ${b} ${stroke ? 'RG' : 'rg'}`); return this; }
+  lw(mm) { this.o.push(`${f2(mm * MM)} w`); return this; }
+  dash(on, off) { this.o.push(on ? `[${f2(on * MM)} ${f2(off * MM)}] 0 d` : '[] 0 d'); return this; }
+  poly(pts, mode) { pts.forEach((p, i) => this.o.push(`${f2(p[0] * MM)} ${f2(p[1] * MM)} ${i ? 'l' : 'm'}`)); this.o.push('h ' + mode); return this; }
+  line(a, b) { this.o.push(`${f2(a[0] * MM)} ${f2(a[1] * MM)} m ${f2(b[0] * MM)} ${f2(b[1] * MM)} l S`); return this; }
+  rect(x, y, w, h, mode) { this.o.push(`${f2(x * MM)} ${f2(y * MM)} ${f2(w * MM)} ${f2(h * MM)} re ${mode}`); return this; }
+  clip(x, y, w, h) { this.o.push(`q ${f2(x * MM)} ${f2(y * MM)} ${f2(w * MM)} ${f2(h * MM)} re W n`); return this; }
+  unclip() { this.o.push('Q'); return this; }
+  textRot(x, y, ptSize, s, opt = {}) { const font = opt.bold ? '/F2' : '/F1'; const w = String(s).length * 0.556 * ptSize / MM; const dy = opt.center ? -w / 2 : 0; this.o.push(`BT ${font} ${f2(ptSize)} Tf 0 1 -1 0 ${f2(x * MM)} ${f2((y + dy) * MM)} Tm ${pdfStr(s)} Tj ET`); return this; }
+  circle(cx, cy, r) { const pts = []; for (let i = 0; i < 28; i++) { const a = i / 28 * Math.PI * 2; pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return this.poly(pts, 'S'); }
+  cross(cx, cy) { this.circle(cx, cy, 2.6); this.line([cx - 4.5, cy], [cx + 4.5, cy]); this.line([cx, cy - 4.5], [cx, cy + 4.5]); return this; }
+  text(x, y, ptSize, s, opt = {}) { const font = opt.bold ? '/F2' : '/F1'; let dx = 0; if (opt.center) dx = -String(s).length * 0.556 * ptSize / 2 / MM; this.o.push(`BT ${font} ${f2(ptSize)} Tf ${f2((x + dx) * MM)} ${f2(y * MM)} Td ${pdfStr(s)} Tj ET`); return this; }
+}
+async function makePDF(pages) {
+  const enc = new TextEncoder(), parts = [], offs = [];
+  let len = 0; const push = (x) => { const b = typeof x === 'string' ? enc.encode(x) : x; parts.push(b); len += b.length; };
+  push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'.replace(/[\xE2\xE3\xCF\xD3]/g, 'a'));
+  const nObj = 4 + pages.length * 2;
+  const obj = (i, body) => { offs[i] = len; push(`${i} 0 obj\n`); if (typeof body === 'string') push(body); else for (const b of body) push(b); push('\nendobj\n'); };
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, `<< /Type /Pages /Kids [${pages.map((_, i) => (5 + i * 2) + ' 0 R').join(' ')}] /Count ${pages.length} >>`);
+  obj(3, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  obj(4, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  for (let i = 0; i < pages.length; i++) {
+    const pg = pages[i], pid = 5 + i * 2, cid = pid + 1;
+    obj(pid, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f2(pg.w * MM)} ${f2(pg.h * MM)}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${cid} 0 R >>`);
+    const raw = enc.encode(pg.o.join('\n'));
+    const z = await deflate(raw, 'deflate');
+    if (z) obj(cid, [`<< /Length ${z.length} /Filter /FlateDecode >>\nstream\n`, z, '\nendstream']);
+    else obj(cid, [`<< /Length ${raw.length} >>\nstream\n`, raw, '\nendstream']);
+  }
+  const xref = len;
+  let x = `xref\n0 ${nObj + 1}\n0000000000 65535 f \n`; for (let i = 1; i <= nObj; i++) x += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+  push(x + `trailer\n<< /Size ${nObj + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  const out = new Uint8Array(len); let o = 0; for (const b of parts) { out.set(b, o); o += b.length; } return out;
+}
+function tint(hex, k) { const c = hexToRgb(hex); return rgbToHex(c.map(v => v + (255 - v) * k)); }
+const LETTER = (i) => String.fromCharCode(65 + i);
+const PAPERS = { A4: [210, 297], A3: [297, 420], Letter: [215.9, 279.4] };
+const SHEET = { m: 10, head: 6, ov: 10 }; // margine stampante, intestazione, fascia di sovrapposizione
+function sheetPlan(p) {
+  const [a, b] = PAPERS[p.paper] || PAPERS.A4, { m, head, ov } = SHEET;
+  const n = (len, c) => len <= c ? 1 : 1 + Math.ceil((len - c) / (c - ov));
+  return [[a, b], [b, a]].map(([pw, ph]) => { const cw = pw - 2 * m, ch = ph - 2 * m - head; return { pw, ph, cw, ch, sx: cw - ov, sy: ch - ov, nx: n(p.W, cw), ny: n(p.H, ch) }; })
+    .sort((u, v) => (u.nx * u.ny - v.nx * v.ny) || (u.nx - v.nx))[0];
+}
+const sheetName = (r, c) => String.fromCharCode(65 + r) + (c + 1);
+function buildPDF(p) {
+  const L = S.layout, pages = [];
+  // copertina
+  const cov = new Page(210, 297); let y = 270;
+  cov.rgb('#172126').text(18, y, 22, 'Prismatica ' + VERSION, { bold: true }); y -= 9;
+  cov.text(18, y, 11, `Opera ${p.W} × ${p.H} mm · ${L.cells.length} pezzi · lato ${p.s.toFixed(1)} mm · forma ${p.shape}`); y -= 14;
+  cov.text(18, y, 12, 'Colori', { bold: true }); y -= 7;
+  S.palette.forEach((c, i) => { cov.rgb(dispHex(c)).rect(18, y - 1.2, 6, 4.5, 'f').rgb('#172126').lw(0.15).rect(18, y - 1.2, 6, 4.5, 'S'); cov.text(27, y, 10, `${LETTER(i)}  ${dispLabel(c)}  ${dispHex(c).toUpperCase()}  ·  ${S.counts[i]} pezzi`); y -= 7;
+    if (c.mixOn && c.mix) { cov.rgb('#B86A00').text(27, y, 8.5, `AMS: ${c.mix.parts.map(x => x.f.name + ' ' + x.pct + '%').join(' + ')} · in Bambu Studio crea il filamento misto ${c.mix.ratio}`); y -= 6; cov.rgb('#172126'); } });
+  y -= 6; cov.text(18, y, 12, 'Piatti di stampa', { bold: true }); y -= 7;
+  for (const pl of S.plates) { if (y < 30) break; cov.text(18, y, 9.5, `${pl.name}  ·  ${pl.kind === 'pieces' ? pl.items.length + ' pezzi, numeri ' + pl.items[0].cell.id + (pl.items.length > 1 ? ' ... ' + pl.items[pl.items.length - 1].cell.id : '') : 'tassello del telaio'}`); y -= 5.2; }
+  y -= 6;
+  const tips = ['Stampa la dima al 100% ("dimensioni effettive"): le barre da 50 mm devono misurare 50 mm.', 'Taglia lungo la linea rossa TAGLIA e fai combaciare le mezze croci con quelle del foglio vicino (vedi Mappa dei fogli).', p.frameOn ? 'Incolla i tasselli del telaio sulla dima seguendo le etichette T.., poi su un pannello rigido.' : 'Incolla la dima su un pannello rigido.', 'Ogni pezzo ha il numero inciso sotto (leggibile girandolo): va nella cella con lo stesso numero.'];
+  if (y > 40) { cov.text(18, y, 12, 'Montaggio', { bold: true }); y -= 7; for (const t of tips) { cov.text(18, y, 9.5, '- ' + t); y -= 5.5; } }
+  pages.push(cov);
+  // fogli dima: fascia di sovrapposizione + crocini di registro
+  const SP = sheetPlan(p), { m, head, ov } = SHEET, ink = p.inkSave;
+  const fs = Math.max(4, Math.min(11, p.s * 0.16 * MM));
+  const tileLoops = S.tiles ? S.tiles.tiles.map(t => ({ t, loops: unionBoundary(t.elems.map(e => e.poly)) })) : [];
+  // crocini: centrati sulla linea di taglio di ogni giunzione, stesse coordinate su entrambi i fogli
+  const crossX = [], crossY = [];
+  for (let k = 1; k < SP.nx; k++) crossX.push(k * SP.sx + ov / 2);
+  for (let k = 1; k < SP.ny; k++) crossY.push(p.H - k * SP.sy - ov / 2);
+  const along = (len, start) => { const out = []; for (let v = start + 25; v < start + len - 15; v += 55) out.push(v); return out; };
+  // pagina mappa dei fogli
+  {
+    const pg = new Page(297, 210), sc = Math.min(257 / p.W, 140 / p.H), ox = (297 - p.W * sc) / 2, oy = 22;
+    pg.rgb('#172126').text(15, 196, 14, `Mappa dei fogli · ${SP.nx * SP.ny} fogli ${p.paper} ${SP.pw > SP.ph ? 'orizzontali' : 'verticali'}`, { bold: true });
+    pg.rgb('#55636A').text(15, 189.5, 9, `Opera ${p.W} × ${p.H} mm. Ogni foglio si sovrappone di ${ov} mm a quello a sinistra e a quello sopra. Parti da A1 (in alto a sinistra) e procedi riga per riga.`);
+    pg.rgb('#F4F6F7').rect(ox, oy, p.W * sc, p.H * sc, 'f');
+    if (!ink) for (const cell of L.cells) pg.rgb(tint(dispHex(S.palette[cell.color]), 0.55)).poly(cell.verts.map(v => [ox + v[0] * sc, oy + v[1] * sc]), 'f');
+    for (let r = 0; r < SP.ny; r++) for (let c = 0; c < SP.nx; c++) {
+      const x0 = c * SP.sx, yt = p.H - r * SP.sy, x1 = Math.min(p.W, x0 + SP.cw), yb = Math.max(0, yt - SP.ch);
+      pg.rgb('#172126', true).lw(0.35).rect(ox + x0 * sc, oy + yb * sc, (x1 - x0) * sc, (yt - yb) * sc, 'S');
+      pg.rgb('#172126').text(ox + (x0 + Math.min(SP.sx, x1 - x0) / 2) * sc, oy + (yt - Math.min(SP.sy, yt - yb) / 2) * sc - 2, 13, sheetName(r, c), { center: true, bold: true });
+    }
+    pg.rgb('#172126', true).lw(0.5).rect(ox, oy, p.W * sc, p.H * sc, 'S');
+    const steps = ['1. Stampa al 100% ("dimensioni effettive", non "adatta alla pagina"). Su ogni foglio le barre da 50 mm devono misurare 50 mm in orizzontale e in verticale.',
+      '2. Sul foglio di destra (o di sotto) taglia lungo la linea "TAGLIA", che passa al centro dei crocini.',
+      '3. Appoggialo sul foglio vicino: le mezze croci del bordo tagliato devono completare le croci sotto. Fissa con nastro o colla stick.',
+      p.frameOn ? '4. Incolla la dima su un pannello rigido, poi i tasselli del telaio (contorni ciano T..) e infine i pezzi nei numeri.' : '4. Incolla la dima su un pannello rigido e poi i pezzi sui numeri.'];
+    steps.forEach((t, i) => pg.rgb('#172126').text(15, 17.5 - i * 4.2 + 0, 8.2, t));
+    pages.push(pg);
+  }
+  for (let r = 0; r < SP.ny; r++) for (let c = 0; c < SP.nx; c++) {
+    const pg = new Page(SP.pw, SP.ph), x0 = c * SP.sx, ytop = p.H - r * SP.sy, y0 = ytop - SP.ch;
+    const tx = (X) => m + (X - x0), ty = (Y) => m + (Y - y0);
+    const cL = m, cB = m, cR = m + SP.cw, cT = m + SP.ch;
+    pg.clip(cL, cB, SP.cw, SP.ch);
+    if (!ink) pg.rgb('#F4F6F7').rect(tx(0), ty(0), p.W, p.H, 'f');
+    for (const cell of L.cells) {
+      const bx = cell.c[0], by = cell.c[1]; if (bx < x0 - p.s || bx > x0 + SP.cw + p.s || by < y0 - p.s || by > ytop + p.s) continue;
+      const pts = cell.verts.map(v => [tx(v[0]), ty(v[1])]);
+      if (!ink) pg.rgb(tint(dispHex(S.palette[cell.color]), 0.72)).poly(pts, 'f');
+      pg.rgb(ink ? '#8A969C' : '#55636A', true).lw(ink ? 0.12 : 0.15).poly(pts, 'S');
+      pg.rgb('#172126').text(tx(cell.c[0]), ty(cell.c[1]) - fs / MM * 0.35, fs, String(cell.id), { center: true });
+      pg.rgb('#55636A').text(tx(cell.c[0]), ty(cell.c[1]) + (cell.up ? -1 : 1) * fs / MM * 0.95 - fs / MM * 0.25, fs * 0.6, LETTER(cell.color), { center: true });
+    }
+    for (const { t, loops } of tileLoops) { pg.rgb('#2FA9BA', true).lw(ink ? 0.4 : 0.6).dash(3, 1.5); for (const l of loops) pg.poly(l.map(v => [tx(v[0]), ty(v[1])]), 'S'); pg.dash(); const cc = centroidOf(loops[0]); pg.rgb('#2FA9BA').text(tx(cc[0]), ty(cc[1]), 14, t.label, { center: true, bold: true }); }
+    pg.rgb('#172126', true).lw(0.35).rect(tx(0), ty(0), p.W, p.H, 'S');
+    // crocini di registro
+    pg.rgb('#000000', true).lw(0.25);
+    for (const X of crossX) if (X > x0 - 1 && X < x0 + SP.cw + 1) for (const Y of along(Math.min(ytop, p.H) - Math.max(y0, 0), Math.max(y0, 0))) pg.cross(tx(X), ty(Y));
+    for (const Y of crossY) if (Y > y0 - 1 && Y < ytop + 1) for (const X of along(Math.min(x0 + SP.cw, p.W) - x0, x0)) pg.cross(tx(X), ty(Y));
+    for (const X of crossX) for (const Y of crossY) if (X > x0 - 1 && X < x0 + SP.cw + 1 && Y > y0 - 1 && Y < ytop + 1) pg.cross(tx(X), ty(Y));
+    pg.unclip();
+    // bordo area utile
+    pg.rgb('#9AA5AA', true).lw(0.2).rect(cL, cB, SP.cw, SP.ch, 'S');
+    // linee di taglio (sinistra, alto) al centro della fascia
+    pg.rgb('#E2484F', true).lw(0.35).dash(2.5, 1.5);
+    if (c > 0) { const X = tx(x0 + ov / 2); pg.line([X, 2], [X, SP.ph - 2]); }
+    if (r > 0) { const Y = ty(ytop - ov / 2); pg.line([2, Y], [SP.pw - 2, Y]); }
+    pg.dash();
+    if (c > 0) pg.rgb('#E2484F').textRot(m - 1.5, cB + SP.ch / 2, 7, `TAGLIA - si appoggia su ${sheetName(r, c - 1)}`, { center: true, bold: true });
+    if (r > 0) pg.rgb('#E2484F').text(cL + SP.cw / 2, cT + 1.2 - 0, 7, `TAGLIA - si appoggia su ${sheetName(r - 1, c)}`, { center: true, bold: true });
+    // fasce dove si appoggia il foglio successivo
+    pg.rgb('#55636A', true).lw(0.2).dash(0.6, 1);
+    if (c < SP.nx - 1) { const X = cR - ov; pg.line([X, cB], [X, cT]); }
+    if (r < SP.ny - 1) { const Y = cB + ov; pg.line([cL, Y], [cR, Y]); }
+    pg.dash();
+    if (c < SP.nx - 1) pg.rgb('#55636A').textRot(SP.pw - 2.2, cB + SP.ch / 2, 6.5, `${sheetName(r, c + 1)} si sovrappone qui (${ov} mm)`, { center: true });
+    if (r < SP.ny - 1) pg.rgb('#55636A').text(cL + 2, m / 2 - 1, 6.5, `${sheetName(r + 1, c)} si sovrappone qui (${ov} mm)`);
+    // intestazione + mini mappa
+    pg.rgb('#172126').text(m, SP.ph - m + 2.2, 10, `Foglio ${sheetName(r, c)}`, { bold: true });
+    pg.rgb('#55636A').text(m + 22, SP.ph - m + 2.2, 7, `riga ${r + 1} di ${SP.ny}, colonna ${c + 1} di ${SP.nx} · scala 1:1, stampa al 100% · Prismatica ${VERSION}`);
+    const ms = Math.min(3.2, 30 / SP.nx, 7 / SP.ny), mx = SP.pw - m - SP.nx * ms, my = SP.ph - m + 1.2;
+    for (let rr = 0; rr < SP.ny; rr++) for (let cc = 0; cc < SP.nx; cc++) { const X = mx + cc * ms, Y = my + (SP.ny - 1 - rr) * ms; if (rr === r && cc === c) pg.rgb('#172126').rect(X, Y, ms - 0.4, ms - 0.4, 'f'); else pg.rgb('#9AA5AA', true).lw(0.15).rect(X, Y, ms - 0.4, ms - 0.4, 'S'); }
+    // barre di controllo 50 mm (orizzontale e verticale)
+    pg.rgb('#172126', true).lw(0.4);
+    const bx = SP.pw - m - 50, by = m / 2 + 0.5;
+    pg.line([bx, by], [bx + 50, by]).line([bx, by - 1], [bx, by + 1]).line([bx + 50, by - 1], [bx + 50, by + 1]);
+    pg.rgb('#172126').text(bx + 18, by + 1.3, 6, '50 mm');
+    const vx = SP.pw - m / 2 - 1.5, vy = cB + 4;
+    pg.rgb('#172126', true).line([vx, vy], [vx, vy + 50]).line([vx - 1, vy], [vx + 1, vy]).line([vx - 1, vy + 50], [vx + 1, vy + 50]);
+    pages.push(pg);
+  }
+  // mappe piatti
+  for (const pl of S.plates) {
+    const pg = new Page(297, 210), sc = Math.min((297 - 30) / p.bedW, (210 - 34) / p.bedD), ox = (297 - p.bedW * sc) / 2, oy = 14;
+    pg.rgb('#172126').text(15, 196, 14, pl.name.replace(/(\d)di(\d)/, '$1 di $2'), { bold: true });
+    pg.rgb('#55636A').text(15, 190, 9, pl.kind === 'pieces' ? `${pl.items.length} pezzi · ${S.palette[pl.color].mixOn && S.palette[pl.color].mix ? 'MIX con AMS: ' + S.palette[pl.color].mix.parts.map(x => x.f.name + ' ' + x.pct + '%').join(' + ') : 'colore ' + S.palette[pl.color].label + ' ' + S.palette[pl.color].hex.toUpperCase()} · piano ${p.bedW} × ${p.bedD} mm` : `Tassello telaio ${pl.tile.label} · piano ${p.bedW} × ${p.bedD} mm`);
+    pg.rgb('#172126', true).lw(0.3).rect(ox, oy, p.bedW * sc, p.bedD * sc, 'S');
+    if (pl.kind === 'pieces') {
+      const sF = p.s - SQ3 * 0.3, R = sF / SQ3;
+      const nfs = Math.max(4, Math.min(10, sF * sc * 0.2 * MM));
+      for (const it of pl.items) {
+        const s0 = it.slot, pts = [0, 1, 2].map(k => { const a = (s0.up ? Math.PI / 2 : -Math.PI / 2) + k * 2 * Math.PI / 3; return [ox + (s0.x + R * Math.cos(a)) * sc, oy + (s0.y + R * Math.sin(a)) * sc]; });
+        pg.rgb(tint(dispHex(S.palette[pl.color]), 0.6)).poly(pts, 'f').rgb('#55636A', true).lw(0.15).poly(pts, 'S');
+        pg.rgb('#172126').text(ox + s0.x * sc, oy + s0.y * sc - nfs / MM * 0.35, nfs, String(it.cell.id), { center: true });
+      }
+    } else {
+      const loops = unionBoundary(pl.tile.elems.map(e => e.poly)); let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const l of loops) for (const v of l) { x0 = Math.min(x0, v[0]); x1 = Math.max(x1, v[0]); y0 = Math.min(y0, v[1]); y1 = Math.max(y1, v[1]); }
+      const dx = p.bedW / 2 - (x0 + x1) / 2, dy = p.bedD / 2 - (y0 + y1) / 2;
+      pg.rgb(tint(p.frameColor, 0.5)); for (const l of loops) pg.poly(l.map(v => [ox + (v[0] + dx) * sc, oy + (v[1] + dy) * sc]), 'f');
+      pg.rgb('#172126').text(ox + p.bedW * sc / 2, oy + p.bedD * sc / 2, 18, pl.tile.label, { center: true, bold: true });
+    }
+    pages.push(pg);
+  }
+  return makePDF(pages);
+}
+
+let DL = null;
+function initDL() { try { if (window.claude && typeof window.claude.use === 'function') window.claude.use('downloads').then(d => { if (d) DL = d; }).catch(() => {}); } catch (e) {} }
+initDL(); setTimeout(initDL, 1200);
+async function saveFile(name, bytes) {
+  const blob = new Blob([bytes], { type: name.endsWith('.pdf') ? 'application/pdf' : 'application/zip' });
+  if (!DL) { initDL(); await new Promise(r => setTimeout(r, 300)); }
+  if (DL) {
+    try { await DL.save({ filename: name, data: blob }); return 'Scaricato: ' + name; }
+    catch (e) { if (e && e.code === 'declined') return 'Download annullato.'; if (e && e.code === 'rate_limited') return 'Una richiesta di download è già aperta: confermala o riprova tra poco.'; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  return 'Scaricato: ' + name;
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+function prog(v, msg) { $('progBar').style.width = Math.round(v * 100) + '%'; if (msg) $('status').textContent = msg; }
+function baseName(p) { return `prismatica_${p.W}x${p.H}_${S.layout.cells.length}pz_${VERSION}`; }
+async function exportZip() {
+  const btns = [$('btnZip'), $('btnPdf')]; btns.forEach(b => b.disabled = true);
+  try {
+    clearTimeout(timer); if (pending !== 'view') run();
+    const p = P(), enc = new TextEncoder(), files = [], base = baseName(p);
+    for (let i = 0; i < S.plates.length; i++) {
+      const pl = S.plates[i]; prog(i / (S.plates.length + 2), `Genero ${pl.name} (${i + 1} di ${S.plates.length})…`); await tick();
+      const r = plateTris(pl, p, p.engrave);
+      const cname = pl.kind === 'frame' ? 'Telaio' : dispLabel(S.palette[pl.color]);
+      const fname = pl.name.replace(/[^\p{L}\p{N}-]+/gu, '_');
+      files.push({ name: `${base}/3MF/${fname}.3mf`, data: await make3MF(r.objects, r.color, cname, pl.name), compress: false });
+      files.push({ name: `${base}/STL/${fname}.stl`, data: stlBinary(r.objects) });
+    }
+    prog(0.9, 'Preparo dima e mappe…'); await tick();
+    files.push({ name: `${base}/Dima_1a1_e_mappa_piatti.pdf`, data: await buildPDF(p), compress: false });
+    const plateOf = new Map(); for (const pl of S.plates) if (pl.kind === 'pieces') for (const it of pl.items) plateOf.set(it.cell.id, pl.name);
+    const csv = ['numero;colore;hex;riga_dall_alto;posizione_nella_riga;piatto;x_mm;y_mm;altezza_mm;punta_su'].concat(S.layout.cells.map(c => [c.id, dispLabel(S.palette[c.color]), dispHex(S.palette[c.color]), c.rowTop + 1, c.j + 1, plateOf.get(c.id), c.c[0].toFixed(1), c.c[1].toFixed(1), c.h.toFixed(1), c.up ? 'si' : 'no'].join(';')));
+    files.push({ name: `${base}/assemblaggio.csv`, data: enc.encode('﻿' + csv.join('\n')) });
+    files.push({ name: `${base}/LEGGIMI.txt`, data: enc.encode(readme(p)) });
+    prog(0.96, 'Comprimo…'); await tick();
+    const zip = await zipFiles(files);
+    prog(1, await saveFile(base + '.zip', zip));
+  } catch (e) { console.error(e); prog(0, 'Errore durante l\'esportazione: ' + e.message); }
+  btns.forEach(b => b.disabled = false);
+}
+function readme(p) {
+  const L = S.layout;
+  return [`Prismatica ${VERSION} - wall art 3D a triangoli`, '', `Opera finita: ${p.W} x ${p.H} mm`, `Pezzi: ${L.cells.length} (lato ${p.s.toFixed(1)} mm, forma ${p.shape}, altezza ${p.hMin}-${p.hMax} mm)`, `Piano: ${p.bedW} x ${p.bedD} mm`, '',
+    'COLORI', ...S.palette.map((c, i) => `  ${LETTER(i)}  ${dispLabel(c)}  ${dispHex(c).toUpperCase()}  ${S.counts[i]} pezzi` + (c.mixOn && c.mix ? `\r\n       MIX: carica nell'AMS ${c.mix.parts.map(x => x.f.name + ' (' + x.pct + '%)').join(' + ')}. In Bambu Studio 2.5.3+: Filamenti > Aggiungi filamento misto, rapporto ${c.mix.ratio}, assegnalo a tutti gli oggetti del piatto. Spurgo stimato ${mixCost(i, p).grams} g, +${mixCost(i, p).hours.toFixed(1)} h.` : '')), '',
+    'FILE', '  3MF/  un file per piatto, ogni pezzo e un oggetto separato chiamato #numero (consigliato)', '  STL/  gli stessi piatti in STL binario', '  Dima_1a1_e_mappa_piatti.pdf  dima da stampare al 100% + mappa di ogni piatto', '  assemblaggio.csv  elenco pezzi con colore, piatto, posizione e altezza', '',
+    S.palette.some(c => c.mixOn && c.mix) ? 'I piatti a colore singolo non richiedono AMS. I piatti "Mix" vanno stampati con AMS e filamento misto (vedi COLORI).' : 'OGNI PIATTO E DI UN SOLO COLORE: non serve AMS. Carica il filamento indicato nel nome del file.', '',
+    'MONTAGGIO',
+    `  1. Stampa la dima (${sheetPlan(p).nx * sheetPlan(p).ny} fogli ${p.paper}) al 100%, "dimensioni effettive". Controlla le barre da 50 mm. Taglia lungo la linea rossa TAGLIA e allinea le mezze croci al foglio vicino (fascia di ${SHEET.ov} mm). Segui la pagina Mappa dei fogli.`,
+    p.frameOn ? `  2. Stampa i tasselli del telaio (spessore ${p.frameT} mm) e incollali sulla dima / su un pannello rigido seguendo le etichette.` : '  2. Incolla la dima su un pannello rigido.',
+    '  3. Stampa i piatti dei pezzi. Il numero e inciso sotto ogni pezzo (si legge girandolo).',
+    p.frameOn ? `  4. Inserisci ogni pezzo nella cella con lo stesso numero. Gioco incastro ${p.tol} mm: se e duro, aumentalo e rigenera.` : '  4. Incolla ogni pezzo sulla cella con lo stesso numero.',
+    '', 'Consigli di stampa: altezza strato 0.2 mm, 2-3 perimetri, riempimento 10-15%, nessun supporto.'].join('\r\n');
+}
+$('btnZip').addEventListener('click', exportZip);
+$('btnPdf').addEventListener('click', async () => { $('btnPdf').disabled = true; try { clearTimeout(timer); if (pending !== 'view') run(); const p = P(); prog(0.5, 'Preparo la dima…'); await tick(); prog(1, await saveFile(baseName(p) + '_dima.pdf', await buildPDF(p))); } catch (e) { prog(0, 'Errore: ' + e.message); } $('btnPdf').disabled = false; });
+
+// avvio
+S.src = demoImage();
+resize();
+run();
+loadInventory();
+window.__prismatica = { S, P, plateTris, buildPDF, make3MF, stlBinary, zipFiles };
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# FilamentBox v2.0.1 — edizione FULL (Home Assistant + lettore NFC + Prismatica)
+# Copia il contenuto della cartella server/ in /opt/filamentbox sul server, poi crea lo stack.
+services:
+  filamentbox:
+    image: node:20-alpine
+    container_name: filamentbox
+    working_dir: /app
+    volumes:
+      - /opt/filamentbox:/app          # qui restano anche db.json, ha_config.json, claude_config.json
+    ports:
+      - "3025:3025"
+    environment:
+      - FB_EDITION=full
+      # Chiave Claude per la scansione etichette (facoltativa, puoi anche inserirla da Settings)
+      - ANTHROPIC_API_KEY=
+      # - ANTHROPIC_MODEL=claude-sonnet-5-5
+    command: sh -c "npm install --omit=dev && node server.js"
+    restart: unless-stopped
