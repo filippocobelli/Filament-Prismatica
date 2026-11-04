@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.3
+
+Aggiunto il firmware del lettore NFC (`nfc-reader/`, v1.1: indirizzo del server in una sola costante, versione stampata all'avvio) e la guida completa con collegamenti, librerie e LED.
+
 ## FilamentBox 2.0.2
 
 Pagina del progetto in italiano e inglese (`site/`, pubblicata con GitHub Pages insieme all'app in `/app/`), licenza MIT. Nessuna modifica al funzionamento.

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- FilamentBox frontend v2.0.2 — v2.0.2: solo versione · v2.0.1: solo versione · v2.0.0: edizioni Lite/Smart/Full (window.FB_EDITION), Claude AI e backup in Settings, entità HA configurabili, percorsi relativi · v1.7.0: v1.7.0: import bobine da fattura PDF (Bambu Lab) · v1.6.1: Prismatica v1.5 · v1.6.0: link a Prismatica nella barra in basso · v1.5.1: solo versione (fix consumi lato server) · v1.5.0: vista Scaffali + stato sigillata/aperta -->
+<!-- FilamentBox frontend v2.0.3 — v2.0.3: solo versione · v2.0.2: solo versione · v2.0.1: solo versione · v2.0.0: edizioni Lite/Smart/Full (window.FB_EDITION), Claude AI e backup in Settings, entità HA configurabili, percorsi relativi · v1.7.0: v1.7.0: import bobine da fattura PDF (Bambu Lab) · v1.6.1: Prismatica v1.5 · v1.6.0: link a Prismatica nella barra in basso · v1.5.1: solo versione (fix consumi lato server) · v1.5.0: vista Scaffali + stato sigillata/aperta -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -15,7 +15,7 @@
 <script src="local-api.js"></script>
 <script>
   // Edizione: Lite (senza server), Smart (HA + NFC) o Full (tutto). Il server o la build Lite la impostano.
-  window.FB_EDITION = window.FB_EDITION || { name: 'full', version: '2.0.2', features: ['ha', 'nfc', 'server', 'prismatica'] };
+  window.FB_EDITION = window.FB_EDITION || { name: 'full', version: '2.0.3', features: ['ha', 'nfc', 'server', 'prismatica'] };
   window.FB_HAS = (f) => window.FB_EDITION.features.includes(f);
   document.addEventListener('DOMContentLoaded', () => { for (const f of ['ha', 'nfc', 'server', 'prismatica']) document.body.classList.toggle('f-' + f, FB_HAS(f)); document.body.classList.add('ed-' + FB_EDITION.name); });
 </script>
@@ -559,7 +559,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;height:380px;
   </button>
 </nav>
 
-<div class="version-badge" id="versionBadge">v2.0.2</div>
+<div class="version-badge" id="versionBadge">v2.0.3</div>
 <div class="toast" id="toast"></div>
 
 <!-- ── IMPORT FATTURA MODAL (v1.7.0) ── -->

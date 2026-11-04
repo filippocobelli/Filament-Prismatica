@@ -14,7 +14,7 @@ FilamentBox su un server di casa, collegato a Home Assistant e al lettore NFC fi
 1. Copia **il contenuto** della cartella `server/` in una cartella del server, per esempio `/opt/filamentbox`. Devono esserci `server.js`, `package.json` e `public/`.
 2. Crea lo stack con `server/docker-compose.smart.yml`. In Portainer: **Stacks → Add stack → Web editor**, incolla il file e controlla il percorso del volume.
 3. Avvia lo stack. Al primo avvio il container installa Express e crea `db.json`.
-4. Controlla i log: deve comparire `FilamentBox v2.0.2 (smart) in ascolto sulla porta 3025`.
+4. Controlla i log: deve comparire `FilamentBox v2.0.3 (smart) in ascolto sulla porta 3025`.
 5. Apri `http://<indirizzo-del-server>:3025`.
 
 Senza Docker: `cd server && npm install && FB_EDITION=smart node server.js` (serve Node.js 20 o più recente).

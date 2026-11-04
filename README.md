@@ -2,7 +2,7 @@
 
 **FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero.
 
-Versione **2.0.2** · Prismatica **1.6**
+Versione **2.0.3** · Prismatica **1.6**
 
 FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa c'è dietro.
 
@@ -37,7 +37,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 - [Prismatica](docs/prismatica.md): dall'immagine ai piatti di stampa numerati
 - [Chiave API Claude](docs/claude-api.md): scansione intelligente delle etichette in tutte le edizioni
 - [Home Assistant](docs/home-assistant.md): entità, webhook, automazione
-- [Lettore NFC](docs/lettore-nfc.md): hardware e protocollo
+- [Lettore NFC](docs/lettore-nfc.md): hardware, collegamenti, firmware e protocollo
 - [Backup e migrazione tra edizioni](docs/backup.md)
 - [Storico delle versioni](CHANGELOG.md)
 
@@ -51,6 +51,7 @@ lite/              edizione Lite pronta all'uso (generata, non modificarla a man
 site/              pagina del progetto (italiano e inglese) pubblicata con GitHub Pages
 prismatica/src/    sorgenti di Prismatica (app.html + core.js)
 tools/             build-lite.mjs: rigenera lite/ da server/public
+nfc-reader/        firmware Arduino del lettore NFC (D1 Mini + PN532)
 docs/              guide
 ```
 
