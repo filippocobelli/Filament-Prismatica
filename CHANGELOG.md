@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.5 · Prismatica 1.8
+
+Sincronizzazione di Prismatica con FilamentBox più robusta: l'inventario si ricontrolla ogni 15 secondi anche quando gli eventi in tempo reale sono attivi (utile dietro proxy o tunnel che trattengono lo stream SSE), la connessione agli eventi si riapre da sola se cade e l'inventario si aggiorna appena torni sulla finestra.
+
 ## FilamentBox 2.0.4 · Prismatica 1.7
 
 Link Ko-fi per le donazioni: sezione «Supporta il progetto» in Settings, pulsante in Prismatica, pagina del progetto, README e pulsante Sponsor di GitHub (`.github/FUNDING.yml`).

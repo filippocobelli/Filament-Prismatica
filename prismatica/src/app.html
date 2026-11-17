@@ -125,7 +125,7 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.7</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.8</span></div>
   <div class="stats" id="stats"></div>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
@@ -282,7 +282,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /*__CORE__*/
 
-const VERSION = 'v1.7'; // v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.8'; // v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
@@ -772,7 +772,7 @@ async function loadInventory(manual) {
     setInventory(normalizeInventory(await r.json()), 'FilamentBox', true);
     $('fbBack').hidden = false;
     startEvents();
-    clearTimeout(invTimer); invTimer = setTimeout(pollInventory, S.sse ? INVENTORY_POLL_MS * 4 : INVENTORY_POLL_MS);
+    clearTimeout(invTimer); invTimer = setTimeout(pollInventory, INVENTORY_POLL_MS);
   } catch (e) {
     if (S.invSource === 'FilamentBox' && S.invSig) { $('invStatus').textContent = 'FilamentBox momentaneamente non raggiungibile: riprovo…'; $('invStatus').classList.remove('live'); clearTimeout(invTimer); invTimer = setTimeout(pollInventory, INVENTORY_POLL_MS * 2); }
     else {
@@ -795,11 +795,12 @@ function startEvents() {
     const es = new EventSource(EVENTS_URL); S.es = es;
     es.addEventListener('spools', () => loadInventory());
     es.onopen = () => { S.sse = true; };
-    es.onerror = () => { S.sse = false; };
+    es.onerror = () => { S.sse = false; if (es.readyState === 2) { S.es = null; setTimeout(startEvents, 5000); } };
   } catch (e) { S.es = null; }
 }
 function pollInventory() { if (document.visibilityState === 'visible') loadInventory(); else { clearTimeout(invTimer); invTimer = setTimeout(pollInventory, INVENTORY_POLL_MS); } }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.invSource === 'FilamentBox') loadInventory(); });
+window.addEventListener('focus', () => { if (S.invSource === 'FilamentBox') loadInventory(); });
 function updateOutputs(p) {
   $('borderO').textContent = p.border + ' mm'; $('kO').textContent = p.k; $('offO').textContent = Math.round(p.offset * 100) + '%';
   $('twistO').textContent = p.twist + '°'; $('cxO').textContent = Math.round(p.cx * 100) + '%'; $('cyO').textContent = Math.round(p.cy * 100) + '%';
