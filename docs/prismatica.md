@@ -2,15 +2,16 @@
 
 Prismatica trasforma un'immagine in una **wall art 3D a triangoli**: un telaio a incastro con centinaia di pezzi in rilievo, ognuno con un colore e una punta orientata, che insieme ricompongono l'immagine. Genera i file di stampa già divisi in **piatti numerati, uno per colore**, quindi l'AMS non serve.
 
-Versione 1.8. È inclusa nelle edizioni **Full** e **Lite**. Si può usare anche da sola, senza inventario.
+Versione 1.9. È inclusa nelle edizioni **Full** e **Lite**. Si può usare anche da sola, senza inventario.
 
 ## Il flusso
 
-1. **Immagine**: carica un JPG o PNG (anche trascinandolo). Viene ritagliata alle proporzioni dell'opera.
+1. **Immagine**: carica un JPG, PNG o WebP (anche trascinandolo). Viene ritagliata alle proporzioni dell'opera. Le parti trasparenti prendono il **colore dello sfondo** che scegli (bianco di partenza); uno sfondo a scacchi disegnato nell'immagine (finta trasparenza) viene riconosciuto e trattato come trasparente.
 2. **Dimensioni e pezzi**: larghezza e altezza dell'opera finita in mm e numero di pezzi desiderato (oppure il lato del triangolo). Il reticolo è di triangoli equilateri; una cornice piena riempie i bordi.
 3. **Colori**:
    - *Solo i miei filamenti*: Prismatica sceglie, tra le bobine disponibili, i colori che rendono meglio l'immagine. Filtri per materiale e residuo minimo. Puoi cambiare a mano il filamento di ogni colore.
    - *Liberi, presi dall'immagine*: i colori vengono estratti dall'immagine (k-means) e li modifichi con il selettore.
+   - **Numero di colori**: a ogni immagine nuova Prismatica conta le famiglie di colore distinte e imposta da sola quante ne servono (sotto il cursore c'è il valore consigliato). Con meno colori, zone diverse si fondono (es. bianco e grigio chiaro).
 4. **Forma del pezzo**: Corno, Piramide, Cupola, Spillo, Pinna o Piatto. Altezza minima e massima, con l'altezza guidata da luminosità, distanza dal centro, colore, casuale o costante. Lo spostamento della punta inclina la forma.
 5. **Orientamento delle punte**: vortice attorno a un centro (con torsione), lungo i contorni dell'immagine, verso le zone chiare, angolo fisso o casuale, più una variazione casuale.
 6. **Stampa e telaio**: piano di stampa (A1 mini, Ender 3, MK4, X1/P1/A1, 300, 350), margini, distanza tra i pezzi, telaio a incastro con spessore, costole e gioco, colore del telaio, numero inciso sotto i pezzi, carta per la dima.

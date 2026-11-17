@@ -100,6 +100,8 @@ label.btn{display:inline-block;text-align:center}
 .btn:disabled{opacity:.55;cursor:progress}
 .btn.small{padding:6px 10px;font-size:12px}
 .note{font-size:12px;color:var(--muted);margin:0}
+.bgrow{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;margin-top:10px}.bgrow strong{font-size:13px}.bgrow input[type=color]{width:56px;height:34px;padding:2px;border:1px solid var(--line);border-radius:8px;background:#fff}
+#kHint button{font:inherit;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
 .export{position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:12px 16px;display:grid;gap:8px}
 .prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
 .prog i{display:block;height:100%;width:0;background:var(--cyan);transition:width .15s}
@@ -125,7 +127,7 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.8</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.9</span></div>
   <div class="stats" id="stats"></div>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
@@ -139,6 +141,10 @@ label.btn{display:inline-block;text-align:center}
         <div><strong>Carica un'immagine</strong><p>JPG o PNG, anche trascinata qui. Viene ritagliata alle proporzioni dell'opera.</p></div>
       </label>
       <input type="file" id="imgFile" accept="image/*" hidden>
+      <div class="bgrow" id="bgF" hidden>
+        <input type="color" id="bgColor" value="#ffffff" aria-labelledby="bgTitle">
+        <div><strong id="bgTitle">Colore dello sfondo</strong><p class="note" id="bgNote">L'immagine ha parti trasparenti: diventano di questo colore.</p></div>
+      </div>
     </div>
   </details>
   <details open>
@@ -173,6 +179,7 @@ label.btn{display:inline-block;text-align:center}
         <div class="invbtns"><button class="btn small" id="invReload" type="button">Aggiorna inventario</button><label class="btn small" for="invFile">Carica elenco JSON</label><input type="file" id="invFile" accept=".json,application/json" hidden></div>
       </div>
       <label class="field"><span>Numero di colori <output id="kO">3</output></span><input type="range" id="k" min="2" max="8" step="1" value="3"></label>
+      <p class="note" id="kHint" hidden></p>
       <div class="pal" id="pal"></div>
       <button class="btn small" id="repal" type="button">Ricalcola i colori dall'immagine</button>
     </div>
@@ -282,7 +289,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /*__CORE__*/
 
-const VERSION = 'v1.8'; // v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.9'; // v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
@@ -332,6 +339,50 @@ function kmeans(samples, k, seed) {
   return cent.sort((a, b) => b[0] - a[0]);
 }
 
+// quanti colori servono: famiglie di colore distinte (oltre 12 ΔE l'una dall'altra) che coprono almeno l'1% dell'immagine
+function suggestK(lab, n) {
+  const step = Math.max(1, Math.floor(n / 4000)), smp = [];
+  for (let i = 0; i < n; i += step) smp.push([lab[i * 3], lab[i * 3 + 1], lab[i * 3 + 2]]);
+  const cent = kmeans(smp, 12, 11), share = new Array(cent.length).fill(0);
+  for (const q of smp) { let b = 0, bd = Infinity; for (let c = 0; c < cent.length; c++) { const d = d2(q, cent[c]); if (d < bd) { bd = d; b = c; } } share[b]++; }
+  const order = cent.map((c, i) => i).filter(i => share[i] >= smp.length * 0.01).sort((a, b) => share[b] - share[a]);
+  const seeds = [];
+  for (const i of order) if (!seeds.some(j => d2(cent[i], cent[j]) < 144)) seeds.push(i);
+  return Math.max(2, Math.min(8, seeds.length));
+}
+
+// sfondo a scacchi disegnato nell'immagine (finta trasparenza): lo riconosce dal bordo e lo rende trasparente
+function removeFakeChecker(c) {
+  const w = c.width, h = c.height, g = c.getContext('2d', { willReadFrequently: true }), id = g.getImageData(0, 0, w, h), d = id.data;
+  const ring = [];
+  for (let x = 0; x < w; x++) { ring.push(x, (h - 1) * w + x); }
+  for (let y = 1; y < h - 1; y++) { ring.push(y * w, y * w + w - 1); }
+  const hist = new Uint32Array(256); let neutral = 0;
+  for (const i of ring) { const o = i * 4, r = d[o], gg = d[o + 1], b = d[o + 2]; if (d[o + 3] > 250 && Math.max(r, gg, b) - Math.min(r, gg, b) < 12 && r > 140) { neutral++; hist[Math.round((r + gg + b) / 3)]++; } }
+  if (neutral < ring.length * 0.85) return false;
+  // due livelli di grigio ben distinti, ciascuno almeno il 20% del bordo
+  const peaks = []; for (let v = 0; v < 256; v++) { let t = 0; for (let j = Math.max(0, v - 3); j <= Math.min(255, v + 3); j++) t += hist[j]; peaks.push(t); }
+  const p1 = peaks.indexOf(Math.max(...peaks)); let p2 = -1, b2 = 0;
+  for (let v = 0; v < 256; v++) if (Math.abs(v - p1) >= 8 && peaks[v] > b2) { b2 = peaks[v]; p2 = v; }
+  if (p2 < 0 || peaks[p1] < neutral * 0.2 || b2 < neutral * 0.2) return false;
+  // alternanza lungo il bordo alto: tanti cambi tra i due livelli
+  let flips = 0, last = -1; for (let x = 0; x < w; x++) { const o = x * 4, v = (d[o] + d[o + 1] + d[o + 2]) / 3, lv = Math.abs(v - p1) < Math.abs(v - p2) ? 0 : 1; if (last >= 0 && lv !== last) flips++; last = lv; }
+  if (flips < Math.max(4, w / 60)) return false;
+  const near = (o) => { const r = d[o], gg = d[o + 1], b = d[o + 2]; if (Math.max(r, gg, b) - Math.min(r, gg, b) > 14) return false; const v = (r + gg + b) / 3; return Math.abs(v - p1) <= 14 || Math.abs(v - p2) <= 14; };
+  const seen = new Uint8Array(w * h), stack = new Int32Array(w * h); let sp = 0;
+  for (const i of ring) if (!seen[i] && near(i * 4)) { seen[i] = 1; stack[sp++] = i; }
+  while (sp) {
+    const i = stack[--sp]; d[i * 4 + 3] = 0;
+    const x = i % w, y = (i - x) / w;
+    if (x > 0 && !seen[i - 1] && near((i - 1) * 4)) { seen[i - 1] = 1; stack[sp++] = i - 1; }
+    if (x < w - 1 && !seen[i + 1] && near((i + 1) * 4)) { seen[i + 1] = 1; stack[sp++] = i + 1; }
+    if (y > 0 && !seen[i - w] && near((i - w) * 4)) { seen[i - w] = 1; stack[sp++] = i - w; }
+    if (y < h - 1 && !seen[i + w] && near((i + w) * 4)) { seen[i + w] = 1; stack[sp++] = i + w; }
+  }
+  g.putImageData(id, 0, 0); return true;
+}
+function hasAlpha(c) { const d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height).data; for (let i = 3; i < d.length; i += 4 * 7) if (d[i] < 250) return true; return false; }
+
 // ---------- stato ----------
 const S = { src: null, isDemo: true, palette: [], img: null, cells: [], layout: null, plates: [], tiles: null, view: 'art', plate: 0 };
 
@@ -361,7 +412,7 @@ function P() {
     dirMode: $('dirMode').value, twist: num('twist', 70), cx: num('cx', 50) / 100, cy: num('cy', 50) / 100, angle: num('angle', 90), jitter: num('jitter', 0),
     bedW: bw, bedD: bd, margin: num('margin', 6), gap: num('gap', 3), frameOn: $('frameOn').checked, frameT: num('frameT', 3), rib: num('rib', 1.6), tol: num('tol', 0.15), flangeT: num('flangeT', 1.2),
     frameColor: $('frameColor').value, engrave: $('engrave').checked, segs: num('segs', 14),
-    palSrc: $('palSrc').value, mat: $('matFilter').value, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
+    palSrc: $('palSrc').value, bg: $('bgColor').value, mat: $('matFilter').value, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
   };
 }
 function pieceOpts(p) {
@@ -376,6 +427,8 @@ function sampleImage(p) {
   const g = cv.getContext('2d', { willReadFrequently: true });
   const sw = src.width, sh = src.height, ar = gw / gh;
   let cw = sw, ch = sw / ar; if (ch > sh) { ch = sh; cw = sh * ar; }
+  g.fillStyle = p.bg || '#ffffff'; g.fillRect(0, 0, gw, gh); // le parti trasparenti prendono il colore di sfondo scelto
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
   g.drawImage(src, (sw - cw) / 2, (sh - ch) / 2, cw, ch, 0, 0, gw, gh);
   const data = g.getImageData(0, 0, gw, gh).data;
   const lab = new Float32Array(gw * gh * 3);
@@ -387,9 +440,17 @@ function sampleImage(p) {
   const bd = bg.getImageData(0, 0, bw, bh).data, blum = new Float32Array(bw * bh);
   for (let i = 0; i < bw * bh; i++) blum[i] = rgbToLab([bd[i * 4], bd[i * 4 + 1], bd[i * 4 + 2]])[0];
   S.img = { gw, gh, lab, bw, bh, blum, canvas: cv };
+  S.kSug = suggestK(lab, gw * gh);
+  if (S.autoK) { S.autoK = false; $('k').value = S.kSug; p.k = S.kSug; $('kO').textContent = S.kSug; }
+  updateKHint(p);
   // thumb
   const th = $('thumb'), tg = th.getContext('2d'); tg.fillStyle = '#EDF0F1'; tg.fillRect(0, 0, th.width, th.height);
   const sc = Math.min(th.width / gw, th.height / gh); tg.drawImage(cv, (th.width - gw * sc) / 2, (th.height - gh * sc) / 2, gw * sc, gh * sc);
+}
+function updateKHint(p) {
+  const kh = $('kHint'); if (!S.kSug) { kh.hidden = true; return; } kh.hidden = false;
+  kh.innerHTML = p.k >= S.kSug ? `Per questa immagine ne servono circa ${S.kSug}.` : `Per questa immagine ne servono circa ${S.kSug}: con meno colori alcune zone si fondono. <button type="button" id="kUse">Usa ${S.kSug}</button>`;
+  const ku = $('kUse'); if (ku) ku.onclick = () => { $('k').value = S.kSug; schedule('palette'); };
 }
 function labAt(x, y, p) { const I = S.img; const px = Math.min(I.gw - 1, Math.max(0, Math.floor(x / p.W * I.gw))), py = Math.min(I.gh - 1, Math.max(0, Math.floor((1 - y / p.H) * I.gh))); const o = (py * I.gw + px) * 3; return [I.lab[o], I.lab[o + 1], I.lab[o + 2]]; }
 function blumAt(x, y, p) {
@@ -847,7 +908,7 @@ function run() {
   const lvl = pending; pending = 'view';
   const p = P(); updateOutputs(p);
   try {
-    if (LEV[lvl] >= 3) sampleImage(p);
+    if (LEV[lvl] >= 3) sampleImage(p); else updateKHint(p);
     const wantK = p.palSrc === 'inv' && S.inv.length ? Math.min(p.k, Math.max(2, invCandidates(p).length)) : p.k;
     if (LEV[lvl] >= 2 || S.palette.length !== wantK || (p.palSrc === 'inv') !== !!S.palFromInv && (p.palSrc !== 'inv' || invCandidates(p).length >= 2)) computePalette(p);
     if (LEV[lvl] >= 1) { computeCells(p); computeMixes(p); computePlates(p); fillPlateSel(); }
@@ -860,7 +921,7 @@ function run() {
 }
 
 // eventi
-const lvlFor = { W: 'all', H: 'all', k: 'palette', frameColor: 'view', paper: 'view', inkSave: 'view', palSrc: 'palette', matFilter: 'palette', minG: 'palette' };
+const lvlFor = { W: 'all', H: 'all', bgColor: 'all', k: 'palette', frameColor: 'view', paper: 'view', inkSave: 'view', palSrc: 'palette', matFilter: 'palette', minG: 'palette' };
 document.querySelectorAll('aside input, aside select').forEach(el => {
   if (el.id === 'imgFile' || el.id === 'invFile' || /^p[cs]\d/.test(el.id)) return;
   el.addEventListener('input', () => schedule(lvlFor[el.id] || 'cells'));
@@ -878,7 +939,10 @@ async function loadFile(f) {
     const bmp = await createImageBitmap(f);
     const c = document.createElement('canvas'); const sc = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
     c.width = Math.round(bmp.width * sc); c.height = Math.round(bmp.height * sc); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-    S.src = c; S.isDemo = false; $('imgHint').textContent = f.name.length > 22 ? f.name.slice(0, 20) + '…' : f.name;
+    const checker = removeFakeChecker(c), alpha = checker || hasAlpha(c);
+    $('bgF').hidden = !alpha;
+    $('bgNote').textContent = checker ? 'Lo sfondo a scacchi (finta trasparenza) è stato tolto: diventa di questo colore.' : 'L\'immagine ha parti trasparenti: diventano di questo colore.';
+    S.src = c; S.isDemo = false; S.autoK = true; $('imgHint').textContent = f.name.length > 22 ? f.name.slice(0, 20) + '…' : f.name;
     schedule('all');
   } catch (e) { $('status').textContent = 'Immagine non leggibile: prova con un JPG o PNG.'; }
 }

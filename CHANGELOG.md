@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.6 · Prismatica 1.9
+
+Immagini rese più fedeli: le parti trasparenti (PNG, WebP) prendono un colore di sfondo a scelta invece di diventare nere; lo sfondo a scacchi disegnato nell'immagine (finta trasparenza) viene riconosciuto e tolto; a ogni immagine nuova Prismatica imposta da sola il numero di colori che servono e lo indica sotto il cursore; il ridimensionamento dell'immagine è più morbido.
+
 ## FilamentBox 2.0.5 · Prismatica 1.8
 
 Sincronizzazione di Prismatica con FilamentBox più robusta: l'inventario si ricontrolla ogni 15 secondi anche quando gli eventi in tempo reale sono attivi (utile dietro proxy o tunnel che trattengono lo stream SSE), la connessione agli eventi si riapre da sola se cade e l'inventario si aggiorna appena torni sulla finestra.
