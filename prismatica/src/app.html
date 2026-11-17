@@ -127,7 +127,7 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver">v1.9</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.10</span></div>
   <div class="stats" id="stats"></div>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
@@ -289,7 +289,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /*__CORE__*/
 
-const VERSION = 'v1.9'; // v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.10'; // v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
@@ -1256,6 +1256,10 @@ $('btnPdf').addEventListener('click', async () => { $('btnPdf').disabled = true;
 S.src = demoImage();
 resize();
 run();
+// versione di FilamentBox che include Prismatica (edizioni Lite e 2.x): «v1.10 · FilamentBox 2.0.7»
+function showSuite(e) { if (e && e.version) { $('ver').textContent = VERSION + ' · FilamentBox ' + e.version; $('ver').title = 'Prismatica ' + VERSION + ', inclusa in FilamentBox ' + e.version; } }
+if (window.FB_EDITION) showSuite(window.FB_EDITION);
+else fetch('../edition.js', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => { const m = /"version"\s*:\s*"([^"]+)"/.exec(t) || /version\s*:\s*['"]([^'"]+)['"]/.exec(t); if (m) showSuite({ version: m[1] }); }).catch(() => {});
 loadInventory();
 window.__prismatica = { S, P, plateTris, buildPDF, make3MF, stlBinary, zipFiles };
 </script>

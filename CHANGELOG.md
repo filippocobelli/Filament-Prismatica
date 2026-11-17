@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.7 · Prismatica 1.10
+
+Versioni allineate: Prismatica mostra anche la versione di FilamentBox in cui è inclusa («v1.10 · FilamentBox 2.0.7»), e la pagina del progetto mostra entrambe («v2.0.7 · Prismatica 1.10»).
+
 ## FilamentBox 2.0.6 · Prismatica 1.9
 
 Immagini rese più fedeli: le parti trasparenti (PNG, WebP) prendono un colore di sfondo a scelta invece di diventare nere; lo sfondo a scacchi disegnato nell'immagine (finta trasparenza) viene riconosciuto e tolto; a ogni immagine nuova Prismatica imposta da sola il numero di colori che servono e lo indica sotto il cursore; il ridimensionamento dell'immagine è più morbido.
