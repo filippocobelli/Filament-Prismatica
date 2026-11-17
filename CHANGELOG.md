@@ -1,5 +1,11 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.5 · Tratto 0.6
+
+- Tratto: 9 nuovi disegni generativi presi dai classici della plotter art: **Schotter** (omaggio a Georg Nees), **Rosone**, **Tunnel**, **Nastri**, **Bolle**, **Op‑art**, **Automi cellulari**, **Albero**, **Girasole**. Ognuno con i suoi cursori e diviso tra più penne se vuoi.
+- Nuovo stile da immagine **Puntinato** (stippling).
+- Guida (italiano e inglese) e sito aggiornati.
+
 ## FilamentBox 2.1.4 · Tratto 0.5
 
 - Tratto: **disegni a più colori con più penne**. Immagine: «Penne (colori)» da 2 a 6 divide l'immagine nei suoi colori principali, un gruppo per colore con lo stile scelto; i colori si cambiano per farli uguali ai pennarelli, ordine dal più chiaro al più scuro. Generativo: linee divise tra le penne a fasce, ad anelli, a caso o a turno. Una pausa di cambio penna per colore.

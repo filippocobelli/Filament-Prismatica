@@ -4,7 +4,7 @@
 
 Tratto turns a Bambu Lab **P1S** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
 
-Version 0.5. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
+Version 0.6. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
 
 ## Language
 
@@ -15,8 +15,8 @@ The interface is in Italian and English. Tratto follows the browser language; th
 1. **Tool**: Stabilo point 88, POSCA, cutting blade or a custom pen. For each one: how to mount it, Z‑offset, speed, Z‑hop, acceleration and passes. Values are saved in the browser, tool by tool.
 2. **Sheet**: a diagram of the plate with the UMTS profile's excluded area and the usable area (≈ 206 × 199 mm). The sheet goes **29 mm from the right wall** and **41 mm from the rear wall**. An X/Y correction shifts every file if the line lands in the wrong spot.
 3. **Drawing**:
-   - *Image*: cross‑hatching, contours (isolines), line art (skeleton), waves, spiral, single continuous line (TSP).
-   - *Generative*: flow field, topography, ridges, Truchet, spirograph, harmonograph, moiré, maze. «🎲 Variation» changes the seed, «✨ Random» changes the style too.
+   - *Image*: cross‑hatching, contours (isolines), line art (skeleton), waves, spiral, single continuous line (TSP), stippling.
+   - *Generative*: flow field, topography, ridges, Truchet, spirograph, harmonograph, moiré, maze, Schotter (a tribute to Georg Nees), rosette, tunnel, ribbons, bubbles, op‑art, cellular automata, tree, sunflower. «🎲 Variation» changes the seed, «✨ Random» changes the style too.
    - *SVG*: each stroke colour becomes a group (one pen); solid shapes can be filled with hatching.
    - *Stickers ✂*: from the subject (a transparent PNG works best) a pen **drawing** file and a **cut** file with the outline and the chosen margin; or grids of circles and rectangles for labels.
    - *Technical drawing*: a dimensioned drawing with border, title block and, if you like, graph paper (see below).
@@ -29,7 +29,7 @@ The interface is in Italian and English. Tratto follows the browser language; th
 
 Each pen is a group: the file has a pause before each one to change marker, and the sheet doesn't move, so the colours line up.
 
-- *Image*: with «Pens (colours)» from 2 to 6 Tratto splits the image into its main colours (white stays paper) and draws each colour in the chosen style: hatching, contours, line art, waves, spiral or single line. Each colour can be changed to match the marker you have: areas go to the pen with the closest colour. «↺ Colours from the image» goes back to the colours taken from the image. The order is from the lightest colour to the darkest.
+- *Image*: with «Pens (colours)» from 2 to 6 Tratto splits the image into its main colours (white stays paper) and draws each colour in the chosen style: hatching, contours, line art, waves, spiral, single line or stippling. Each colour can be changed to match the marker you have: areas go to the pen with the closest colour. «↺ Colours from the image» goes back to the colours taken from the image. The order is from the lightest colour to the darkest.
 - *Generative*: with «Pens (colours)» from 2 to 6 the lines are split between the pens in horizontal bands, vertical bands, rings from the centre, at random or in turn. Colours are chosen in step 4.
 - *SVG*: each stroke colour is already a pen.
 - *Technical drawing*: drawing and dimensions can use two pens.

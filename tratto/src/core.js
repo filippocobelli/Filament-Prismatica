@@ -384,6 +384,19 @@ function algCenterline(img, W, H, o) {
   return out;
 }
 // Linea continua (TSP) su punti campionati dal tono
+// puntinato: tanti cerchietti, più fitti dove l'immagine è scura
+function algStipple(img, W, H, o, seed) {
+  const S = sampler(img, W, H), r = mulberry32(seed || 1), N = Math.max(100, o.points || 5000), dot = Math.max(0.15, o.dot || 0.35), g = o.gamma || 1.4;
+  const minD = Math.max(dot * 2 + 0.25, Math.sqrt(W * H / N) * 0.55), cell = minD, gw = Math.ceil(W / cell) + 1, grid = new Map(), pts = [];
+  const ok = (x, y) => { const i = Math.floor(x / cell), j = Math.floor(y / cell); for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const l = grid.get((j + b) * gw + i + a); if (l) for (const q of l) if ((q[0] - x) ** 2 + (q[1] - y) ** 2 < minD * minD) return false; } return true; };
+  for (let t = 0; t < N * 30 && pts.length < N; t++) {
+    const x = r() * W, y = r() * H, d = Math.pow(S(x, y), g);
+    if (r() > d) continue;
+    if (!ok(x, y)) continue;
+    const k = Math.floor(y / cell) * gw + Math.floor(x / cell); if (!grid.has(k)) grid.set(k, []); grid.get(k).push([x, y]); pts.push([x, y]);
+  }
+  return pts.map(([x, y]) => { const p = []; for (let s = 0; s <= 8; s++) { const b = s / 8 * Math.PI * 2; p.push([x + dot * Math.cos(b), y + dot * Math.sin(b)]); } return p; });
+}
 function algTSP(img, W, H, o, seed) {
   const S = sampler(img, W, H), r = mulberry32(seed || 1);
   const N = o.points || 3000, pts = []; let tries = 0;
@@ -551,6 +564,127 @@ const GEN = {
     for (let L = 1; L < n; L++) for (const p of marching(f, w, h, 0.2 + 0.6 * L / n)) {
       const q = simplify(chaikin(p.map(([x, y]) => [x * res, y * res]), 1), 0.04);
       if (pathLength(q) > 2) out.push(q);
+    }
+    return clipToRect(out, W, H);
+  },
+  // Georg Nees, «Schotter» (1968): quadrati sempre più in disordine scendendo
+  schotter(W, H, o, seed) {
+    const r = mulberry32(seed), c = Math.max(4, o.cell || 10), amp = o.amp || 1, out = [];
+    const nx = Math.floor(W / c), ny = Math.floor(H / c), ox = (W - nx * c) / 2, oy = (H - ny * c) / 2;
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const t = ny > 1 ? j / (ny - 1) : 0, a = (r() - 0.5) * t * Math.PI / 2 * amp;
+      const cx = ox + (i + 0.5) * c + (r() - 0.5) * t * c * 0.5 * amp, cy = oy + (j + 0.5) * c + (r() - 0.5) * t * c * 0.5 * amp, h = c * 0.46;
+      const q = [[-h, -h], [h, -h], [h, h], [-h, h], [-h, -h]].map(([x, y]) => [cx + x * Math.cos(a) - y * Math.sin(a), cy + x * Math.sin(a) + y * Math.cos(a)]);
+      out.push(q);
+    }
+    return clipToRect(out, W, H);
+  },
+  // poligono ruotato e rimpicciolito tante volte: rosone a interferenza
+  rosette(W, H, o, seed) {
+    const r = mulberry32(seed), n = Math.max(3, Math.round(o.sides || 8)), N = Math.max(4, Math.round(o.lines || 60));
+    const R0 = Math.min(W, H) / 2 * 0.96, twist = (o.amp || 1) * 2 * Math.PI / n * (0.6 + r() * 0.8), shrink = Math.min(0.95, Math.max(0, o.scale == null ? 0.6 : o.scale));
+    const off = (r() - 0.5) * 0.25, out = [];
+    for (let k = 0; k < N; k++) {
+      const t = k / N, R = R0 * (1 - shrink * t), a0 = twist * t * N / 10 + off, p = [];
+      for (let v = 0; v <= n; v++) { const a = a0 + v / n * Math.PI * 2; p.push([W / 2 + R * Math.cos(a), H / 2 + R * Math.sin(a)]); }
+      out.push(p);
+    }
+    return out;
+  },
+  // cerchi che si stringono e si spostano: tunnel / conchiglia
+  tunnel(W, H, o, seed) {
+    const r = mulberry32(seed), N = Math.max(10, Math.round(o.lines || 90)), Rm = Math.min(W, H) / 2 * 0.97;
+    const turns = (o.amp || 1) * (0.5 + r()), ph = r() * Math.PI * 2, pw = 1.2 + r() * 0.8, out = [];
+    for (let k = 0; k < N; k++) {
+      const t = k / (N - 1), rad = Math.max(1.5, Rm * Math.pow(1 - t, pw)), d = (Rm - rad) * 0.9, a = ph + t * turns * Math.PI * 2;
+      const cx = W / 2 + d * Math.cos(a) * 0.6, cy = H / 2 + d * Math.sin(a) * 0.6, m = Math.max(24, Math.round(rad * 2)), p = [];
+      for (let s = 0; s <= m; s++) { const b = s / m * Math.PI * 2; p.push([cx + rad * Math.cos(b), cy + rad * Math.sin(b)]); }
+      out.push(p);
+    }
+    return clipToRect(out, W, H);
+  },
+  // linee interpolate tra due curve: nastri che si attorcigliano
+  ribbon(W, H, o, seed) {
+    const r = mulberry32(seed), out = [], nR = Math.max(1, Math.round(o.copies || 1)), n = Math.max(6, Math.round(o.lines || 50));
+    const curve = (pts) => (s) => { // Catmull-Rom
+      const m = pts.length - 1, f = Math.min(m - 1e-9, s * m), i = Math.floor(f), u = f - i;
+      const P = (k) => pts[Math.max(0, Math.min(m, k))], p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+      return [0, 1].map(d => 0.5 * ((2 * p1[d]) + (-p0[d] + p2[d]) * u + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * u * u + (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * u * u * u));
+    };
+    for (let q = 0; q < nR; q++) {
+      const k = 5, yc = H * (q + 0.5) / nR, band = H / nR * 0.45;
+      const A = [], B = [];
+      for (let i = 0; i < k; i++) { const x = W * i / (k - 1); A.push([x, yc + (r() - 0.5) * 2 * band]); B.push([x, yc + (r() - 0.5) * 2 * band]); }
+      const a = curve(A), b = curve(B);
+      for (let l = 0; l < n; l++) {
+        const u = l / (n - 1), p = [];
+        for (let s = 0; s <= 200; s++) { const pa = a(s / 200), pb = b(s / 200); p.push([pa[0] + (pb[0] - pa[0]) * u, pa[1] + (pb[1] - pa[1]) * u]); }
+        out.push(simplify(p, 0.02));
+      }
+    }
+    return clipToRect(out, W, H);
+  },
+  // cerchi impacchettati, ognuno a cerchi concentrici
+  bubbles(W, H, o, seed) {
+    const r = mulberry32(seed), sp = Math.max(0.8, o.spacing || 1.6), rmax = Math.max(4, o.cell || 30), rmin = Math.max(2, rmax / 8), C = [], out = [];
+    for (let t = 0; t < 6000 && C.length < 600; t++) {
+      const x = r() * W, y = r() * H;
+      let rad = Math.min(rmax, x, y, W - x, H - y);
+      for (const c of C) { rad = Math.min(rad, Math.hypot(x - c[0], y - c[1]) - c[2] - 1); if (rad < rmin) break; }
+      if (rad >= rmin) C.push([x, y, rad * (0.85 + r() * 0.15)]);
+    }
+    for (const [x, y, R] of C) for (let rad = R; rad > sp * 0.6; rad -= sp) {
+      const m = Math.max(16, Math.round(rad * 2)), p = [];
+      for (let s = 0; s <= m; s++) { const b = s / m * Math.PI * 2; p.push([x + rad * Math.cos(b), y + rad * Math.sin(b)]); }
+      out.push(p);
+    }
+    return out;
+  },
+  // griglia deformata da lenti: effetto op‑art
+  opart(W, H, o, seed) {
+    const r = mulberry32(seed), sp = Math.max(0.8, o.spacing || 2.5), nL = Math.max(1, Math.round(o.count || 5)), amp = o.amp || 1;
+    const L = Array.from({ length: nL }, () => [W * (0.1 + r() * 0.8), H * (0.1 + r() * 0.8), Math.min(W, H) * (0.1 + r() * 0.12), (r() < 0.3 ? -0.45 : 0.45 + r() * 0.45) * amp]);
+    const warp = (x, y) => { let dx = 0, dy = 0; for (const [cx, cy, R, k] of L) { const ex = x - cx, ey = y - cy, f = k * Math.exp(-(ex * ex + ey * ey) / (R * R)); dx += ex * f; dy += ey * f; } return [x + dx, y + dy]; };
+    const out = [], st = 0.5;
+    for (let y = 0; y <= H + 1e-6; y += sp) { const p = []; for (let x = 0; x <= W + 1e-6; x += st) p.push(warp(x, y)); out.push(simplify(p, 0.02)); }
+    if (o.double !== false) for (let x = 0; x <= W + 1e-6; x += sp) { const p = []; for (let y = 0; y <= H + 1e-6; y += st) p.push(warp(x, y)); out.push(simplify(p, 0.02)); }
+    return clipToRect(out, W, H);
+  },
+  // automa cellulare elementare (regola di Wolfram), celle a triangoli
+  automata(W, H, o, seed) {
+    const r = mulberry32(seed), c = Math.max(1.5, o.cell || 4), rule = Math.max(0, Math.min(255, Math.round(o.rule == null ? 30 : o.rule)));
+    const nx = Math.floor(W / c), ny = Math.floor(H / c), ox = (W - nx * c) / 2, oy = (H - ny * c) / 2, segs = [];
+    let row = new Uint8Array(nx); if (seed % 2) row[Math.floor(nx / 2)] = 1; else for (let i = 0; i < nx; i++) row[i] = r() < 0.5 ? 1 : 0;
+    for (let j = 0; j < ny; j++) {
+      for (let i = 0; i < nx; i++) if (row[i]) { const x = ox + i * c, y = oy + j * c; segs.push([[x, y], [x + c, y], [x + c / 2, y + c], [x, y]]); }
+      const nr = new Uint8Array(nx);
+      for (let i = 0; i < nx; i++) { const k = (row[(i - 1 + nx) % nx] << 2) | (row[i] << 1) | row[(i + 1) % nx]; nr[i] = (rule >> k) & 1; }
+      row = nr;
+    }
+    return segs;
+  },
+  // albero ricorsivo
+  tree(W, H, o, seed) {
+    const r = mulberry32(seed), depth = Math.max(3, Math.min(13, Math.round(o.depth || 10))), spread = (o.amp || 1) * 0.42, segs = [];
+    const grow = (x, y, a, len, d) => {
+      const x2 = x + Math.cos(a) * len, y2 = y + Math.sin(a) * len; segs.push([[x, y], [x2, y2]]);
+      if (d <= 0 || len < 0.8) return;
+      const k = 2 + (r() < 0.15 ? 1 : 0);
+      for (let i = 0; i < k; i++) { const da = (i - (k - 1) / 2) * spread * 2 / Math.max(1, k - 1) + (r() - 0.5) * spread * 0.6; grow(x2, y2, a + da, len * (0.66 + r() * 0.14), d - 1); }
+    };
+    grow(W / 2, H, -Math.PI / 2, H * 0.27, depth);
+    const b = bbox(segs), s = Math.min(W / Math.max(1e-6, b.w), H / Math.max(1e-6, b.h), 1) * 0.98;
+    return chainPaths(segs.map(p => p.map(([x, y]) => [W / 2 + (x - (b.x0 + b.x1) / 2) * s, H - (b.y1 - y) * s])), 0.01);
+  },
+  // girasole: cerchi disposti con l'angolo aureo
+  phyllo(W, H, o, seed) {
+    const N = Math.max(50, Math.round(o.count || 600)), Rm = Math.min(W, H) / 2 * 0.97, c = Rm / Math.sqrt(N), ga = Math.PI * (3 - Math.sqrt(5)), sz = o.scale == null ? 1 : o.scale, out = [];
+    const rot = (seed % 360) * Math.PI / 180;
+    for (let k = 1; k <= N; k++) {
+      const rr = c * Math.sqrt(k), a = k * ga + rot, x = W / 2 + rr * Math.cos(a), y = H / 2 + rr * Math.sin(a);
+      const rad = Math.max(0.4, c * 0.5 * sz * (0.4 + 0.6 * Math.sqrt(k / N))), m = Math.max(10, Math.round(rad * 3)), p = [];
+      for (let s = 0; s <= m; s++) { const b = s / m * Math.PI * 2; p.push([x + rad * Math.cos(b), y + rad * Math.sin(b)]); }
+      out.push(p);
     }
     return clipToRect(out, W, H);
   },
@@ -1012,7 +1146,7 @@ function splitPens(paths, n, mode, W, H, seed) {
 }
 
 const api = { P1S, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainPaths, orderPaths, bbox, clipToRect, pathLength, isClosed,
-  algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
+  algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, algStipple, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
   strokesToExPolys, slabMesh, planLayers, slicesOf, buildProjectConfig, build3MF, buildSVG,
   rgbToLab, paletteKMeans, separateColors, cutByLayer, splitPens };
 if (isNode) module.exports = api; else root.TR = api;

@@ -4,7 +4,7 @@
 
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.5. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.6. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Lingua
 
@@ -15,8 +15,8 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 1. **Utensile**: Stabilo point 88, POSCA, lama da taglio o penna personalizzata. Per ognuno: come montarlo, Z‑offset, velocità, Z‑hop, accelerazione e passate. I valori si salvano nel browser, utensile per utensile.
 2. **Foglio**: schema del piatto con l'area esclusa del profilo UMTS e l'area utile (≈ 206 × 199 mm). Il foglio va a **29 mm dalla parete destra** e **41 mm da quella posteriore**. Una correzione X/Y sposta tutti i file se il tratto cade fuori posto.
 3. **Disegno**:
-   - *Immagine*: tratteggio incrociato, contorni (isolinee), linee a tratto (scheletro), onde, spirale, linea continua (TSP).
-   - *Generativo*: campo di flusso, topografia, creste, Truchet, spirografo, armonografo, moiré, labirinto. «🎲 Variante» cambia il seme, «✨ A caso» cambia anche lo stile.
+   - *Immagine*: tratteggio incrociato, contorni (isolinee), linee a tratto (scheletro), onde, spirale, linea continua (TSP), puntinato (stippling).
+   - *Generativo*: campo di flusso, topografia, creste, Truchet, spirografo, armonografo, moiré, labirinto, Schotter (omaggio a Georg Nees), rosone, tunnel, nastri, bolle, op‑art, automi cellulari, albero, girasole. «🎲 Variante» cambia il seme, «✨ A caso» cambia anche lo stile.
    - *SVG*: ogni colore del tratto diventa un gruppo (una penna); le forme piene si possono riempire a tratteggio.
    - *Adesivi ✂*: dal soggetto (meglio PNG trasparente) un file **disegno** a penna e un file **taglio** con la sagoma e il margine scelto; oppure griglie di cerchi e rettangoli per etichette.
    - *Tavola tecnica*: tavola quotata con cornice, cartiglio e, se vuoi, carta millimetrata (vedi sotto).
@@ -29,7 +29,7 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 
 Ogni penna è un gruppo: nel file c'è una pausa prima di ciascuno per cambiare pennarello, e il foglio non si muove, quindi i colori combaciano.
 
-- *Immagine*: con «Penne (colori)» da 2 a 6 Tratto divide l'immagine nei suoi colori principali (il bianco resta carta) e disegna ogni colore con lo stile scelto: tratteggio, contorni, linee a tratto, onde, spirale o linea continua. Ogni colore si può cambiare con quello del pennarello che hai: le zone vanno alla penna di colore più vicino. «↺ Colori dall'immagine» torna ai colori ricavati dall'immagine. L'ordine è dal colore più chiaro al più scuro.
+- *Immagine*: con «Penne (colori)» da 2 a 6 Tratto divide l'immagine nei suoi colori principali (il bianco resta carta) e disegna ogni colore con lo stile scelto: tratteggio, contorni, linee a tratto, onde, spirale, linea continua o puntinato. Ogni colore si può cambiare con quello del pennarello che hai: le zone vanno alla penna di colore più vicino. «↺ Colori dall'immagine» torna ai colori ricavati dall'immagine. L'ordine è dal colore più chiaro al più scuro.
 - *Generativo*: con «Penne (colori)» da 2 a 6 le linee si dividono tra le penne a fasce orizzontali, a fasce verticali, ad anelli dal centro, a caso o a turno. I colori si scelgono al passo 4.
 - *SVG*: ogni colore del tratto è già una penna.
 - *Tavola tecnica*: disegno e quote possono usare due penne.

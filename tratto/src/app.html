@@ -96,7 +96,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.5</span>
+  <span class="ver" id="ver">v0.6</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
@@ -182,6 +182,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
         <button data-alg="waves">Onde</button>
         <button data-alg="spiral">Spirale</button>
         <button data-alg="tsp">Linea continua</button>
+        <button data-alg="stipple">Puntinato</button>
       </div>
       <p class="small" id="algHelp"></p>
       <div id="algParams"></div>
@@ -202,6 +203,15 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
         <button data-gen="harmono">Armonografo</button>
         <button data-gen="circles">Moiré</button>
         <button data-gen="maze">Labirinto</button>
+        <button data-gen="schotter">Schotter</button>
+        <button data-gen="rosette">Rosone</button>
+        <button data-gen="tunnel">Tunnel</button>
+        <button data-gen="ribbon">Nastri</button>
+        <button data-gen="bubbles">Bolle</button>
+        <button data-gen="opart">Op‑art</button>
+        <button data-gen="automata">Automi cellulari</button>
+        <button data-gen="tree">Albero</button>
+        <button data-gen="phyllo">Girasole</button>
       </div>
       <div class="row"><label class="f">Seme<input type="number" id="seed" value="1"></label><div style="display:flex;align-items:end;gap:6px"><button class="btn pri" id="dice" style="flex:1">🎲 Variante</button><button class="btn" id="surprise" style="flex:1">✨ A caso</button></div></div>
       <div id="genParams"></div>
@@ -362,7 +372,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.5'; // v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.6'; // v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -466,6 +476,7 @@ const ALG_HELP = {
   waves: 'Righe ondulate: l’onda si allarga e si stringe con il tono.',
   spiral: 'Un’unica spirale dal centro, modulata dal tono. Una sola alzata di penna.',
   tsp: 'Un’unica linea continua che passa per punti distribuiti in base al tono.',
+  stipple: 'Tanti piccoli punti, più fitti dove l’immagine è scura (stippling). Lento da disegnare ma molto fine: meglio con la Stabilo.',
 };
 function renderAlgParams() {
   const c = $('#algParams'); c.innerHTML = ''; $('#algHelp').textContent = ALG_HELP[S.alg];
@@ -476,6 +487,7 @@ function renderAlgParams() {
   if (S.alg === 'waves') { slider(c, 'w_spacing', 'Passo righe (mm)', Math.max(1, minSp), 6, 0.1, 2); slider(c, 'w_freq', 'Frequenza', 0.3, 4, 0.1, 1.2); slider(c, 'w_gamma', 'Contrasto onde', 0.5, 3, 0.1, 1.2); }
   if (S.alg === 'spiral') { slider(c, 's_spacing', 'Passo spirale (mm)', Math.max(1, minSp), 6, 0.1, 1.8); slider(c, 's_freq', 'Frequenza', 0.3, 4, 0.1, 1.5); slider(c, 's_gamma', 'Contrasto', 0.5, 3, 0.1, 1.2); }
   if (S.alg === 'tsp') { slider(c, 't_points', 'Punti', 300, 12000, 100, 3000); slider(c, 't_gamma', 'Contrasto', 0.5, 4, 0.1, 1.6); }
+  if (S.alg === 'stipple') { slider(c, 'p_points', 'Punti', 500, 30000, 100, 6000); slider(c, 'p_dot', 'Grandezza punto (mm)', 0.15, 1.2, 0.05, 0.35); slider(c, 'p_gamma', 'Contrasto', 0.5, 4, 0.1, 1.4); }
 }
 function renderImgParams() {
   const c = $('#imgParams'); c.innerHTML = '';
@@ -493,6 +505,27 @@ const GEN_P = {
   harmono: c => {},
   circles: c => { slider(c, 'g_spacing', 'Distanza cerchi (mm)', 0.8, 8, 0.1, 2.5); },
   maze: c => { slider(c, 'g_cell', 'Cella (mm)', 3, 30, 1, 8); },
+  schotter: c => { slider(c, 'gs_cell', 'Lato quadrati (mm)', 4, 30, 1, 10); slider(c, 'gs_amp', 'Disordine', 0, 3, 0.1, 1); note(c, 'Omaggio a «Schotter» di Georg Nees (1968): i quadrati si scompongono scendendo.'); },
+  rosette: c => { slider(c, 'gr_sides', 'Lati', 3, 12, 1, 8); slider(c, 'gr_lines', 'Copie', 10, 200, 1, 60); slider(c, 'gr_amp', 'Rotazione', 0, 3, 0.05, 1); slider(c, 'gr_scale', 'Rimpicciolimento', 0, 0.95, 0.01, 0.4); },
+  tunnel: c => { slider(c, 'gt_lines', 'Cerchi', 10, 250, 1, 90); slider(c, 'gt_amp', 'Giri', 0, 3, 0.05, 1); },
+  ribbon: c => { slider(c, 'gn_lines', 'Linee per nastro', 6, 150, 1, 50); slider(c, 'gn_copies', 'Nastri', 1, 4, 1, 1); },
+  bubbles: c => { slider(c, 'gb_cell', 'Raggio massimo (mm)', 6, 80, 1, 30); slider(c, 'gb_sp', 'Distanza anelli (mm)', 0.8, 6, 0.1, 1.6); },
+  opart: c => { slider(c, 'go_sp', 'Passo griglia (mm)', 1, 8, 0.1, 2.5); slider(c, 'go_n', 'Lenti', 1, 15, 1, 7); slider(c, 'go_amp', 'Deformazione', 0.2, 2, 0.05, 1); check(c, 'go_double', 'griglia nei due versi', true); },
+  automata: c => { slider(c, 'ga_rule', 'Regola', 1, 255, 1, 30); slider(c, 'ga_cell', 'Cella (mm)', 1.5, 10, 0.5, 4); note(c, 'Automa cellulare elementare: ogni riga nasce dalla precedente. Regole belle: 30, 45, 73, 90, 105, 110, 150. Seme dispari: si parte da una cella al centro; pari: prima riga a caso.'); },
+  tree: c => { slider(c, 'gk_depth', 'Livelli di rami', 4, 13, 1, 10); slider(c, 'gk_amp', 'Apertura', 0.3, 2, 0.05, 1); },
+  phyllo: c => { slider(c, 'gp_n', 'Semi', 50, 2000, 10, 600); slider(c, 'gp_sz', 'Grandezza cerchi', 0.3, 2, 0.05, 1); },
+};
+function note(c, t) { const p = document.createElement('p'); p.className = 'small'; p.textContent = t; c.appendChild(p); }
+const GEN_O = {
+  schotter: () => ({ cell: P('gs_cell', 10), amp: P('gs_amp', 1) }),
+  rosette: () => ({ sides: P('gr_sides', 8), lines: P('gr_lines', 60), amp: P('gr_amp', 1), scale: P('gr_scale', 0.4) }),
+  tunnel: () => ({ lines: P('gt_lines', 90), amp: P('gt_amp', 1) }),
+  ribbon: () => ({ lines: P('gn_lines', 50), copies: P('gn_copies', 1) }),
+  bubbles: () => ({ cell: P('gb_cell', 30), spacing: P('gb_sp', 1.6) }),
+  opart: () => ({ spacing: P('go_sp', 2.5), count: P('go_n', 7), amp: P('go_amp', 1), double: P('go_double', true) }),
+  automata: () => ({ rule: P('ga_rule', 30), cell: P('ga_cell', 4) }),
+  tree: () => ({ depth: P('gk_depth', 10), amp: P('gk_amp', 1) }),
+  phyllo: () => ({ count: P('gp_n', 600), scale: P('gp_sz', 1) }),
 };
 function renderTavParams() {
   const c = $('#tfParams'); c.innerHTML = '';
@@ -712,6 +745,7 @@ function imageAlg(alg, img, W, H, seed) {
   if (alg === 'waves') return { paths: TR.algWaves(img, W, H, { spacing: P('w_spacing', 2), freq: P('w_freq', 1.2), gamma: P('w_gamma', 1.2) }) };
   if (alg === 'spiral') return { paths: TR.algSpiral(img, W, H, { spacing: P('s_spacing', 1.8), freq: P('s_freq', 1.5), gamma: P('s_gamma', 1.2) }) };
   if (alg === 'tsp') return { paths: TR.algTSP(img, W, H, { points: P('t_points', 3000), gamma: P('t_gamma', 1.6) }, seed) };
+  if (alg === 'stipple') return { paths: TR.orderPaths(TR.algStipple(img, W, H, { points: P('p_points', 6000), dot: P('p_dot', 0.35), gamma: P('p_gamma', 1.4) }, seed)) };
   return { paths: [] };
 }
 function adjust() { return { bright: P('i_bright', 0), contrast: P('i_contrast', 1.2), invert: P('i_invert', false) }; }
@@ -730,7 +764,7 @@ function computeJob() {
     }
   } else if (S.src === 'gen') {
     const o = { spacing: P('g_spacing', 2.5), scale: P('g_scale', 1), turb: P('g_turb', 2), length: P('g_len', 90), levels: P('g_levels', 18), lines: P('g_lines', 60), amp: P('g_amp', 1), cell: P('g_cell', S.gen === 'maze' ? 8 : 12), copies: P('g_copies', 3) };
-    let paths = TR.GEN[S.gen](W, H, o, S.seed);
+    let paths = TR.GEN[S.gen](W, H, GEN_O[S.gen] ? GEN_O[S.gen]() : o, S.seed);
     paths = TR.orderPaths(TR.clipToRect(paths, W, H));
     const np = P('g_pens', 1);
     if (np > 1) groups = TR.splitPens(paths, np, S.params.g_split || 'bands', W, H, S.seed).map(ps => ({ tool: S.tool, paths: TR.orderPaths(ps) }));
