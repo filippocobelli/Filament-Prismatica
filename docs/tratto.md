@@ -4,7 +4,7 @@
 
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.4. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.5. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Lingua
 
@@ -24,6 +24,17 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 4. **Colori**: ogni gruppo è un cambio di penna, con nome, colore e numero di passate.
 5. **File**: riepilogo di strati e pause, download del 3MF (e dell'SVG).
 6. **In stampa**: la sequenza da seguire e i problemi comuni.
+
+## Più colori, più penne
+
+Ogni penna è un gruppo: nel file c'è una pausa prima di ciascuno per cambiare pennarello, e il foglio non si muove, quindi i colori combaciano.
+
+- *Immagine*: con «Penne (colori)» da 2 a 6 Tratto divide l'immagine nei suoi colori principali (il bianco resta carta) e disegna ogni colore con lo stile scelto: tratteggio, contorni, linee a tratto, onde, spirale o linea continua. Ogni colore si può cambiare con quello del pennarello che hai: le zone vanno alla penna di colore più vicino. «↺ Colori dall'immagine» torna ai colori ricavati dall'immagine. L'ordine è dal colore più chiaro al più scuro.
+- *Generativo*: con «Penne (colori)» da 2 a 6 le linee si dividono tra le penne a fasce orizzontali, a fasce verticali, ad anelli dal centro, a caso o a turno. I colori si scelgono al passo 4.
+- *SVG*: ogni colore del tratto è già una penna.
+- *Tavola tecnica*: disegno e quote possono usare due penne.
+
+Cambiando penna, inserisci la nuova con la stessa sporgenza della precedente.
 
 ## Tavola tecnica
 

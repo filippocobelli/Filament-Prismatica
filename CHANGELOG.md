@@ -1,5 +1,10 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.4 · Tratto 0.5
+
+- Tratto: **disegni a più colori con più penne**. Immagine: «Penne (colori)» da 2 a 6 divide l'immagine nei suoi colori principali, un gruppo per colore con lo stile scelto; i colori si cambiano per farli uguali ai pennarelli, ordine dal più chiaro al più scuro. Generativo: linee divise tra le penne a fasce, ad anelli, a caso o a turno. Una pausa di cambio penna per colore.
+- Guida (italiano e inglese) e sito aggiornati.
+
 ## FilamentBox 2.1.3 · Tratto 0.4
 
 - Tratto in **inglese**: tutta l'interfaccia, le guide, i nomi dei gruppi e delle parti nel 3MF, i nomi dei file e i testi delle tavole tecniche (cartiglio, viste). Lingua del browser, pulsante **EN / IT** nell'intestazione o `?lang=en` / `?lang=it`.

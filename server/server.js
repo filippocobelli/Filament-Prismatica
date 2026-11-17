@@ -1,6 +1,6 @@
-// FilamentBox server — v2.1.3
+// FilamentBox server — v2.1.4
 // CHANGELOG
-// v2.1.3 — Tratto 0.4: interfaccia anche in inglese · v2.1.2 — solo titolo del sito: «Filament-Prismatica · Tratto» · v2.1.1 — Tratto 0.4 (tavole tecniche da foto e da STL/3MF)
+// v2.1.4 — Tratto 0.5: disegni a più colori con più penne · v2.1.3 — Tratto 0.4: interfaccia anche in inglese · v2.1.2 — solo titolo del sito: «Filament-Prismatica · Tratto» · v2.1.1 — Tratto 0.3 (tavole tecniche da foto e da STL/3MF)
 // v2.1.0 — Tratto (plotter e taglio con il kit UMTS) servito su /tratto/ nell'edizione Full, come Prismatica
 // v2.0.10 — solo versione: Prismatica 1.13 (niente flessibili, colori nell'elenco dei filamenti)
 // v2.0.9 — solo versione: Prismatica 1.12 (linee sottili)
@@ -36,7 +36,7 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3025;
-const VERSION = '2.1.3';
+const VERSION = '2.1.4';
 const EDITION = (process.env.FB_EDITION || 'full').toLowerCase() === 'smart' ? 'smart' : 'full';
 const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica', 'tratto'];
 const DB_PATH = path.join(__dirname, 'db.json');

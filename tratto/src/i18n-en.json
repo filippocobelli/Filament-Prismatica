@@ -261,7 +261,15 @@
 "Switch to English": "Switch to English",
 "3MF file": "3MF file",
 "# · Cut (blade)": "# · Cut (blade)",
-"# · Drawing (pen)": "# · Drawing (pen)"
+"# · Drawing (pen)": "# · Drawing (pen)",
+"Penne (colori)": "Pens (colours)",
+"Una penna sola: il disegno segue i toni di grigio. Con più penne l’immagine viene divisa nei suoi colori principali, con un gruppo (e una pausa di cambio penna) per colore.": "A single pen: the drawing follows the shades of grey. With more pens the image is split into its main colours, with one group (and one pen‑change pause) per colour.",
+"Carica un’immagine: Tratto ne ricava i colori principali.": "Load an image: Tratto picks out its main colours.",
+"Clicca un colore e mettilo uguale al pennarello che hai: ogni zona dell’immagine va alla penna di colore più vicino, il bianco resta carta. Si disegna dal colore più chiaro al più scuro.": "Click a colour and match it to the marker you have: every area of the image goes to the pen with the closest colour, white stays paper. Drawing goes from the lightest colour to the darkest.",
+"↺ Colori dall’immagine": "↺ Colours from the image",
+"Con più penne le linee vengono divise tra i colori, con una pausa per cambiare penna tra un colore e l’altro.": "With more pens the lines are split between the colours, with a pause to change pen between one colour and the next.",
+"Come dividere le linee": "How to split the lines",
+"I colori delle penne li scegli al passo #.": "You choose the pen colours in step #."
 },
 "re": [
 [

@@ -4,7 +4,7 @@
 
 Tratto turns a Bambu Lab **P1S** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
 
-Version 0.4. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
+Version 0.5. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
 
 ## Language
 
@@ -24,6 +24,17 @@ The interface is in Italian and English. Tratto follows the browser language; th
 4. **Colours**: each group is a pen change, with name, colour and number of passes.
 5. **File**: summary of layers and pauses, download of the 3MF (and of the SVG).
 6. **Printing**: the sequence to follow and common problems.
+
+## More colours, more pens
+
+Each pen is a group: the file has a pause before each one to change marker, and the sheet doesn't move, so the colours line up.
+
+- *Image*: with «Pens (colours)» from 2 to 6 Tratto splits the image into its main colours (white stays paper) and draws each colour in the chosen style: hatching, contours, line art, waves, spiral or single line. Each colour can be changed to match the marker you have: areas go to the pen with the closest colour. «↺ Colours from the image» goes back to the colours taken from the image. The order is from the lightest colour to the darkest.
+- *Generative*: with «Pens (colours)» from 2 to 6 the lines are split between the pens in horizontal bands, vertical bands, rings from the centre, at random or in turn. Colours are chosen in step 4.
+- *SVG*: each stroke colour is already a pen.
+- *Technical drawing*: drawing and dimensions can use two pens.
+
+When changing pen, insert the new one with the same protrusion as the previous one.
 
 ## Technical drawing
 

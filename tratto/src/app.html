@@ -87,13 +87,16 @@ details summary{cursor:pointer;font-weight:600;font-size:13px}
 kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:12px;background:#fff}
 .plate svg{width:100%;height:auto;display:block}
 @media (max-width:860px){ header{gap:8px;padding:8px 12px} header .sub,header .h1sub{display:none} main{grid-template-columns:1fr;grid-template-rows:auto 60vh;height:auto} aside{border-right:0} .view{height:60vh;order:-1} }
+.pens{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.pen{display:flex;align-items:center;gap:6px;border:1px solid var(--line,#dcdfe6);border-radius:10px;padding:4px 10px 4px 4px;font-size:13px;cursor:pointer;background:#fff}
+.pen input[type=color]{width:30px;height:30px;border:0;padding:0;background:none;cursor:pointer}
 </style>
 </head>
 <body>
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.4</span>
+  <span class="ver" id="ver">v0.5</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
@@ -182,6 +185,8 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       </div>
       <p class="small" id="algHelp"></p>
       <div id="algParams"></div>
+      <h3>Colori</h3>
+      <div id="imgColors"></div>
       <h3>Regolazioni immagine</h3>
       <div id="imgParams"></div>
     </div>
@@ -200,6 +205,8 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       </div>
       <div class="row"><label class="f">Seme<input type="number" id="seed" value="1"></label><div style="display:flex;align-items:end;gap:6px"><button class="btn pri" id="dice" style="flex:1">🎲 Variante</button><button class="btn" id="surprise" style="flex:1">✨ A caso</button></div></div>
       <div id="genParams"></div>
+      <h3>Colori</h3>
+      <div id="genColors"></div>
     </div>
 
     <!-- svg -->
@@ -355,7 +362,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.4'; // v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.5'; // v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -496,6 +503,59 @@ function renderTavParams() {
   slider(m, 'tm_crease', 'Spigoli da (°)', 5, 80, 1, 30, v => v + '°');
 }
 function renderGenParams() { const c = $('#genParams'); c.innerHTML = ''; GEN_P[S.gen](c); }
+
+// ------------------------------------------------------------------ più colori
+const CNAMES = [['#1b1b1b', 'Nero', 'Black'], ['#808080', 'Grigio', 'Grey'], ['#d4352b', 'Rosso', 'Red'], ['#f08a00', 'Arancione', 'Orange'], ['#f2d000', 'Giallo', 'Yellow'],
+  ['#1d9a46', 'Verde', 'Green'], ['#35a8e0', 'Azzurro', 'Light blue'], ['#2747c9', 'Blu', 'Blue'], ['#7b3fb5', 'Viola', 'Purple'], ['#ef6fa8', 'Rosa', 'Pink'], ['#7a4a25', 'Marrone', 'Brown']];
+const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const rgbToHex = c => '#' + c.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+function colorName(h) {
+  const L = TR.rgbToLab(...hexRgb(h)); let best = CNAMES[0], bd = Infinity;
+  for (const c of CNAMES) { const q = TR.rgbToLab(...hexRgb(c[0])), d = (L[0] - q[0]) ** 2 + (L[1] - q[1]) ** 2 + (L[2] - q[2]) ** 2; if (d < bd) { bd = d; best = c; } }
+  return tL(best[1], best[2]);
+}
+function penNames(hexes) { const seen = {}; return hexes.map(h => { const n = colorName(h); seen[n] = (seen[n] || 0) + 1; return n; }).map((n, i, a) => (a.filter(x => x === n).length > 1 ? n + ' ' + (a.slice(0, i + 1).filter(x => x === n).length) : n)); }
+function updateImgPens() {
+  const n = P('i_pens', 1);
+  if (!S.img || n <= 1) return;
+  if (S.imgPensAuto !== false || !S.imgPens || S.imgPens.length !== n) {
+    const R = imgRGBA(S.img, 220);
+    S.imgPens = TR.paletteKMeans(R.rgba, n, 7).map(rgbToHex); S.imgPensAuto = true;
+  }
+}
+function renderImgColors() {
+  const c = $('#imgColors'); c.innerHTML = '';
+  slider(c, 'i_pens', 'Penne (colori)', 1, 6, 1, 1);
+  const inp = c.querySelector('#p_i_pens'), base = inp.oninput;
+  inp.oninput = () => { S.imgPensAuto = true; base(); updateImgPens(); renderImgPenRow(); };
+  const row = document.createElement('div'); row.id = 'imgPenRow'; c.appendChild(row); renderImgPenRow();
+}
+function renderImgPenRow() {
+  const row = $('#imgPenRow'); if (!row) return;
+  if (P('i_pens', 1) <= 1) { row.innerHTML = '<p class="small">Una penna sola: il disegno segue i toni di grigio. Con più penne l’immagine viene divisa nei suoi colori principali, con un gruppo (e una pausa di cambio penna) per colore.</p>'; return; }
+  if (!S.img || !S.imgPens) { row.innerHTML = '<p class="small">Carica un’immagine: Tratto ne ricava i colori principali.</p>'; return; }
+  const names = penNames(S.imgPens);
+  row.innerHTML = `<div class="pens">${S.imgPens.map((h, i) => `<label class="pen"><input type="color" value="${h}" data-i="${i}"><span>${esc(names[i])}</span></label>`).join('')}</div>`
+    + `<p class="small">Clicca un colore e mettilo uguale al pennarello che hai: ogni zona dell’immagine va alla penna di colore più vicino, il bianco resta carta. Si disegna dal colore più chiaro al più scuro.</p>`
+    + `<div class="btns"><button class="btn" id="penAuto" type="button">↺ Colori dall’immagine</button></div>`;
+  row.querySelectorAll('input[type=color]').forEach(el => el.onchange = () => setImgPen(+el.dataset.i, el.value));
+  $('#penAuto').onclick = () => { S.imgPensAuto = true; S.imgPens = null; updateImgPens(); renderImgPenRow(); schedule(); };
+}
+function setImgPen(i, hex) { if (!S.imgPens) return; S.imgPens[i] = hex; S.imgPensAuto = false; renderImgPenRow(); schedule(); }
+const SPLITS = [['bands', 'fasce orizzontali', 'horizontal bands'], ['cols', 'fasce verticali', 'vertical bands'], ['rings', 'anelli dal centro', 'rings from the centre'], ['random', 'a caso', 'random'], ['alternate', 'a turno, linea per linea', 'in turn, line by line']];
+function renderGenColors() {
+  const c = $('#genColors'); c.innerHTML = '';
+  slider(c, 'g_pens', 'Penne (colori)', 1, 6, 1, 1);
+  const inp = c.querySelector('#p_g_pens'), base = inp.oninput;
+  inp.oninput = () => { base(); renderGenColors(); };
+  if (P('g_pens', 1) <= 1) { const p = document.createElement('p'); p.className = 'small'; p.textContent = 'Con più penne le linee vengono divise tra i colori, con una pausa per cambiare penna tra un colore e l’altro.'; c.appendChild(p); return; }
+  if (!S.params.g_split) S.params.g_split = 'bands';
+  const l = document.createElement('label'); l.className = 'f';
+  l.innerHTML = 'Come dividere le linee<select id="genSplit">' + SPLITS.map(o => `<option value="${o[0]}"${S.params.g_split === o[0] ? ' selected' : ''}>${tL(o[1], o[2])}</option>`).join('') + '</select>';
+  c.appendChild(l);
+  l.querySelector('select').onchange = e => { S.params.g_split = e.target.value; schedule(); };
+  const p = document.createElement('p'); p.className = 'small'; p.textContent = 'I colori delle penne li scegli al passo 4.'; c.appendChild(p);
+}
 const CAL_HELP = {
   frame: 'Disegna la cornice dell’area utile, la croce al centro e tacche ogni 10 mm. Serve a vedere dove cade il tratto sul foglio e a regolare la correzione X/Y.',
   press: 'Quadratini e diagonali ripetuti 8 volte con una pausa prima di ogni passata: a ogni pausa abbassi la penna di 1–2 mm (o ritocchi lo Z‑offset per il file successivo).',
@@ -548,7 +608,7 @@ function loadImage(file) {
   return new Promise((res, rej) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
 }
 pick('#imgDrop', '#imgFile', async file => {
-  try { const im = await loadImage(file); S.img = im; S.imgAR = im.naturalWidth / im.naturalHeight; $('#imgDrop').textContent = '✓ ' + file.name; $('#imgDrop').classList.add('has'); fitArea(); }
+  try { const im = await loadImage(file); S.img = im; S.imgAR = im.naturalWidth / im.naturalHeight; S.imgPens = null; S.imgPensAuto = true; updateImgPens(); renderImgPenRow(); $('#imgDrop').textContent = '✓ ' + file.name; $('#imgDrop').classList.add('has'); fitArea(); }
   catch (e) { toast('Immagine non leggibile'); }
 });
 pick('#stkDrop', '#stkFile', async file => {
@@ -661,14 +721,21 @@ function computeJob() {
   let groups = [], name = 'tratto';
   if (S.src === 'image') {
     if (!S.img) return null;
-    const img = rasterize(S.img, W, H, P('i_res', 4), adjust());
-    const r = imageAlg(S.alg, img, W, H, S.seed);
-    groups = [Object.assign({ tool: S.tool }, r)]; name = tL('immagine-', 'image-') + S.alg;
+    if (P('i_pens', 1) > 1 && S.imgPens && S.imgPens.length) {
+      groups = colorGroups(W, H); name = tL('immagine-', 'image-') + S.alg + '-' + S.imgPens.length + tL('colori', 'colours');
+    } else {
+      const img = rasterize(S.img, W, H, P('i_res', 4), adjust());
+      const r = imageAlg(S.alg, img, W, H, S.seed);
+      groups = [Object.assign({ tool: S.tool }, r)]; name = tL('immagine-', 'image-') + S.alg;
+    }
   } else if (S.src === 'gen') {
     const o = { spacing: P('g_spacing', 2.5), scale: P('g_scale', 1), turb: P('g_turb', 2), length: P('g_len', 90), levels: P('g_levels', 18), lines: P('g_lines', 60), amp: P('g_amp', 1), cell: P('g_cell', S.gen === 'maze' ? 8 : 12), copies: P('g_copies', 3) };
     let paths = TR.GEN[S.gen](W, H, o, S.seed);
     paths = TR.orderPaths(TR.clipToRect(paths, W, H));
-    groups = [{ tool: S.tool, paths }]; name = S.gen + '-' + S.seed;
+    const np = P('g_pens', 1);
+    if (np > 1) groups = TR.splitPens(paths, np, S.params.g_split || 'bands', W, H, S.seed).map(ps => ({ tool: S.tool, paths: TR.orderPaths(ps) }));
+    else groups = [{ tool: S.tool, paths }];
+    name = S.gen + '-' + S.seed + (np > 1 ? '-' + np + tL('colori', 'colours') : '');
   } else if (S.src === 'svg') {
     if (!S.svgDoc) return null;
     groups = svgGroups(W, H).map(g => Object.assign({ tool: S.tool }, g)); name = 'svg';
@@ -703,6 +770,23 @@ function computeJob() {
   }
   groups = groups.filter(g => (g.slices ? g.slices.some(s => s.length) : g.paths && g.paths.length));
   return { name, W, H, groups };
+}
+// immagine divisa nei colori delle penne: un gruppo per colore, stesso stile di disegno
+function colorGroups(W, H) {
+  const pxmm = P('i_res', 4);
+  const w = Math.max(16, Math.min(1400, Math.round(W * pxmm))), h = Math.max(16, Math.min(1400, Math.round(H * pxmm)));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.clearRect(0, 0, w, h); cx.drawImage(S.img, 0, 0, w, h);
+  const rgba = cx.getImageData(0, 0, w, h).data;
+  const sep = TR.separateColors(rgba, w, h, S.imgPens.map(hexRgb)), adj = adjust(), names = penNames(S.imgPens);
+  return S.imgPens.map((hex, j) => {
+    const d = new Float32Array(w * h);
+    for (let i = 0; i < w * h; i++) if (sep.assign[i] === j) d[i] = Math.max(0, Math.min(1, (sep.tone[i] - 0.5) * adj.contrast + 0.5 + adj.bright));
+    const img = { w, h, d, mask: null };
+    let r = imageAlg(S.alg, img, W, H, S.seed + j);
+    if (r.paths && (S.alg === 'waves' || S.alg === 'spiral')) r = { paths: TR.orderPaths(TR.cutByLayer(r.paths, img, W, H)) };
+    return Object.assign({ tool: S.tool, presetColor: hex, presetName: names[j], penIdx: j }, r);
+  });
 }
 function imgRGBA(im, maxSide) {
   const k = Math.min(1, maxSide / Math.max(im.naturalWidth, im.naturalHeight));
@@ -774,7 +858,8 @@ function decorate(job) {
   job.groups.forEach((g, i) => {
     const meta = S.groupsMeta[i] || {};
     const tl = toolOf(g.tool);
-    if (g.presetColor) g.color = meta.color || g.presetColor;
+    if (g.penIdx != null) g.color = g.presetColor;
+    else if (g.presetColor) g.color = meta.color || g.presetColor;
     else if (!g.color || S.src !== 'svg') g.color = meta.color || (g.tool === 'blade' ? TOOLS.blade.color : (i === 0 ? tl.color : PALETTE[(pi) % PALETTE.length]));
     else if (meta.color) g.color = meta.color;
     if (g.tool !== 'blade') pi++;
@@ -795,7 +880,9 @@ function renderGroups() {
     return `<div class="g"><input type="color" value="${g.color}" data-i="${i}" data-k="color"><input value="${g.name}" data-i="${i}" data-k="name"><input type="number" min="1" max="12" value="${g.passes}" data-i="${i}" data-k="passes" title="passate"><span class="small">${g.tool === 'blade' ? '✂ lama' : '✎ penna'}</span><div class="meta">${n} tratti · ${(L / 1000).toFixed(2)} m${sl > 1 ? ' · ' + sl + ' strati (una direzione ciascuno)' : ''}</div></div>`;
   }).join('');
   $$('#groups input').forEach(inp => inp.onchange = () => {
-    const i = +inp.dataset.i, k = inp.dataset.k; S.groupsMeta[i] = S.groupsMeta[i] || {};
+    const i = +inp.dataset.i, k = inp.dataset.k;
+    if (k === 'color' && job.groups[i] && job.groups[i].penIdx != null) { setImgPen(job.groups[i].penIdx, inp.value); return; }
+    S.groupsMeta[i] = S.groupsMeta[i] || {};
     S.groupsMeta[i][k] = k === 'passes' ? Math.max(1, parseInt(inp.value) || 1) : inp.value; recompute(true);
   });
 }
@@ -972,7 +1059,7 @@ $('#nozT').onchange = e => { S.nozT = Math.max(170, +e.target.value || 180); per
 $('#bedT').onchange = e => { S.bedT = Math.max(20, +e.target.value || 25); persist(); };
 
 // ------------------------------------------------------------------ avvio
-renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderTavParams(); clampDims();
+renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderImgColors(); renderGenColors(); renderTavParams(); clampDims();
 // mostra subito un esempio generativo
 S.src = 'gen'; $$('#srcTabs button').forEach(b => b.classList.toggle('on', b.dataset.src === 'gen')); $$('.src').forEach(d => d.hidden = d.dataset.src !== 'gen');
 schedule();

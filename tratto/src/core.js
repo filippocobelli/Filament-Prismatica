@@ -920,8 +920,100 @@ function buildSVG(job) {
   return parts.join('\n');
 }
 
+// ------------------------------------------------------------------ più colori: separazione e penne
+function srgbLin(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+function rgbToLab(r, g, b) {
+  const R = srgbLin(r), G = srgbLin(g), B = srgbLin(b);
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const X = f((0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047), Y = f(0.2126 * R + 0.7152 * G + 0.0722 * B), Z = f((0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883);
+  return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+}
+const lumOf = (c) => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+const isPaperLab = (L) => L[0] > 88 && Math.hypot(L[1], L[2]) < 14;
+// colori principali dell'immagine (k-means in Lab), escluso il bianco della carta; dal più chiaro al più scuro
+function paletteKMeans(rgba, k, seed) {
+  const n = rgba.length / 4, step = Math.max(1, Math.floor(n / 30000)), pts = [], cols = [];
+  for (let i = 0; i < n; i += step) {
+    if (rgba[i * 4 + 3] < 128) continue;
+    const c = [rgba[i * 4], rgba[i * 4 + 1], rgba[i * 4 + 2]], L = rgbToLab(c[0], c[1], c[2]);
+    if (isPaperLab(L)) continue;
+    pts.push(L); cols.push(c);
+  }
+  if (!pts.length) return [[27, 27, 27]];
+  k = Math.max(1, Math.min(k, pts.length));
+  const r = mulberry32(seed || 7), C = [pts[Math.floor(r() * pts.length)].slice()];
+  const d2 = new Float64Array(pts.length).fill(Infinity);
+  while (C.length < k) {           // k-means++
+    let sum = 0; const last = C[C.length - 1];
+    for (let i = 0; i < pts.length; i++) { const p = pts[i], d = (p[0] - last[0]) ** 2 + (p[1] - last[1]) ** 2 + (p[2] - last[2]) ** 2; if (d < d2[i]) d2[i] = d; sum += d2[i]; }
+    if (sum <= 0) break;
+    let t = r() * sum, j = 0; for (; j < pts.length - 1; j++) { t -= d2[j]; if (t <= 0) break; }
+    C.push(pts[j].slice());
+  }
+  const as = new Int32Array(pts.length);
+  for (let it = 0; it < 16; it++) {
+    for (let i = 0; i < pts.length; i++) { let b = 0, bd = Infinity; for (let c = 0; c < C.length; c++) { const p = pts[i], q = C[c], d = (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2 + (p[2] - q[2]) ** 2; if (d < bd) { bd = d; b = c; } } as[i] = b; }
+    const acc = C.map(() => [0, 0, 0, 0]);
+    for (let i = 0; i < pts.length; i++) { const a = acc[as[i]], p = pts[i]; a[0] += p[0]; a[1] += p[1]; a[2] += p[2]; a[3]++; }
+    acc.forEach((a, c) => { if (a[3]) C[c] = [a[0] / a[3], a[1] / a[3], a[2] / a[3]]; });
+  }
+  const acc = C.map(() => [0, 0, 0, 0]);
+  for (let i = 0; i < pts.length; i++) { const a = acc[as[i]], c = cols[i]; a[0] += c[0]; a[1] += c[1]; a[2] += c[2]; a[3]++; }
+  return acc.filter(a => a[3] > pts.length * 0.004).map(a => [a[0] / a[3], a[1] / a[3], a[2] / a[3]].map(Math.round)).sort((a, b) => lumOf(b) - lumOf(a));
+}
+// ogni pixel va alla penna di colore più vicino (o resta carta); tono = quanto è pieno rispetto al colore della penna
+function separateColors(rgba, w, h, pens) {
+  const PL = pens.map(c => rgbToLab(c[0], c[1], c[2])), PW = [100, 0, 0], plum = pens.map(lumOf);
+  const assign = new Int8Array(w * h).fill(-1), tone = new Float32Array(w * h), cache = new Map();
+  for (let i = 0; i < w * h; i++) {
+    if (rgba[i * 4 + 3] < 128) continue;
+    const r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2], key = ((r >> 2) << 12) | ((g >> 2) << 6) | (b >> 2);
+    let j = cache.get(key);
+    if (j === undefined) {
+      const L = rgbToLab(r, g, b); let bd = (L[0] - PW[0]) ** 2 + L[1] ** 2 + L[2] ** 2; j = -1;
+      for (let c = 0; c < PL.length; c++) { const q = PL[c], d = (L[0] - q[0]) ** 2 + (L[1] - q[1]) ** 2 + (L[2] - q[2]) ** 2; if (d < bd) { bd = d; j = c; } }
+      cache.set(key, j);
+    }
+    if (j < 0) continue;
+    assign[i] = j; tone[i] = Math.max(0, Math.min(1, (1 - lumOf([r, g, b])) / Math.max(0.12, 1 - plum[j])));
+  }
+  return { assign, tone };
+}
+// taglia i tratti dove lo strato di quel colore è vuoto (per onde e spirale a più colori)
+function cutByLayer(paths, img, W, H, thr) {
+  const S = sampler(img, W, H), out = [], t = thr == null ? 0.04 : thr;
+  for (const p of paths) {
+    let cur = [];
+    for (let i = 0; i < p.length; i++) {
+      const a = p[i], pts = [a];
+      if (i > 0) { const b = p[i - 1], L = Math.hypot(a[0] - b[0], a[1] - b[1]), n = Math.floor(L / 0.4); pts.length = 0; for (let k = 1; k <= n; k++) pts.push([b[0] + (a[0] - b[0]) * k / (n + 1), b[1] + (a[1] - b[1]) * k / (n + 1)]); pts.push(a); }
+      for (const q of pts) { if (S(q[0], q[1]) > t) cur.push(q); else { if (cur.length > 1) out.push(cur); cur = []; } }
+    }
+    if (cur.length > 1) out.push(cur);
+  }
+  return out.map(q => simplify(q, 0.02)).filter(q => pathLength(q) > 0.6);
+}
+// divide i tratti di un disegno generativo tra n penne
+function splitPens(paths, n, mode, W, H, seed) {
+  const G = Array.from({ length: n }, () => []), r = mulberry32((seed || 1) + 101);
+  paths.forEach((p, i) => {
+    let j;
+    if (mode === 'random') j = Math.floor(r() * n);
+    else if (mode === 'alternate') j = i % n;
+    else {
+      const b = bbox([p]), cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+      const f = mode === 'rings' ? Math.min(0.9999, Math.hypot(cx - W / 2, cy - H / 2) / (Math.hypot(W, H) / 2))
+        : mode === 'cols' ? cx / W : cy / H;
+      j = Math.max(0, Math.min(n - 1, Math.floor(f * n)));
+    }
+    G[j].push(p);
+  });
+  return G;
+}
+
 const api = { P1S, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainPaths, orderPaths, bbox, clipToRect, pathLength, isClosed,
   algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
-  strokesToExPolys, slabMesh, planLayers, slicesOf, buildProjectConfig, build3MF, buildSVG };
+  strokesToExPolys, slabMesh, planLayers, slicesOf, buildProjectConfig, build3MF, buildSVG,
+  rgbToLab, paletteKMeans, separateColors, cutByLayer, splitPens };
 if (isNode) module.exports = api; else root.TR = api;
 })(typeof window !== 'undefined' ? window : globalThis);
