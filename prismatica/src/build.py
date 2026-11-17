@@ -7,7 +7,7 @@ core = open(os.path.join(here, 'core.js'), encoding='utf-8').read()
 app = open(os.path.join(here, 'app.html'), encoding='utf-8').read()
 
 # Catalogo per «Libreria completa»: codice prodotto Bambu Lab -> (materiale, finitura).
-# Esclusi i supporti (S..), i multicolore (A05), i traslucidi (A17, G01) e i fosforescenti (A12):
+# Esclusi i flessibili (U02 TPU), i supporti (S..), i multicolore (A05), i traslucidi (A17, G01) e i fosforescenti (A12):
 # nella wall art il colore stampato non corrisponde al codice esadecimale.
 FAMILIES = {
     'A00': ('PLA', 'PLA Basic'), 'A01': ('PLA', 'PLA Matte'), 'A02': ('PLA', 'PLA Metal'), 'A06': ('PLA', 'PLA Silk+'),
@@ -17,7 +17,7 @@ FAMILIES = {
     'B00': ('ABS', 'ABS'), 'B01': ('ASA', 'ASA'), 'B02': ('ASA', 'ASA Aero'), 'B50': ('ABS', 'ABS-GF'), 'B51': ('ASA', 'ASA-CF'),
     'C00': ('PC', 'PC'), 'C01': ('PC', 'PC FR'),
     'G00': ('PETG', 'PETG Basic'), 'G02': ('PETG', 'PETG HF'), 'G50': ('PETG', 'PETG-CF'),
-    'N04': ('PA', 'PAHT-CF'), 'N08': ('PA', 'PA6-GF'), 'U02': ('TPU', 'TPU for AMS'),
+    'N04': ('PA', 'PAHT-CF'), 'N08': ('PA', 'PA6-GF'),
 }
 src = open(os.path.join(root, 'server', 'public', 'vendor', 'bambu-colors.js'), encoding='utf-8').read()
 colors = json.loads(src[src.index('{'):src.rindex('}') + 1])

@@ -1,5 +1,10 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.10 · Prismatica 1.13
+
+- I filamenti flessibili (TPU, TPE e simili) non vengono più proposti per i colori, né dall'inventario né dal catalogo.
+- L'elenco dei filamenti di ogni colore mostra il pallino del colore accanto a ogni nome, con materiale, grammi rimasti o 🛒, e una casella di ricerca.
+
 ## FilamentBox 2.0.9 · Prismatica 1.12
 
 - Il colore di ogni pezzo si decide su 25 punti distribuiti su tutto il triangolo (prima 7 vicino al centro): niente più pezzi scuri sparsi lungo i contorni sottili.

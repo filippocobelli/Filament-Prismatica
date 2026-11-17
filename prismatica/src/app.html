@@ -79,6 +79,17 @@ label.card:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 
 .sw.f{grid-template-columns:34px 1fr;row-gap:4px}
 .sw.f .ct{grid-column:2;text-align:left}
 .sw select{font:500 12px var(--body);padding:5px 6px;min-width:0}
+.fsel{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:6px;text-align:left;font:600 12px var(--body);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px;padding:5px 8px;cursor:pointer;min-width:0}
+.fsel:hover,.fsel[aria-expanded=true]{border-color:var(--accent)}
+.fsel .fn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fsel .fm{grid-row:2;font:500 11px var(--body);color:var(--muted)}.fsel .fcaret{grid-row:1/3;grid-column:2;align-self:center;color:var(--muted)}
+.fpop{position:fixed;z-index:50;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(23,33,38,.18);overflow:hidden}
+.fpop input{margin:8px;padding:6px 8px;font:500 13px var(--body);border:1px solid var(--line);border-radius:6px}
+.flist{overflow:auto;padding:0 4px 6px}
+.fgr{margin:8px 6px 4px;font:600 11px var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.fopt{display:grid;grid-template-columns:22px 1fr;column-gap:8px;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:5px 6px;cursor:pointer;color:var(--ink)}
+.fopt:hover,.fopt:focus-visible{background:var(--paper);outline:none}.fopt[aria-selected=true]{background:#FCE9EA}
+.fopt .fdot{grid-row:1/3;width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.15);align-self:center}
+.fopt .fn{font:600 12px var(--body)}.fopt .fm{font:500 11px var(--body);color:var(--muted)}
 .sw .dot{width:34px;height:26px;border-radius:5px;border:1px solid var(--line)}
 .inv .note.live{color:var(--ok)}
 .mixrow{grid-column:1 / -1;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;border-top:1px dashed var(--line);padding-top:6px;margin-top:2px}
@@ -128,7 +139,7 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.12</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.13</span></div>
   <div class="stats" id="stats"></div>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
@@ -178,7 +189,7 @@ label.btn{display:inline-block;text-align:center}
           <label class="field"><span>Minimo residuo (g)</span><input type="number" id="minG" value="50" min="0" max="5000" step="10"></label>
         </div>
         <label class="switch libsw"><input type="checkbox" id="fullLib"><span>Libreria completa</span></label>
-        <p class="note">Aggiunge tutto il catalogo Bambu Lab, anche i filamenti che non hai: PLA, PETG, ABS, ASA, PC, PA e TPU. Così hai più colori a disposizione. Quelli da comprare sono segnati con 🛒.</p>
+        <p class="note">Aggiunge tutto il catalogo Bambu Lab, anche i filamenti che non hai: PLA, PETG, ABS, ASA, PC e PA (i flessibili come il TPU restano fuori). Così hai più colori a disposizione. Quelli da comprare sono segnati con 🛒.</p>
         <div class="invbtns"><button class="btn small" id="invReload" type="button">Aggiorna inventario</button><label class="btn small" for="invFile">Carica elenco JSON</label><input type="file" id="invFile" accept=".json,application/json" hidden></div>
       </div>
       <label class="field"><span>Numero di colori <output id="kO">3</output></span><input type="range" id="k" min="2" max="8" step="1" value="3"></label>
@@ -272,6 +283,7 @@ label.btn{display:inline-block;text-align:center}
     <p id="status">Il pacchetto contiene 3MF e STL per ogni piatto, la dima 1:1 e la mappa dei piatti.</p>
   </div>
 </aside>
+<div class="fpop" id="fpop" hidden><input type="search" id="fq" placeholder="Cerca colore o materiale" aria-label="Cerca filamento"><div class="flist" id="flist" role="listbox" aria-label="Filamenti"></div></div>
 <section class="viewer">
   <canvas id="gl"></canvas>
   <div class="vbar">
@@ -294,7 +306,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 /*__CORE__*/
 
-const VERSION = 'v1.12'; // v1.12: colore di ogni pezzo deciso su 25 punti distribuiti su tutto il triangolo (prima 7 vicino al centro) e opzione «Linee sottili»: togliere i contorni più sottili di un pezzo oppure renderli continui · v1.11: switch «Libreria completa» (catalogo Bambu Lab di tutti i materiali, anche filamenti da comprare, per una gamma di colori più ampia), scelta dei filamenti per gruppi di colore dell'immagine (le zone piccole ma distinte non si perdono), mix solo tra filamenti posseduti dello stesso materiale, pulsante «← FilamentBox» più robusto · v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.13'; // v1.13: filamenti flessibili (TPU, TPE…) esclusi dalla scelta dei colori; elenco dei filamenti con il pallino del colore accanto a ogni nome e ricerca · v1.12: v1.12: colore di ogni pezzo deciso su 25 punti distribuiti su tutto il triangolo (prima 7 vicino al centro) e opzione «Linee sottili»: togliere i contorni più sottili di un pezzo oppure renderli continui · v1.11: switch «Libreria completa» (catalogo Bambu Lab di tutti i materiali, anche filamenti da comprare, per una gamma di colori più ampia), scelta dei filamenti per gruppi di colore dell'immagine (le zone piccole ma distinte non si perdono), mix solo tra filamenti posseduti dello stesso materiale, pulsante «← FilamentBox» più robusto · v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
@@ -473,16 +485,17 @@ function catalog() {
   return CATALOG;
 }
 const SPECIAL = /Silk|Metal|Sparkle|Galaxy|Marble|Wood|Aero|-CF|-GF|Glow/;
+const FLEX = /TPU|TPE|FLEX|PEBA|TPC|SEBS|\bTPA\b/i; // flessibili: esclusi dalla scelta dei colori
 const baseMat = (m) => String(m || '').toUpperCase().split(/[\s\-+]/)[0];
 function fillMatOptions(first) {
-  const lib = $('fullLib').checked, mats = [...new Set(S.inv.map(f => f.material).concat(lib ? catalog().map(f => f.material) : []).filter(Boolean))].sort();
+  const lib = $('fullLib').checked, mats = [...new Set(S.inv.map(f => f.material).filter(m => !FLEX.test(m || '')).concat(lib ? catalog().map(f => f.material) : []).filter(Boolean))].sort();
   const ms = $('matFilter'), cur = ms.value;
   ms.innerHTML = '<option value="">Tutti</option>' + mats.map(m => `<option>${escH(m)}</option>`).join('');
   if (mats.includes(cur)) ms.value = cur; else if (first && !lib && mats.includes('PLA')) ms.value = 'PLA'; else ms.value = '';
 }
 function wantKOf(p) { return p.palSrc === 'inv' && (S.inv.length || p.fullLib) ? Math.min(p.k, Math.max(2, invCandidates(p).length)) : p.k; }
 function invCandidates(p) {
-  const own = S.inv.filter(f => f.grams == null || f.grams >= p.minG).filter(f => !p.mat || f.material === p.mat);
+  const own = S.inv.filter(f => f.grams == null || f.grams >= p.minG).filter(f => !FLEX.test(f.material + ' ' + f.name)).filter(f => !p.mat || f.material === p.mat);
   if (!p.fullLib) return own;
   // libreria completa: catalogo intero, tranne i colori che hai già nello stesso materiale
   const extra = catalog().filter(f => (!p.mat || f.material === p.mat) && !own.some(o => baseMat(o.material) === f.material && d2(o.lab, f.lab) < 9));
@@ -762,11 +775,33 @@ const SHAPES = [
 $('shapes').innerHTML = SHAPES.map(([v, n, d], i) => `<label class="card"><input type="radio" name="shape" value="${v}" id="shape-${v}" ${i === 0 ? 'checked' : ''}><svg viewBox="0 0 52 30" aria-hidden="true"><path d="${d}" fill="${'#E2484F'}"/><path d="M0 28.5H52" stroke="#5CC3D0" stroke-width="2"/></svg>${n}</label>`).join('');
 
 const gramsNeeded = (i) => S.volByColor && S.volByColor[i] != null ? S.volByColor[i] / 1000 * 1.24 * 0.6 * 1.1 : null; // ~60% del pieno + 10% scarto
-function optList(opts) {
-  const o = (f, j) => `<option value="${j}">${f.buy ? '🛒 ' : ''}${escH(f.name)}${f.material ? ' · ' + escH(f.material) : ''}${f.grams != null ? ' · ' + Math.round(f.grams) + ' g' : ''}</option>`;
-  const own = opts.map((f, j) => f.buy ? '' : o(f, j)).join(''), buy = opts.map((f, j) => f.buy ? o(f, j) : '').join('');
-  return buy ? `<optgroup label="I tuoi filamenti">${own}</optgroup><optgroup label="Da comprare (catalogo Bambu Lab)">${buy}</optgroup>` : own;
+// elenco dei filamenti con il colore accanto al nome (un <select> non può mostrare i colori)
+const fmeta = (f) => [f.material, f.grams != null ? Math.round(f.grams) + ' g' : '', f.buy ? '🛒 da comprare' : ''].filter(Boolean).join(' · ');
+let picker = null;
+function closePicker() { if (!picker) return; picker.btn.setAttribute('aria-expanded', 'false'); $('fpop').hidden = true; picker = null; }
+function openPicker(btn, opts, cur, onPick) {
+  if (picker && picker.btn === btn) { closePicker(); return; }
+  closePicker();
+  const pop = $('fpop'), q = $('fq'), list = $('flist');
+  picker = { btn }; btn.setAttribute('aria-expanded', 'true');
+  const draw = () => {
+    const t = q.value.trim().toLowerCase();
+    const item = (f, j) => (!t || (f.name + ' ' + f.material).toLowerCase().includes(t)) ? `<button type="button" role="option" class="fopt" data-j="${j}" aria-selected="${f === cur}"><span class="fdot" style="background:${f.hex}"></span><span class="fn">${escH(f.name)}</span><span class="fm">${escH(fmeta(f))}</span></button>` : '';
+    const own = opts.map((f, j) => f.buy ? '' : item(f, j)).join(''), buy = opts.map((f, j) => f.buy ? item(f, j) : '').join('');
+    list.innerHTML = (own ? (buy ? '<p class="fgr">I tuoi filamenti</p>' : '') + own : '') + (buy ? '<p class="fgr">Da comprare (catalogo Bambu Lab)</p>' + buy : '') || '<p class="fgr">Nessun filamento trovato</p>';
+  };
+  q.value = ''; q.oninput = draw; draw();
+  list.onclick = (e) => { const b = e.target.closest('.fopt'); if (!b) return; onPick(opts[+b.dataset.j]); closePicker(); btn.focus(); };
+  const r = btn.getBoundingClientRect(), w = Math.max(r.width, 320), h = Math.min(380, innerHeight - 24);
+  pop.style.width = w + 'px'; pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+  pop.style.top = (r.bottom + h + 8 < innerHeight ? r.bottom + 4 : Math.max(8, r.top - h - 4)) + 'px'; pop.style.maxHeight = h + 'px';
+  pop.hidden = false;
+  const sel = list.querySelector('[aria-selected="true"]'); if (sel) sel.scrollIntoView({ block: 'center' });
+  q.focus();
 }
+document.addEventListener('pointerdown', (e) => { if (picker && !$('fpop').contains(e.target) && !picker.btn.contains(e.target)) closePicker(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && picker) { const b = picker.btn; closePicker(); b.focus(); } });
+window.addEventListener('resize', closePicker);
 function renderPalette() {
   const p = P();
   const key = (S.palFromInv ? 'inv' : 'img') + S.palette.length + '|' + S.inv.length + '|' + p.fullLib + '|' + p.mat;
@@ -775,12 +810,11 @@ function renderPalette() {
     S.paletteKey = key;
     const opts = invCandidates(p);
     box.innerHTML = S.palette.map((c, i) => S.palFromInv
-      ? `<div class="sw f"><span class="dot" id="pd${i}"></span><select id="ps${i}" aria-label="Filamento ${i + 1}">${optList(opts)}</select><span class="ct" id="pt${i}"></span><div class="mixrow" id="pm${i}" hidden><label class="switch"><input type="checkbox" id="px${i}"><span>Mix Bambu</span></label><span class="mixsw" id="pmc${i}"></span><p class="mixnote" id="pmn${i}"></p></div></div>`
+      ? `<div class="sw f"><span class="dot" id="pd${i}"></span><button type="button" class="fsel" id="ps${i}" aria-haspopup="listbox" aria-expanded="false" aria-label="Filamento ${i + 1}"><span class="fn" id="pf${i}"></span><span class="fm" id="pfm${i}"></span><span class="fcaret" aria-hidden="true">▾</span></button><span class="ct" id="pt${i}"></span><div class="mixrow" id="pm${i}" hidden><label class="switch"><input type="checkbox" id="px${i}"><span>Mix Bambu</span></label><span class="mixsw" id="pmc${i}"></span><p class="mixnote" id="pmn${i}"></p></div></div>`
       : `<div class="sw"><input type="color" id="pc${i}" value="${c.hex}" aria-label="Colore ${i + 1}"><span class="nm" id="pn${i}"></span><span class="ct" id="pt${i}"></span></div>`).join('');
     S.palette.forEach((c, i) => {
       if (S.palFromInv) {
-        const sel = $('ps' + i); sel.value = String(opts.indexOf(c.inv));
-        sel.addEventListener('change', () => { const f = opts[+sel.value]; c.inv = f; c.hex = f.hex; c.lab = f.lab; c.name = f.name; dedupeNames(); schedule('cells'); });
+        $('ps' + i).addEventListener('click', (e) => openPicker(e.currentTarget, invCandidates(P()), c.inv, (f) => { c.inv = f; c.hex = f.hex; c.lab = f.lab; c.name = f.name; dedupeNames(); schedule('cells'); }));
         $('px' + i).addEventListener('change', (e) => { c.mixOn = e.target.checked; S.paletteKey = S.paletteKey; schedule('cells'); });
       } else $('pc' + i).addEventListener('input', (e) => { c.hex = e.target.value; c.lab = rgbToLab(hexToRgb(c.hex)); c.name = colorName(c.lab); dedupeNames(); schedule('cells'); });
     });
@@ -798,6 +832,7 @@ function renderPalette() {
     }
     ct.title = have != null && g != null && g > have ? 'Filamento insufficiente per questo colore' : '';
     if ($('pd' + i)) $('pd' + i).style.background = c.hex;
+    if ($('pf' + i) && c.inv) { $('pf' + i).textContent = (c.inv.buy ? '🛒 ' : '') + c.inv.name; $('pfm' + i).textContent = fmeta(c.inv); }
     const mr = $('pm' + i);
     if (mr) {
       mr.hidden = !c.mix;
