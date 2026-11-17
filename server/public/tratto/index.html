@@ -96,7 +96,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.8.1</span>
+  <span class="ver" id="ver">v0.8.2</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
@@ -2271,9 +2271,12 @@ async function geocode(q) {
   const u = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&accept-language=' + (root.TRATTO_LANG === 'en' ? 'en' : 'it') + '&q=' + encodeURIComponent(q);
   const r = await fetch(u, { headers: { Accept: 'application/json' } });
   if (!r.ok) throw new Error('Nominatim ' + r.status);
-  return (await r.json()).map(x => {
+  // prima le città e i luoghi precisi, poi province, regioni e stati (cercando «Brescia» si vuole la città, non la provincia)
+  const PREF = ['city', 'town', 'village', 'hamlet', 'suburb', 'quarter', 'neighbourhood', 'road', 'square', 'municipality'];
+  const rank = (x) => { const k = PREF.indexOf(x.addresstype || x.type); return k < 0 ? 50 + (x.place_rank ? 30 - Math.min(30, x.place_rank) : 0) : k; };
+  return (await r.json()).map((x, i) => ({ x, i })).sort((a, b) => rank(a.x) - rank(b.x) || a.i - b.i).map(({ x }) => {
     const a = x.address || {};
-    const name = a.city || a.town || a.village || a.municipality || a.county || x.name || q;
+    const name = a.city || a.town || a.village || a.municipality || x.name || a.county || q;
     return { lat: +x.lat, lon: +x.lon, name, sub: a.country || '', label: x.display_name };
   });
 }
@@ -2379,18 +2382,20 @@ function build(M, o, W, H) {
   if (o.contours !== false && M.elev) {
     const E = M.elev, n = E.n, m = E.m, f = E.f;
     let lo = Infinity, hi = -Infinity; for (const v of f) { if (v < lo) lo = v; if (v > hi) hi = v; }
-    const step = Math.max(1, o.step || 10), sm = TR.blurField(f, n, m, 1);
+    // al massimo ~30 curve: in montagna il passo sale da solo a un valore tondo
+    const NICE = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500];
+    const step = Math.max(Math.max(1, o.step || 10), NICE.find(v => (hi - lo) / v <= 30) || 500), sm = TR.blurField(f, n, m, 1);
     // la griglia copre il riquadro scaricato: lo riporto in mm
     const b = E.bbox, x0 = (b.w - lon0) * kx + bx0 + bw / 2, x1 = (b.e - lon0) * kx + bx0 + bw / 2, y0 = -(b.n - lat0) * ky + by0 + bh / 2, y1 = -(b.s - lat0) * ky + by0 + bh / 2;
     const out = [];
     for (let L = Math.ceil(lo / step) * step; L <= hi; L += step) {
       for (const p of TR.marching(sm, n, m, L)) {
         const q = TR.simplify(TR.chaikin(p.map(([i, j]) => [x0 + (x1 - x0) * i / (n - 1), y0 + (y1 - y0) * j / (m - 1)]), 1), 0.05);
-        const bq = TR.bbox([q]); if (TR.pathLength(q) > 3 && Math.hypot(bq.w, bq.h) > 4.5) out.push(q); // niente cerchietti di rumore
+        const bq = TR.bbox([q]); if (TR.pathLength(q) > 3 && Math.hypot(bq.w, bq.h) > 6) out.push(q); // niente cerchietti di rumore
       }
     }
     const c = clip(out).filter(p => TR.pathLength(p) > 2);
-    if (c.length) groups.push({ key: 'contours', paths: c });
+    if (c.length) groups.push({ key: 'contours', paths: c, step });
   }
   if (o.water !== false && water.length) { const c = clip(water); if (c.length) groups.push({ key: 'water', paths: c }); }
   const black = [];
@@ -2428,7 +2433,7 @@ if (isNode) module.exports = api; else root.MAPPA = api;
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.8.1'; // v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.8.2'; // v0.8.2: ricerca che preferisce la città alla provincia, passo delle curve automatico in montagna · v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -2644,7 +2649,9 @@ function mapGroups(W, H) {
   const o = { roads: P('m_roads', true), thick: P('m_thick', true), small: P('m_small', false), rail: P('m_rail', true), water: P('m_water', true), contours: P('m_contour', true), step: P('m_step', 10),
     buildings: P('m_bld', false), text: P('m_text', true), frame: P('m_frame', true), title: $('#mapTitle').value, sub: $('#mapSub').value };
   const NAMES = { contours: [tL('Curve di livello', 'Contour lines'), '#e8692c'], water: [tL('Acqua', 'Water'), '#2a7fd4'], streets: [tL('Strade e testo', 'Streets and text'), '#1b1b1b'] };
-  const g = MAPPA.build(Object.assign({}, M, { km: P('m_km', 2) }), o, W, H).map(x => ({ tool: S.tool, paths: TR.orderPaths(x.paths), presetName: NAMES[x.key][0], presetColor: NAMES[x.key][1] }));
+  const built = MAPPA.build(Object.assign({}, M, { km: P('m_km', 2) }), o, W, H), cg = built.find(x => x.key === 'contours');
+  S.mapStep = cg ? cg.step : null;
+  const g = built.map(x => ({ tool: S.tool, paths: TR.orderPaths(x.paths), presetName: NAMES[x.key][0] + (x.key === 'contours' ? tL(' (ogni ', ' (every ') + x.step + ' m)' : ''), presetColor: NAMES[x.key][1] }));
   return { groups: g, name: tL('mappa-', 'map-') + (M.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') };
 }
 $('#mapGo').onclick = mapSearch;

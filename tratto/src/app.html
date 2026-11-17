@@ -96,7 +96,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.8.1</span>
+  <span class="ver" id="ver">v0.8.2</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
@@ -387,7 +387,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.8.1'; // v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.8.2'; // v0.8.2: ricerca che preferisce la città alla provincia, passo delle curve automatico in montagna · v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -603,7 +603,9 @@ function mapGroups(W, H) {
   const o = { roads: P('m_roads', true), thick: P('m_thick', true), small: P('m_small', false), rail: P('m_rail', true), water: P('m_water', true), contours: P('m_contour', true), step: P('m_step', 10),
     buildings: P('m_bld', false), text: P('m_text', true), frame: P('m_frame', true), title: $('#mapTitle').value, sub: $('#mapSub').value };
   const NAMES = { contours: [tL('Curve di livello', 'Contour lines'), '#e8692c'], water: [tL('Acqua', 'Water'), '#2a7fd4'], streets: [tL('Strade e testo', 'Streets and text'), '#1b1b1b'] };
-  const g = MAPPA.build(Object.assign({}, M, { km: P('m_km', 2) }), o, W, H).map(x => ({ tool: S.tool, paths: TR.orderPaths(x.paths), presetName: NAMES[x.key][0], presetColor: NAMES[x.key][1] }));
+  const built = MAPPA.build(Object.assign({}, M, { km: P('m_km', 2) }), o, W, H), cg = built.find(x => x.key === 'contours');
+  S.mapStep = cg ? cg.step : null;
+  const g = built.map(x => ({ tool: S.tool, paths: TR.orderPaths(x.paths), presetName: NAMES[x.key][0] + (x.key === 'contours' ? tL(' (ogni ', ' (every ') + x.step + ' m)' : ''), presetColor: NAMES[x.key][1] }));
   return { groups: g, name: tL('mappa-', 'map-') + (M.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') };
 }
 $('#mapGo').onclick = mapSearch;

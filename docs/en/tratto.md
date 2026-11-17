@@ -4,7 +4,7 @@
 
 Tratto turns a Bambu Lab **P1S** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
 
-Version 0.8.1. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
+Version 0.8.2. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
 
 ## Language
 
@@ -31,7 +31,7 @@ The interface is in Italian and English. Tratto follows the browser language; th
 Search for a city or an address: Tratto downloads streets, railways, rivers and lakes from **OpenStreetMap** and elevation from the **Terrain Tiles** (Mapzen, AWS Open Data), then draws the map with title, country and coordinates underneath, poster style.
 
 - **Area width** from 0.3 to 8 km; when you change it the data is downloaded again on its own.
-- Layers: streets (main roads thicker, with two extra strokes alongside), service roads and footpaths, railways and trams, water, contour lines (interval in metres), buildings, border, title and coordinates.
+- Layers: streets (main roads thicker, with two extra strokes alongside), service roads and footpaths, railways and trams, water, contour lines (interval in metres; in the mountains it rises on its own to stay around 30 lines at most), buildings, border, title and coordinates.
 - Three pens, each with its own pause: **contour lines** (orange), **water** (blue), **streets and text** (black). Colours can be changed in step 4.
 - Title and subtitle can be rewritten; bottom right there is the «(C) OpenStreetMap contributors» attribution required by the ODbL licence.
 - Internet is needed: search uses Nominatim, data comes from Overpass. If elevation doesn't arrive, the map comes out without contour lines.

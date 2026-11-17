@@ -4,7 +4,7 @@
 
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.8.1. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.8.2. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Lingua
 
@@ -31,7 +31,7 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 Cerca una città o un indirizzo: Tratto scarica strade, ferrovie, fiumi e laghi da **OpenStreetMap** e le quote dai **Terrain Tiles** (Mapzen, AWS Open Data), poi disegna la piantina con titolo, paese e coordinate sotto, in stile poster.
 
 - **Larghezza della zona** da 0,3 a 8 km; se la cambi, i dati si riscaricano da soli.
-- Strati: strade (le principali più spesse, con due tratti in più ai lati), vie di servizio e pedonali, ferrovie e tram, acqua, curve di livello (distanza in metri), edifici, cornice, titolo e coordinate.
+- Strati: strade (le principali più spesse, con due tratti in più ai lati), vie di servizio e pedonali, ferrovie e tram, acqua, curve di livello (distanza in metri; in montagna sale da sola per non superare circa 30 curve), edifici, cornice, titolo e coordinate.
 - Tre penne, ognuna con la sua pausa: **curve di livello** (arancione), **acqua** (blu), **strade e testo** (nero). I colori si cambiano al passo 4.
 - Titolo e sottotitolo si possono riscrivere; in basso a destra c'è l'attribuzione «(C) OpenStreetMap contributors», richiesta dalla licenza ODbL.
 - Serve internet: la ricerca usa Nominatim, i dati Overpass. Se le quote non arrivano, la mappa esce senza curve di livello.

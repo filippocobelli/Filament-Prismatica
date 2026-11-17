@@ -19,9 +19,12 @@ async function geocode(q) {
   const u = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=6&accept-language=' + (root.TRATTO_LANG === 'en' ? 'en' : 'it') + '&q=' + encodeURIComponent(q);
   const r = await fetch(u, { headers: { Accept: 'application/json' } });
   if (!r.ok) throw new Error('Nominatim ' + r.status);
-  return (await r.json()).map(x => {
+  // prima le città e i luoghi precisi, poi province, regioni e stati (cercando «Brescia» si vuole la città, non la provincia)
+  const PREF = ['city', 'town', 'village', 'hamlet', 'suburb', 'quarter', 'neighbourhood', 'road', 'square', 'municipality'];
+  const rank = (x) => { const k = PREF.indexOf(x.addresstype || x.type); return k < 0 ? 50 + (x.place_rank ? 30 - Math.min(30, x.place_rank) : 0) : k; };
+  return (await r.json()).map((x, i) => ({ x, i })).sort((a, b) => rank(a.x) - rank(b.x) || a.i - b.i).map(({ x }) => {
     const a = x.address || {};
-    const name = a.city || a.town || a.village || a.municipality || a.county || x.name || q;
+    const name = a.city || a.town || a.village || a.municipality || x.name || a.county || q;
     return { lat: +x.lat, lon: +x.lon, name, sub: a.country || '', label: x.display_name };
   });
 }
@@ -127,18 +130,20 @@ function build(M, o, W, H) {
   if (o.contours !== false && M.elev) {
     const E = M.elev, n = E.n, m = E.m, f = E.f;
     let lo = Infinity, hi = -Infinity; for (const v of f) { if (v < lo) lo = v; if (v > hi) hi = v; }
-    const step = Math.max(1, o.step || 10), sm = TR.blurField(f, n, m, 1);
+    // al massimo ~30 curve: in montagna il passo sale da solo a un valore tondo
+    const NICE = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500];
+    const step = Math.max(Math.max(1, o.step || 10), NICE.find(v => (hi - lo) / v <= 30) || 500), sm = TR.blurField(f, n, m, 1);
     // la griglia copre il riquadro scaricato: lo riporto in mm
     const b = E.bbox, x0 = (b.w - lon0) * kx + bx0 + bw / 2, x1 = (b.e - lon0) * kx + bx0 + bw / 2, y0 = -(b.n - lat0) * ky + by0 + bh / 2, y1 = -(b.s - lat0) * ky + by0 + bh / 2;
     const out = [];
     for (let L = Math.ceil(lo / step) * step; L <= hi; L += step) {
       for (const p of TR.marching(sm, n, m, L)) {
         const q = TR.simplify(TR.chaikin(p.map(([i, j]) => [x0 + (x1 - x0) * i / (n - 1), y0 + (y1 - y0) * j / (m - 1)]), 1), 0.05);
-        const bq = TR.bbox([q]); if (TR.pathLength(q) > 3 && Math.hypot(bq.w, bq.h) > 4.5) out.push(q); // niente cerchietti di rumore
+        const bq = TR.bbox([q]); if (TR.pathLength(q) > 3 && Math.hypot(bq.w, bq.h) > 6) out.push(q); // niente cerchietti di rumore
       }
     }
     const c = clip(out).filter(p => TR.pathLength(p) > 2);
-    if (c.length) groups.push({ key: 'contours', paths: c });
+    if (c.length) groups.push({ key: 'contours', paths: c, step });
   }
   if (o.water !== false && water.length) { const c = clip(water); if (c.length) groups.push({ key: 'water', paths: c }); }
   const black = [];

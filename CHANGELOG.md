@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.9 · Tratto 0.8.2
+
+- Mappe: la ricerca preferisce la città al comune o alla provincia omonimi (es. «Brescia»); in montagna il passo delle curve di livello sale da solo per non superare circa 30 curve, e il gruppo mostra il passo usato.
+
 ## FilamentBox 2.1.8 · Tratto 0.8.1
 
 - Mappe: richiesta a OpenStreetMap più leggera e inviata a tre server Overpass insieme (vince il primo che risponde); niente cerchietti di rumore nelle curve di livello. Provato dal vivo con Edimburgo.
