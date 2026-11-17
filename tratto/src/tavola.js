@@ -4,6 +4,7 @@
 (function (root) {
 'use strict';
 const isNode = typeof module !== 'undefined' && module.exports;
+const tL = (it, en) => (root.TRATTO_LANG === 'en' ? en : it);
 const TR = root.TR || (isNode ? require('./core.js') : null);
 const fflate = root.fflate || (isNode ? require('./vendor/fflate.min.js') : null);
 const FONT_SRC = root.TRATTO_FONT || (isNode ? JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'font-futural.json'), 'utf8')) : null);
@@ -113,12 +114,12 @@ function sheet(W, H, o = {}) {
     lines.push([[bx, r1], [bx + bw, r1]], [[bx, r2], [bx + bw, r2]], [[c1, r1], [c1, by + bh]]);
     const lab = (s, x, y) => lines.push(...text(s, x + 1.2, y + 2.9, 2.1));
     const val = (s, x, y, w, h = 3.2) => { let hh = h; while (textWidth(s, hh) > w - 2.4 && hh > 2.2) hh -= 0.2; lines.push(...text(s, x + 1.2, y + 7.6, hh)); };
-    lab('TITOLO', bx, by - 0.4); val((o.title || 'TAVOLA').toUpperCase(), bx, by + 1.2, bw, 3.6);
-    lab('MATERIALE', bx, r1); val((o.material || '-').toUpperCase(), bx, r1, c1 - bx);
-    lab('SCALA', c1, r1); val(o.scale || '-', c1, r1, bx + bw - c1);
-    lab('DISEGNATO DA', bx, r2); val((o.author || '-').toUpperCase(), bx, r2 - 0.4, c1 - bx, 3);
-    lab('DATA', c1, r2); val(o.date || new Date().toLocaleDateString('it-IT'), c1, r2 - 0.4, bx + bw - c1, 3);
-    lines.push(...text('QUOTE IN MM', bx, by - 1.6, 2.2));
+    lab(tL('TITOLO', 'TITLE'), bx, by - 0.4); val((o.title || tL('TAVOLA', 'DRAWING')).toUpperCase(), bx, by + 1.2, bw, 3.6);
+    lab(tL('MATERIALE', 'MATERIAL'), bx, r1); val((o.material || '-').toUpperCase(), bx, r1, c1 - bx);
+    lab(tL('SCALA', 'SCALE'), c1, r1); val(o.scale || '-', c1, r1, bx + bw - c1);
+    lab(tL('DISEGNATO DA', 'DRAWN BY'), bx, r2); val((o.author || '-').toUpperCase(), bx, r2 - 0.4, c1 - bx, 3);
+    lab(tL('DATA', 'DATE'), c1, r2); val(o.date || new Date().toLocaleDateString(tL('it-IT', 'en-GB')), c1, r2 - 0.4, bx + bw - c1, 3);
+    lines.push(...text(tL('QUOTE IN MM', 'DIMENSIONS IN MM'), bx, by - 1.6, 2.2));
     area.blocked = { x0: bx - 3, y0: by - 4, x1: W, y1: H };
     area.titleRect = { x0: bx, y0: by - 4, x1: bx + bw, y1: by + bh };
   }
@@ -340,7 +341,7 @@ function parse3MF(buf) {
   const main = models[mainKey]; const reI = /<item\b([^>]*)\/?>/g; let it, any = false;
   while ((it = reI.exec(main))) { any = true; const a = it[1]; emit(mainKey + '#' + (/objectid="([^"]+)"/.exec(a) || [])[1], parseTr((/transform="([^"]+)"/.exec(a) || [])[1]), 0); }
   if (!any) for (const k of Object.keys(objs)) if (k.startsWith(mainKey)) emit(k, parseTr(), 0);
-  if (!P.length) throw new Error('Nessuna mesh trovata nel 3MF');
+  if (!P.length) throw new Error(tL('Nessuna mesh trovata nel 3MF', 'No mesh found in the 3MF'));
   return weld(P);
 }
 

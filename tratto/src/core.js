@@ -3,6 +3,7 @@
 (function (root) {
 'use strict';
 const isNode = typeof module !== 'undefined' && module.exports;
+const tL = (it, en) => (root.TRATTO_LANG === 'en' ? en : it);
 const ClipperLib = root.ClipperLib || (isNode ? require('./vendor/clipper.min.js') : null);
 const libtess = root.libtess || (isNode ? require('./vendor/libtess.min.js') : null);
 const fflate = root.fflate || (isNode ? require('./vendor/fflate.min.js') : null);
@@ -714,15 +715,15 @@ function planLayers(groups, opt = {}) {
   let lastRef = null;
   groups.forEach((g, gi) => {
     const sl = G[gi]; if (!sl.length) return;
-    pauses.push({ z: zt(layer), kind: pauses.length ? 'swap' : 'mount', group: gi, msg: (pauses.length ? 'Cambia utensile: ' : 'Monta UMTS: ') + g.name });
+    pauses.push({ z: zt(layer), kind: pauses.length ? 'swap' : 'mount', group: gi, msg: (pauses.length ? tL('Cambia utensile: ', 'Change tool: ') : tL('Monta UMTS: ', 'Mount UMTS: ')) + g.name });
     for (let p = 0; p < Math.max(1, g.passes | 0); p++) {
-      if (p > 0 && opt.pauseEveryPass) pauses.push({ z: zt(layer), kind: 'adjust', group: gi, msg: 'Regola altezza (passata ' + (p + 1) + ')' });
+      if (p > 0 && opt.pauseEveryPass) pauses.push({ z: zt(layer), kind: 'adjust', group: gi, msg: tL('Regola altezza (passata ', 'Adjust height (pass ') + (p + 1) + ')' });
       sl.forEach((_, si) => { vols.push({ group: gi, slice: si, pass: p, z0: zt(layer - 1), z1: zt(layer) }); layer++; });
     }
     lastRef = { group: gi, slice: sl.length - 1 };
   });
   // ultimo strato a vuoto: ospita la pausa "rimuovi UMTS" prima del G-code finale
-  pauses.push({ z: zt(layer), kind: 'remove', msg: 'Rimuovi UMTS' });
+  pauses.push({ z: zt(layer), kind: 'remove', msg: tL('Rimuovi UMTS', 'Remove UMTS') });
   vols.push({ group: lastRef.group, slice: lastRef.slice, pass: -1, z0: zt(layer - 1), z1: zt(layer), ghost: true });
   return { vols, pauses, layers: layer, height: zt(layer) };
 }
@@ -822,10 +823,10 @@ function build3MF(job, settings, base, opt = {}) {
     const mesh = meshFor(v.group, v.slice); if (!mesh.T.length) continue;
     triCount += mesh.T.length / 3;
     const g = job.groups[v.group];
-    const nm = v.ghost ? 'a vuoto' : (g.name + (G[v.group].length > 1 ? ' · fetta ' + (v.slice + 1) : '') + (g.passes > 1 ? ' · passata ' + (v.pass + 1) : ''));
+    const nm = v.ghost ? tL('a vuoto', 'dry run') : (g.name + (G[v.group].length > 1 ? tL(' · fetta ', ' · slice ') + (v.slice + 1) : '') + (g.passes > 1 ? tL(' · passata ', ' · pass ') + (v.pass + 1) : ''));
     volumes.push({ name: nm, mesh, dz: v.z0 });
   }
-  if (!volumes.length) throw new Error('Nessun tratto da esportare');
+  if (!volumes.length) throw new Error(tL('Nessun tratto da esportare', 'No strokes to export'));
   const n = volumes.length, objId = n + 1, files = {};
   const enc = (s) => fflate.strToU8(s);
   // oggetti mesh

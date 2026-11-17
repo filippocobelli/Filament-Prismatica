@@ -1,8 +1,14 @@
 # Tratto
 
+*[English version](en/tratto.md)*
+
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.3. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.4. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+
+## Lingua
+
+L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; il pulsante **EN / IT** nell'intestazione la cambia, e `?lang=en` o `?lang=it` nell'indirizzo la impone. La scelta resta salvata nel browser. Nomi dei gruppi, nomi delle parti nel 3MF, nomi dei file e testi delle tavole tecniche (cartiglio, nomi delle viste) seguono la lingua scelta.
 
 ## Il flusso, in sei passi
 
@@ -75,6 +81,7 @@ Le prime volte segui le fasi di prova dell'autore (solo base, set senza penna, t
 
 ## Sviluppo
 
-- Sorgenti in `tratto/src/`: `app.html` (interfaccia), `core.js` (algoritmi, mesh, 3MF), `tavola.js` (tavole tecniche), `font-futural.json` (font Hershey a tratto), `vendor/` (Clipper, libtess, fflate), `p1s-base.json` (profilo Orca risolto).
+- Sorgenti in `tratto/src/`: `app.html` (interfaccia), `core.js` (algoritmi, mesh, 3MF), `tavola.js` (tavole tecniche), `i18n.js` e `i18n-en.json` (interfaccia in inglese), `font-futural.json` (font Hershey a tratto), `vendor/` (Clipper, libtess, fflate), `p1s-base.json` (profilo Orca risolto).
 - `python3 tratto/src/build.py` scrive `server/public/tratto/index.html`; poi `npm run build:lite` in `tools/` aggiorna la Lite.
 - `python3 tratto/src/mkbase.py <OrcaSlicer>/resources/profiles/BBL` rigenera il profilo da una versione nuova di Orca (oggi 2.5.1).
+- Testi nuovi nell'interfaccia: scrivili in italiano in `app.html`, poi aggiungi l'inglese in `i18n-en.json` (chiave = testo italiano con i numeri sostituiti da `#`). Apri l'app con `?lang=en&i18n=misses` e leggi `TRATTO_I18N_MISSES` nella console per trovare quello che manca.

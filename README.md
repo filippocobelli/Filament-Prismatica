@@ -2,7 +2,7 @@
 
 **FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab P1S in plotter a penna e da taglio con il kit UMTS.
 
-Versione **2.1.2** · Prismatica **1.13** · Tratto **0.3**
+Versione **2.1.3** · Prismatica **1.13** · Tratto **0.4**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
@@ -38,7 +38,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 - [Edizione Full](docs/edizione-full.md): Smart + Prismatica
 - [Come funziona FilamentBox](docs/funzionamento.md): bobine, scaffali, AMS, consumi, fatture, statistiche
 - [Prismatica](docs/prismatica.md): dall'immagine ai piatti di stampa numerati
-- [Tratto](docs/tratto.md): plotter a penna e da taglio con il kit UMTS su P1S
+- [Tratto](docs/tratto.md): plotter a penna e da taglio con il kit UMTS su P1S ([English](docs/en/tratto.md))
 - [Chiave API Claude](docs/claude-api.md): scansione intelligente delle etichette in tutte le edizioni
 - [Home Assistant](docs/home-assistant.md): entità, webhook, automazione
 - [Lettore NFC](docs/lettore-nfc.md): hardware, collegamenti, firmware e protocollo
@@ -54,7 +54,7 @@ server/            edizioni Smart e Full (Node.js + Express, un solo file server
 lite/              edizione Lite pronta all'uso (generata, non modificarla a mano)
 site/              pagina del progetto (italiano e inglese) pubblicata con GitHub Pages
 prismatica/src/    sorgenti di Prismatica (app.html + core.js)
-tratto/src/        sorgenti di Tratto (app.html + core.js + profilo Orca della P1S)
+tratto/src/        sorgenti di Tratto (app.html + core.js + tavola.js + i18n inglese + profilo Orca della P1S)
 tools/             build-lite.mjs: rigenera lite/ da server/public
 nfc-reader/        firmware Arduino del lettore NFC (D1 Mini + PN532)
 docs/              guide

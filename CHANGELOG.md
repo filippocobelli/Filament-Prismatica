@@ -1,5 +1,11 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.3 · Tratto 0.4
+
+- Tratto in **inglese**: tutta l'interfaccia, le guide, i nomi dei gruppi e delle parti nel 3MF, i nomi dei file e i testi delle tavole tecniche (cartiglio, viste). Lingua del browser, pulsante **EN / IT** nell'intestazione o `?lang=en` / `?lang=it`.
+- Guida di Tratto in inglese: [docs/en/tratto.md](docs/en/tratto.md).
+- Sito: la scheda di Tratto cita tavole tecniche e lingue; «Open Tratto» apre l'interfaccia inglese, «Apri Tratto» quella italiana.
+
 ## FilamentBox 2.1.2 · Tratto 0.3
 
 - Sito: il titolo del progetto diventa **Filament-Prismatica · Tratto** (pagina del progetto e scheda su lab.cobelli.uk).

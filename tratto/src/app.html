@@ -93,9 +93,10 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.3</span>
+  <span class="ver" id="ver">v0.4</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
+  <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Tratto è gratuito: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
 <main>
@@ -344,6 +345,8 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 </div>
 </main>
 
+<script>window.TRATTO_EN = /*__I18N__*/;</script>
+<script>/*__I18NJS__*/</script>
 <script>/*__LIBS__*/</script>
 <script>/*__CORE__*/</script>
 <script>window.TRATTO_FONT = /*__FONT__*/;</script>
@@ -352,7 +355,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.3'; // v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.4'; // v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -422,11 +425,11 @@ function plateSVG() {
   <rect x="0" y="0" width="${W}" height="${W}" fill="#e9e6df" stroke="#b8b2a5"/>
   <g transform="translate(0,${W}) scale(1,-1)"><path d="${ex}" fill="#d9534f" fill-opacity=".18" stroke="#d9534f" stroke-dasharray="4 3"/></g>
   <rect x="${a.x0 * s}" y="${Y(a.y1)}" width="${(a.x1 - a.x0) * s}" height="${(a.y1 - a.y0) * s}" fill="#2747c9" fill-opacity=".08" stroke="#2747c9"/>
-  <text x="${(a.x0 + 4) * s}" y="${Y(a.y1) + 14}" fill="#2747c9">area utile ${P1S.areaW}×${P1S.areaH} mm</text>
-  <text x="${8 * s}" y="${Y(20)}" fill="#a3212b">area esclusa</text>
-  <text x="${W / 2}" y="${-12}" text-anchor="middle" fill="#6a7080">retro (parete posteriore)</text>
-  <text x="${W / 2}" y="${W + 20}" text-anchor="middle" fill="#6a7080">fronte (sportello)</text>
-  <text x="${W + 14}" y="${W / 2}" fill="#6a7080" transform="rotate(90 ${W + 14} ${W / 2})" text-anchor="middle">destra</text>
+  <text x="${(a.x0 + 4) * s}" y="${Y(a.y1) + 14}" fill="#2747c9">${tL('area utile', 'usable area')} ${P1S.areaW}×${P1S.areaH} mm</text>
+  <text x="${8 * s}" y="${Y(20)}" fill="#a3212b">${tL('area esclusa', 'excluded area')}</text>
+  <text x="${W / 2}" y="${-12}" text-anchor="middle" fill="#6a7080">${tL('retro (parete posteriore)', 'back (rear wall)')}</text>
+  <text x="${W / 2}" y="${W + 20}" text-anchor="middle" fill="#6a7080">${tL('fronte (sportello)', 'front (door)')}</text>
+  <text x="${W + 14}" y="${W / 2}" fill="#6a7080" transform="rotate(90 ${W + 14} ${W / 2})" text-anchor="middle">${tL('destra', 'right')}</text>
   </svg><p class="small">Vista dall'alto del piatto P1S con l'area esclusa del profilo UMTS. Indicativa: verifica sul tuo foglio con la Cornice.</p>`;
 }
 $('#plateSvg').innerHTML = plateSVG();
@@ -577,10 +580,10 @@ pick('#tmDrop', '#tmFile', async file => {
     const buf = await file.arrayBuffer();
     S.tmMesh = /\.3mf$/i.test(file.name) ? TAV.parse3MF(buf) : TAV.parseSTL(buf);
     S.tmName = file.name.replace(/\.(stl|3mf)$/i, ''); S.tvCache = {};
-    $('#tmDrop').textContent = '✓ ' + file.name + ' · ' + (S.tmMesh.T.length / 3) + ' triangoli'; $('#tmDrop').classList.add('has');
+    $('#tmDrop').textContent = '✓ ' + file.name + ' · ' + (S.tmMesh.T.length / 3) + tL(' triangoli', ' triangles'); $('#tmDrop').classList.add('has');
     if (!$('#tvTitle').value) $('#tvTitle').value = S.tmName;
     schedule();
-  } catch (e) { console.error(e); toast('File non leggibile: ' + esc(e.message)); }
+  } catch (e) { console.error(e); toast(tL('File non leggibile: ', 'Unreadable file: ') + esc(e.message)); }
 });
 ['#tfRealH', '#tmUp', '#tmMethod', '#tmHidden', '#tmIso', '#tvTitle', '#tvMat', '#tvAuthor', '#tvTextH', '#tvFrame', '#tvGrid', '#tvPen2'].forEach(s => $(s).addEventListener('change', () => { if (s === '#tvAuthor') { try { localStorage.setItem('tratto.author', $(s).value); } catch (e) {} } schedule(); }));
 try { $('#tvAuthor').value = localStorage.getItem('tratto.author') || ''; } catch (e) {}
@@ -660,7 +663,7 @@ function computeJob() {
     if (!S.img) return null;
     const img = rasterize(S.img, W, H, P('i_res', 4), adjust());
     const r = imageAlg(S.alg, img, W, H, S.seed);
-    groups = [Object.assign({ tool: S.tool }, r)]; name = 'immagine-' + S.alg;
+    groups = [Object.assign({ tool: S.tool }, r)]; name = tL('immagine-', 'image-') + S.alg;
   } else if (S.src === 'gen') {
     const o = { spacing: P('g_spacing', 2.5), scale: P('g_scale', 1), turb: P('g_turb', 2), length: P('g_len', 90), levels: P('g_levels', 18), lines: P('g_lines', 60), amp: P('g_amp', 1), cell: P('g_cell', S.gen === 'maze' ? 8 : 12), copies: P('g_copies', 3) };
     let paths = TR.GEN[S.gen](W, H, o, S.seed);
@@ -670,7 +673,7 @@ function computeJob() {
     if (!S.svgDoc) return null;
     groups = svgGroups(W, H).map(g => Object.assign({ tool: S.tool }, g)); name = 'svg';
   } else if (S.src === 'sticker') {
-    name = 'adesivi';
+    name = tL('adesivi', 'stickers');
     if (S.stk === 'image') {
       if (!S.stkImg) return null;
       const img = rasterize(S.stkImg.im, W, H, 5, null);
@@ -695,7 +698,7 @@ function computeJob() {
     const r = tavolaGroups(W, H); if (!r) return null;
     groups = r.groups; name = r.name;
   } else if (S.src === 'calib') {
-    name = 'calibrazione-' + S.cal;
+    name = tL('calibrazione-', 'calibration-') + S.cal;
     groups = [{ tool: S.tool, paths: calibPaths(W, H, S.cal) }];
   }
   groups = groups.filter(g => (g.slices ? g.slices.some(s => s.length) : g.paths && g.paths.length));
@@ -708,7 +711,7 @@ function imgRGBA(im, maxSide) {
   return { w, h, rgba: cx.getImageData(0, 0, w, h).data };
 }
 function tavolaGroups(W, H) {
-  const o = { title: $('#tvTitle').value || (S.tav === 'mesh' ? S.tmName : '') || 'Tavola', material: $('#tvMat').value, author: $('#tvAuthor').value, frame: $('#tvFrame').checked, titleBlock: $('#tvFrame').checked, textH: Math.max(2, +$('#tvTextH').value || 3) };
+  const o = { title: $('#tvTitle').value || (S.tav === 'mesh' ? S.tmName : '') || tL('Tavola', 'Drawing'), material: $('#tvMat').value, author: $('#tvAuthor').value, frame: $('#tvFrame').checked, titleBlock: $('#tvFrame').checked, textH: Math.max(2, +$('#tvTextH').value || 3) };
   let L;
   if (S.tav === 'foto') {
     const imgs = S.tfImgs.map((t, i) => t && { t, i }).filter(Boolean); if (!imgs.length) return null;
@@ -720,7 +723,7 @@ function tavolaGroups(W, H) {
         if (!an) return null;
         S.tvCache[key] = TAV.photoViewMM(an, realH, { detail: P('tf_detail', 0.4), features: i === 0 ? P('tf_feat', 3) : 0 });
       }
-      return { name: ['fronte', 'fianco', 'retro'][i], view: S.tvCache[key] };
+      return { name: (tL(['fronte', 'fianco', 'retro'], ['front', 'side', 'back']))[i], view: S.tvCache[key] };
     }).filter(Boolean);
     if (!views.length) return null;
     if (views[0].name !== 'fronte') views[0].view = Object.assign({}, views[0].view);
@@ -736,10 +739,10 @@ function tavolaGroups(W, H) {
   const pen = tool().kind === 'pen' ? S.tool : 'stabilo';
   const drawing = TR.orderPaths([...L.frame, ...L.draw, ...(L.hidden || [])]);
   const groups = [];
-  if ($('#tvGrid').checked) { const A = L.area; const g = TAV.grid(A.frame || { x0: 0, y0: 0, x1: W, y1: H }, 5, 5, A.titleRect); groups.push({ tool: pen, paths: [...g.minor, ...g.major], presetName: 'Griglia', presetColor: '#8fb8e8' }); }
-  if ($('#tvPen2').checked) { groups.push({ tool: pen, paths: drawing, presetName: 'Disegno', presetColor: '#1b1b1b' }); groups.push({ tool: pen, paths: TR.orderPaths(L.dims), presetName: 'Quote', presetColor: '#c0392b' }); }
-  else groups.push({ tool: pen, paths: TR.orderPaths([...drawing, ...L.dims]), presetName: 'Disegno', presetColor: '#1b1b1b' });
-  return { name: 'tavola-' + (S.tav === 'mesh' ? 'stl' : 'foto'), groups };
+  if ($('#tvGrid').checked) { const A = L.area; const g = TAV.grid(A.frame || { x0: 0, y0: 0, x1: W, y1: H }, 5, 5, A.titleRect); groups.push({ tool: pen, paths: [...g.minor, ...g.major], presetName: tL('Griglia', 'Grid'), presetColor: '#8fb8e8' }); }
+  if ($('#tvPen2').checked) { groups.push({ tool: pen, paths: drawing, presetName: tL('Disegno', 'Drawing'), presetColor: '#1b1b1b' }); groups.push({ tool: pen, paths: TR.orderPaths(L.dims), presetName: tL('Quote', 'Dimensions'), presetColor: '#c0392b' }); }
+  else groups.push({ tool: pen, paths: TR.orderPaths([...drawing, ...L.dims]), presetName: tL('Disegno', 'Drawing'), presetColor: '#1b1b1b' });
+  return { name: tL('tavola-', 'drawing-') + (S.tav === 'mesh' ? 'stl' : tL('foto', 'photo')), groups };
 }
 function insetPath(p, d) {
   // rientro semplice verso il baricentro (forme convesse)
@@ -776,7 +779,7 @@ function decorate(job) {
     else if (meta.color) g.color = meta.color;
     if (g.tool !== 'blade') pi++;
     g.passes = meta.passes || tl.passes;
-    g.name = meta.name || g.presetName || (g.tool === 'blade' ? 'Taglio' : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? 'Penna ' + (i + 1) : tl.label));
+    g.name = meta.name || g.presetName || (g.tool === 'blade' ? tL('Taglio', 'Cut') : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? tL('Penna ', 'Pen ') + (i + 1) : TRATTO_TR(tl.label)));
     if (S.src === 'calib' && S.cal === 'press') g.passes = 8;
   });
   return job;
@@ -805,7 +808,7 @@ function recompute(metaOnly) {
   try {
     if (!metaOnly || !jobRaw) jobRaw = computeJob();
     S.job = decorate(jobRaw ? JSON.parse(JSON.stringify(jobRaw)) : null);
-  } catch (e) { console.error(e); S.job = null; hud('Errore: ' + e.message); }
+  } catch (e) { console.error(e); S.job = null; hud(tL('Errore: ', 'Error: ') + e.message); }
   $('#busy').style.display = 'none';
   renderGroups(); draw();
 }
@@ -853,8 +856,8 @@ function draw() {
   const pw = 210, ph = 297, px0 = P1S.cx - pw / 2, py1 = P1S.area.y1;
   ctx.shadowColor = 'rgba(0,0,0,.12)'; ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.fillRect(X(px0), Y(py1), pw * sc, ph * sc); ctx.shadowBlur = 0;
   ctx.setLineDash([4, 4]); ctx.strokeStyle = '#9fb0ef'; ctx.lineWidth = 1; ctx.strokeRect(X(P1S.area.x0), Y(P1S.area.y1), P1S.areaW * sc, P1S.areaH * sc); ctx.setLineDash([]);
-  ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText('area utile UMTS', X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
-  ctx.textAlign = 'right'; ctx.fillText('A4 · posizione indicativa', X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
+  ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText(tL('area utile UMTS', 'UMTS usable area'), X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
+  ctx.textAlign = 'right'; ctx.fillText(tL('A4 · posizione indicativa', 'A4 · approximate position'), X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
   const job = S.job;
   if (!job) { ctx.restore(); hud(S.src === 'tavola' ? (S.tav === 'foto' ? 'Carica la foto della vista di fronte.' : 'Carica un file STL o 3MF.') : S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
   const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
@@ -880,7 +883,7 @@ function draw() {
   }
   ctx.globalAlpha = 1; ctx.restore();
   const st = stats(job);
-  hud(`<b>${job.W.toFixed(0)} × ${job.H.toFixed(0)} mm</b> · ${job.groups.length} grupp${job.groups.length > 1 ? 'i' : 'o'} · ${st.n} tratti · ${(st.L / 1000).toFixed(1)} m di linea · ≈ <b>${fmtTime(st.time)}</b>${ok ? '' : ' · <span style="color:#a3212b">fuori dall\'area utile: riduci o correggi X/Y</span>'}`);
+  hud(`<b>${job.W.toFixed(0)} × ${job.H.toFixed(0)} mm</b> · ${job.groups.length} ${tL(job.groups.length > 1 ? 'gruppi' : 'gruppo', job.groups.length > 1 ? 'groups' : 'group')} · ${st.n} ${tL('tratti', 'strokes')} · ${(st.L / 1000).toFixed(1)} ${tL('m di linea', 'm of line')} · ≈ <b>${fmtTime(st.time)}</b>${ok ? '' : ' · <span style="color:#a3212b">' + tL('fuori dall\'area utile: riduci o correggi X/Y', 'outside the usable area: shrink it or correct X/Y') + '</span>'}`);
 }
 
 // ------------------------------------------------------------------ esportazione
@@ -899,8 +902,8 @@ async function download(data, name, type) {
     let dl = null; try { dl = await window.claude.use('downloads'); } catch (e) {}
     if (dl) {
       const fn = /\.3mf$/i.test(name) ? name + '.zip' : name;
-      try { await dl.save({ filename: fn, data: new Blob([data]) }); if (fn !== name) toast('Salvato come <b>' + esc(fn) + '</b>: rinominalo togliendo “.zip” e aprilo in Orca Slicer.', 9000); }
-      catch (e) { if (!e || e.code !== 'declined') toast('Download non riuscito (' + esc((e && e.code) || e) + ').'); }
+      try { await dl.save({ filename: fn, data: new Blob([data]) }); if (fn !== name) toast(tL('Salvato come <b>' + esc(fn) + '</b>: rinominalo togliendo “.zip” e aprilo in Orca Slicer.', 'Saved as <b>' + esc(fn) + '</b>: rename it removing “.zip” and open it in Orca Slicer.'), 9000); }
+      catch (e) { if (!e || e.code !== 'declined') toast(tL('Download non riuscito (', 'Download failed (') + esc((e && e.code) || e) + ').'); }
       return;
     }
   }
@@ -913,8 +916,8 @@ function exportFiles() {
   // un file per tipo di utensile (penne insieme, con pause di cambio; lama a parte)
   const pens = job.groups.filter(g => g.tool !== 'blade'), cuts = job.groups.filter(g => g.tool === 'blade');
   const files = [];
-  if (pens.length) files.push({ label: cuts.length ? '1 · Disegno (penna)' : 'File 3MF', suffix: cuts.length ? '_1-disegno' : '', groups: pens, toolKey: pens[0].tool });
-  if (cuts.length) files.push({ label: pens.length ? '2 · Taglio (lama)' : 'File 3MF (taglio)', suffix: pens.length ? '_2-taglio' : '_taglio', groups: cuts, toolKey: 'blade' });
+  if (pens.length) files.push({ label: cuts.length ? tL('1 · Disegno (penna)', '1 · Drawing (pen)') : tL('File 3MF', '3MF file'), suffix: cuts.length ? tL('_1-disegno', '_1-drawing') : '', groups: pens, toolKey: pens[0].tool });
+  if (cuts.length) files.push({ label: pens.length ? tL('2 · Taglio (lama)', '2 · Cut (blade)') : tL('File 3MF (taglio)', '3MF file (cut)'), suffix: pens.length ? tL('_2-taglio', '_2-cut') : tL('_taglio', '_cut'), groups: cuts, toolKey: 'blade' });
   return files;
 }
 function renderSummary() {
@@ -926,9 +929,9 @@ function renderSummary() {
   for (const f of files) {
     const plan = TR.planLayers(f.groups, { pauseEveryPass: pauseEvery() });
     const t = toolOf(f.toolKey);
-    html += `<div class="guide"><b>${f.label}</b> — ${t.label}: Z‑offset <b>+${t.zOffset.toFixed(1)} mm</b>, ${t.speed} mm/s, Z‑hop ${t.zHop} mm<table class="pz">` +
+    html += `<div class="guide"><b>${f.label}</b> — ${TRATTO_TR(t.label)}: Z‑offset <b>+${t.zOffset.toFixed(1)} mm</b>, ${t.speed} mm/s, Z‑hop ${t.zHop} mm<table class="pz">` +
       `<tr><td>strato 1</td><td>a vuoto, senza modulo (la testina sale alla quota compensata)</td></tr>` +
-      plan.pauses.map(p => `<tr><td>pausa a ${p.z.toFixed(1)} mm</td><td>${p.kind === 'mount' ? '⏸ <b>monta UMTS</b> con ' + esc(f.groups[p.group].name) : p.kind === 'swap' ? '⏸ cambia penna: <b>' + esc(f.groups[p.group].name) + '</b>' : p.kind === 'adjust' ? '⏸ regola la penna, poi riprendi' : '⏸ <b>rimuovi UMTS</b>, poi interrompi'}</td></tr>`).join('') +
+      plan.pauses.map(p => `<tr><td>pausa a ${p.z.toFixed(1)} mm</td><td>${p.kind === 'mount' ? tL('⏸ <b>monta UMTS</b> con ', '⏸ <b>mount UMTS</b> with ') + esc(f.groups[p.group].name) : p.kind === 'swap' ? tL('⏸ cambia penna: <b>', '⏸ change pen: <b>') + esc(f.groups[p.group].name) + '</b>' : p.kind === 'adjust' ? '⏸ regola la penna, poi riprendi' : '⏸ <b>rimuovi UMTS</b>, poi interrompi'}</td></tr>`).join('') +
       `<tr><td>totale</td><td>${plan.layers} strati da 0,1 mm</td></tr></table></div>`;
   }
   el.innerHTML = html;
@@ -940,7 +943,7 @@ function renderSummary() {
         const sub = { name: job.name, W: job.W, H: job.H, groups: f.groups, offsetX: S.offX, offsetY: S.offY };
         const r = TR.build3MF(sub, settingsFor(f.toolKey), window.BASE_P1S, { pauseEveryPass: pauseEvery(), thumbnail: thumbPNG(sub) });
         download(r.data, `tratto_${job.name}${f.suffix}.3mf`, 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml');
-      } catch (e) { console.error(e); toast('Errore nella creazione del file: ' + esc(e.message)); }
+      } catch (e) { console.error(e); toast(tL('Errore nella creazione del file: ', 'Error while creating the file: ') + esc(e.message)); }
       b.disabled = false; b.textContent = old;
     }, 30);
   });
