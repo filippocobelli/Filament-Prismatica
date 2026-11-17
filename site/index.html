@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Filament-Prismatica · lab.cobelli.uk</title>
-<meta name="description" content="FilamentBox, a filament inventory for 3D printing, and Prismatica, a generator of 3D triangle wall art from any picture. Works in the browser with no server, or on your home server with Home Assistant.">
+<meta name="description" content="FilamentBox, a filament inventory for 3D printing, and Prismatica, a generator of 3D triangle wall art from any picture, and Tratto, a pen plotter and cutter for the Bambu Lab P1S with the UMTS kit. Works in the browser with no server, or on your home server with Home Assistant.">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="alternate" hreflang="it" href="https://lab.cobelli.uk/Filament-Prismatica/it/">
 <link rel="alternate" hreflang="en" href="https://lab.cobelli.uk/Filament-Prismatica/">
@@ -92,7 +92,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
     <p class="prompt mono"><b>~/lab/filament-prismatica</b> $ ./open</p>
     <h1>Filament-Prismatica</h1>
     <span class="status mono" data-repo="filippocobelli/Filament-Prismatica" data-extra="Prismatica 1.13 · Tratto 0.2">v2.1.0 · Prismatica 1.13 · Tratto 0.2 · live</span>
-    <p class="lead">A filament inventory for 3D printing, plus a tool that turns any picture into 3D triangle wall art, printed one colour per plate with the filaments you actually own.</p>
+    <p class="lead">A filament inventory for 3D printing, plus a tool that turns any picture into 3D triangle wall art, printed one colour per plate with the filaments you actually own, and one that turns the printer into a pen plotter and cutter.</p>
     <div class="cta">
       <a class="btn primary" href="app/">Open FilamentBox</a>
       <a class="btn" href="app/prismatica/index.html">Open Prismatica</a>
@@ -101,11 +101,11 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
       <a class="btn" href="https://ko-fi.com/filippocobelli">☕ Support on Ko-fi</a>
       <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica">Source</a>
     </div>
-    <img class="shot" src="img/hero.webp" alt="Prismatica's 3D preview of a triangle wall art in coral, purple and white, next to FilamentBox on a phone with the spool library" width="1600" height="1200">
+    <img class="shot" src="img/hero.webp" alt="Prismatica's 3D preview of a triangle wall art in coral, purple and white, Tratto with a generative line drawing ready for the plotter, and FilamentBox on a phone with the spool library" width="1600" height="1200">
   </section>
 
   <section>
-    <p class="label mono">two tools, one inventory</p>
+    <p class="label mono">three tools, one inventory</p>
     <div class="two">
       <div class="card">
         <h3>FilamentBox</h3>
@@ -128,6 +128,17 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
           <li>1:1 assembly template for an A4 printer and optional Bambu color mixing</li>
         </ul>
         <ul class="tags mono"><li>three.js</li><li>3MF · STL</li><li>Bambu Studio</li><li>A4 template</li></ul>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>Tratto</h3>
+        <p>Turns a Bambu Lab P1S into a pen plotter or a vinyl cutter with Falu's UMTS kit, and builds the file ready for Orca Slicer.</p>
+        <ul>
+          <li>From a picture (hatching, contours, line art, waves, spiral, single line), from an SVG or from random generative art</li>
+          <li>Stickers: the pen draws the subject and the blade cuts around it, in the same place</li>
+          <li>3MF with the UMTS profile already set and pauses to mount, swap and remove the tool</li>
+          <li>Step-by-step guide: mounting the tool, placing the sheet, calibration and first tests</li>
+        </ul>
+        <ul class="tags mono"><li>plotter</li><li>cutter</li><li>3MF</li><li>Orca Slicer</li></ul>
       </div>
     </div>
   </section>
