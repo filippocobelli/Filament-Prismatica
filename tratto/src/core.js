@@ -1215,6 +1215,6 @@ function splitPens(paths, n, mode, W, H, seed) {
 const api = { P1S, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainPaths, orderPaths, bbox, clipToRect, pathLength, isClosed,
   algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, algStipple, algSketch, wobblePaths, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
   strokesToExPolys, slabMesh, planLayers, slicesOf, buildProjectConfig, build3MF, buildSVG,
-  rgbToLab, paletteKMeans, separateColors, cutByLayer, splitPens };
+  rgbToLab, paletteKMeans, separateColors, cutByLayer, splitPens, marching, blurField: blur };
 if (isNode) module.exports = api; else root.TR = api;
 })(typeof window !== 'undefined' ? window : globalThis);

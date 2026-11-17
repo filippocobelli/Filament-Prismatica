@@ -96,7 +96,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.7</span>
+  <span class="ver" id="ver">v0.8</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
@@ -161,6 +161,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       <button data-src="svg">SVG</button>
       <button data-src="sticker">Adesivi ✂</button>
       <button data-src="tavola">Tavola tecnica</button>
+      <button data-src="map">Mappa</button>
       <button data-src="calib">Calibrazione</button>
     </div>
 
@@ -294,6 +295,15 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
     </div>
 
     <!-- calibrazione -->
+    <div class="src" data-src="map" hidden>
+      <label class="f">Città o indirizzo<input id="mapQ" placeholder="es. Brescia, Piazza della Loggia" autocomplete="off"></label>
+      <div class="btns"><button class="btn pri" id="mapGo" type="button">Cerca e scarica la mappa</button></div>
+      <div id="mapRes" class="small"></div>
+      <div id="mapParams"></div>
+      <div class="row"><label class="f">Titolo<input id="mapTitle" placeholder="dal nome della città"></label><label class="f">Sottotitolo<input id="mapSub" placeholder="dal paese"></label></div>
+      <p class="small">Strade, acqua e ferrovie da © OpenStreetMap contributors (ODbL); quote dai Terrain Tiles (Mapzen, AWS Open Data). Serve la connessione a internet. Ogni strato è una penna: curve di livello, acqua, strade e testo.</p>
+    </div>
+
     <div class="src" data-src="calib" hidden>
       <div class="tabs" id="calTabs"><button data-cal="frame" class="on">Cornice area</button><button data-cal="press">Test pressione</button><button data-cal="ghost">Prova a vuoto</button></div>
       <p class="small" id="calHelp"></p>
@@ -372,11 +382,12 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>/*__CORE__*/</script>
 <script>window.TRATTO_FONT = /*__FONT__*/;</script>
 <script>/*__TAVOLA__*/</script>
+<script>/*__MAPPA__*/</script>
 <script>window.BASE_P1S = /*__BASE__*/;</script>
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.7'; // v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.8'; // v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -530,6 +541,74 @@ function renderFx() {
   if (P('fx_copy', false)) { slider(c, 'fx_dx', 'Spostamento X (mm)', -5, 5, 0.1, 1.2); slider(c, 'fx_dy', 'Spostamento Y (mm)', -5, 5, 0.1, 0.8); }
   note(c, 'Effetto a mano: le linee tremano appena, come disegnate a mano. Copia sfalsata: lo stesso disegno ripassato da un’altra penna, spostato di poco, come una stampa fuori registro.');
 }
+// ------------------------------------------------------------------ mappa
+function renderMapParams() {
+  const c = $('#mapParams'); c.innerHTML = '';
+  slider(c, 'm_km', 'Larghezza della zona (km)', 0.3, 8, 0.1, 2);
+  const km = c.querySelector('#p_m_km'), base = km.oninput; km.oninput = () => { base(); mapRefetchSoon(); };
+  check(c, 'm_roads', 'strade', true);
+  check(c, 'm_thick', 'strade principali più spesse', true);
+  check(c, 'm_small', 'anche vie di servizio e pedonali', false);
+  check(c, 'm_rail', 'ferrovie e tram', true);
+  check(c, 'm_water', 'fiumi, laghi e mare', true);
+  check(c, 'm_contour', 'curve di livello', true);
+  slider(c, 'm_step', 'Distanza curve di livello (m)', 1, 50, 1, 10);
+  check(c, 'm_bld', 'edifici (più dati da scaricare)', false);
+  c.lastChild.querySelector('input').addEventListener('change', () => { if (S.map) mapFetch(); });
+  check(c, 'm_text', 'titolo e coordinate sotto la mappa', true);
+  check(c, 'm_frame', 'cornice', true);
+}
+let mapTimer = null;
+function mapRefetchSoon() { clearTimeout(mapTimer); if (S.map) mapTimer = setTimeout(() => mapFetch(), 900); }
+function mapStatus(t) { $('#mapRes').innerHTML = t; }
+async function mapSearch() {
+  const q = $('#mapQ').value.trim(); if (!q) return;
+  mapStatus(tL('Cerco…', 'Searching…'));
+  try {
+    const res = await MAPPA.geocode(q);
+    if (!res.length) { mapStatus(tL('Nessun luogo trovato.', 'No place found.')); return; }
+    S.mapResults = res; mapPick(0);
+  } catch (e) { mapStatus(tL('Ricerca non riuscita: ', 'Search failed: ') + esc(e.message)); }
+}
+function mapPick(i) {
+  const r = S.mapResults[i];
+  S.map = { lat: r.lat, lon: r.lon, name: r.name, sub: r.sub, label: r.label };
+  mapFetch();
+}
+function mapResultsHTML() {
+  const R = S.mapResults || []; if (R.length < 2) return '';
+  return '<br>' + tL('Altri risultati: ', 'Other results: ') + R.map((r, i) => (S.map && r.lat === S.map.lat && r.lon === S.map.lon) ? '' : `<a href="#" data-mi="${i}">${esc(r.label.split(',').slice(0, 3).join(','))}</a>`).filter(Boolean).join(' · ');
+}
+async function mapFetch() {
+  const M = S.map; if (!M) return;
+  const km = P('m_km', 2), side = km * Math.max(1, S.H / S.W) * 1.05, b = MAPPA.bboxOf(M.lat, M.lon, side, side), tok = (S.mapTok = (S.mapTok || 0) + 1);
+  mapStatus(tL('Scarico la mappa di ', 'Downloading the map of ') + '<b>' + esc(M.name) + '</b>…');
+  $('#busy').style.display = 'block';
+  try {
+    const [osm, elev] = await Promise.all([
+      MAPPA.fetchOSM(b, { buildings: P('m_bld', false) }),
+      P('m_contour', true) ? MAPPA.fetchElevation(b, 220).catch(() => null) : Promise.resolve(null),
+    ]);
+    if (tok !== S.mapTok) return;
+    Object.assign(M, { osm, elev, km, fetchedSide: side });
+    const n = (osm.elements || []).length;
+    mapStatus('✓ <b>' + esc(M.name) + '</b>' + (M.sub ? ', ' + esc(M.sub) : '') + ' · ' + MAPPA.fmtCoord(M.lat, M.lon) + ' · ' + n + tL(' elementi', ' features') + (elev ? '' : tL(' · quote non disponibili', ' · elevation not available')) + mapResultsHTML());
+    $$('#mapRes a[data-mi]').forEach(a => a.onclick = (e) => { e.preventDefault(); mapPick(+a.dataset.mi); });
+    schedule();
+  } catch (e) { if (tok === S.mapTok) { mapStatus(tL('Download non riuscito: ', 'Download failed: ') + esc(e.message)); $('#busy').style.display = 'none'; } }
+}
+function mapGroups(W, H) {
+  const M = S.map; if (!M || !M.osm) return null;
+  if (M.km !== P('m_km', 2) || M.fetchedSide < M.km * Math.max(1, H / W)) { mapRefetchSoon(); }
+  const o = { roads: P('m_roads', true), thick: P('m_thick', true), small: P('m_small', false), rail: P('m_rail', true), water: P('m_water', true), contours: P('m_contour', true), step: P('m_step', 10),
+    buildings: P('m_bld', false), text: P('m_text', true), frame: P('m_frame', true), title: $('#mapTitle').value, sub: $('#mapSub').value };
+  const NAMES = { contours: [tL('Curve di livello', 'Contour lines'), '#e8692c'], water: [tL('Acqua', 'Water'), '#2a7fd4'], streets: [tL('Strade e testo', 'Streets and text'), '#1b1b1b'] };
+  const g = MAPPA.build(Object.assign({}, M, { km: P('m_km', 2) }), o, W, H).map(x => ({ tool: S.tool, paths: TR.orderPaths(x.paths), presetName: NAMES[x.key][0], presetColor: NAMES[x.key][1] }));
+  return { groups: g, name: tL('mappa-', 'map-') + (M.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-') };
+}
+$('#mapGo').onclick = mapSearch;
+$('#mapQ').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); mapSearch(); } });
+['#mapTitle', '#mapSub'].forEach(s => $(s).addEventListener('change', schedule));
 function note(c, t) { const p = document.createElement('p'); p.className = 'small'; p.textContent = t; c.appendChild(p); }
 const GEN_O = {
   schotter: () => ({ cell: P('gs_cell', 10), amp: P('gs_amp', 1) }),
@@ -616,7 +695,7 @@ const CAL_HELP = {
 function tabs(sel, attr, key, after) {
   $$(sel + ' button').forEach(b => b.onclick = () => { S[key] = b.dataset[attr]; $$(sel + ' button').forEach(x => x.classList.toggle('on', x === b)); after && after(); schedule(); });
 }
-tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib' || S.src === 'tavola') { fitArea(); } });
+tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib' || S.src === 'tavola' || S.src === 'map') { fitArea(); } });
 tabs('#algTabs', 'alg', 'alg', renderAlgParams);
 tabs('#genTabs', 'gen', 'gen', renderGenParams);
 tabs('#stkTabs', 'stk', 'stk', () => (S.groupsMeta = [], $$('[data-stk]')).forEach(d => { if (d.tagName === 'DIV') d.hidden = d.dataset.stk !== S.stk; }));
@@ -815,6 +894,9 @@ function computeJob() {
     }
   } else if (S.src === 'tavola') {
     const r = tavolaGroups(W, H); if (!r) return null;
+    groups = r.groups; name = r.name;
+  } else if (S.src === 'map') {
+    const r = mapGroups(W, H); if (!r) return null;
     groups = r.groups; name = r.name;
   } else if (S.src === 'calib') {
     name = tL('calibrazione-', 'calibration-') + S.cal;
@@ -1015,7 +1097,7 @@ function draw() {
   ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText(tL('area utile UMTS', 'UMTS usable area'), X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
   ctx.textAlign = 'right'; ctx.fillText(tL('A4 · posizione indicativa', 'A4 · approximate position'), X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
   const job = S.job;
-  if (!job) { ctx.restore(); hud(S.src === 'tavola' ? (S.tav === 'foto' ? 'Carica la foto della vista di fronte.' : 'Carica un file STL o 3MF.') : S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
+  if (!job) { ctx.restore(); hud(S.src === 'map' ? 'Cerca una città per scaricare la mappa.' : S.src === 'tavola' ? (S.tav === 'foto' ? 'Carica la foto della vista di fronte.' : 'Carica un file STL o 3MF.') : S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
   const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
   const tx = x => X(cx - job.W / 2 + x), ty = y => Y(cy + job.H / 2 - y);
   const ok = areaOK(job);
@@ -1128,7 +1210,7 @@ $('#nozT').onchange = e => { S.nozT = Math.max(170, +e.target.value || 180); per
 $('#bedT').onchange = e => { S.bedT = Math.max(20, +e.target.value || 25); persist(); };
 
 // ------------------------------------------------------------------ avvio
-renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderImgColors(); renderGenColors(); renderFx(); renderTavParams(); clampDims();
+renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderImgColors(); renderGenColors(); renderFx(); renderMapParams(); renderTavParams(); clampDims();
 // mostra subito un esempio generativo
 S.src = 'gen'; $$('#srcTabs button').forEach(b => b.classList.toggle('on', b.dataset.src === 'gen')); $$('.src').forEach(d => d.hidden = d.dataset.src !== 'gen');
 schedule();

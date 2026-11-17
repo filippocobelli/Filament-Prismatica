@@ -12,11 +12,12 @@ libs = '\n'.join([
 core, base, app = rd('core.js'), rd('p1s-base.json'), rd('app.html')
 font, tavola = rd('font-futural.json'), rd('tavola.js')
 i18n_js = rd('i18n.js')
+mappa = rd('mappa.js')
 import json as _json
 i18n_en = _json.dumps(_json.loads(rd('i18n-en.json')), ensure_ascii=False, separators=(',', ':'))
-for name, part in (('librerie', libs), ('core.js', core), ('profilo', base), ('font', font), ('tavola.js', tavola), ('i18n.js', i18n_js), ('i18n-en.json', i18n_en)):
+for name, part in (('librerie', libs), ('core.js', core), ('profilo', base), ('font', font), ('tavola.js', tavola), ('i18n.js', i18n_js), ('mappa.js', mappa), ('i18n-en.json', i18n_en)):
     if '</script' in part.lower(): raise SystemExit(name + ' contiene </script')
-out = app.replace('/*__LIBS__*/', libs, 1).replace('/*__CORE__*/', core, 1).replace('/*__BASE__*/', base, 1).replace('/*__FONT__*/', font, 1).replace('/*__TAVOLA__*/', tavola, 1).replace('/*__I18N__*/', i18n_en, 1).replace('/*__I18NJS__*/', i18n_js, 1)
+out = app.replace('/*__LIBS__*/', libs, 1).replace('/*__CORE__*/', core, 1).replace('/*__BASE__*/', base, 1).replace('/*__FONT__*/', font, 1).replace('/*__TAVOLA__*/', tavola, 1).replace('/*__MAPPA__*/', mappa, 1).replace('/*__I18N__*/', i18n_en, 1).replace('/*__I18NJS__*/', i18n_js, 1)
 dest = os.path.join(root, 'server', 'public', 'tratto', 'index.html')
 os.makedirs(os.path.dirname(dest), exist_ok=True)
 open(dest, 'w', encoding='utf-8').write(out)

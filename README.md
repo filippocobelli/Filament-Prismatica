@@ -2,7 +2,7 @@
 
 **FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab P1S in plotter a penna e da taglio con il kit UMTS.
 
-Versione **2.1.6** · Prismatica **1.13** · Tratto **0.7**
+Versione **2.1.7** · Prismatica **1.13** · Tratto **0.8**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
@@ -79,6 +79,7 @@ MIT, vedi [LICENSE](LICENSE).
 - [pdf.js](https://github.com/mozilla/pdf.js) (Apache 2.0): lettura delle fatture PDF
 - [ZXing](https://github.com/zxing-js/browser) (Apache 2.0): scanner barcode
 - [three.js](https://threejs.org) (MIT): anteprima 3D di Prismatica
+- Dati delle mappe di Tratto: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), via Nominatim e Overpass; quote dai [Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Mapzen, AWS Open Data)
 - Font Hershey (pubblico dominio) dal pacchetto [hersheytext](https://github.com/techninja/hersheytextjs) (MIT): testo a tratto delle tavole di Tratto
 - [Clipper](https://www.angusj.com/clipper2/) 6.4.2 (Boost Software License), [libtess.js](https://github.com/brendankenny/libtess.js) (SGI Free Software License B) e [fflate](https://github.com/101arrowz/fflate) (MIT): tratti, triangolazione e 3MF di Tratto
 - Profilo della Bambu Lab P1S ricavato dai profili di sistema di [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) (AGPL 3.0); impostazioni del kit [UMTS](https://makerworld.com/models/2029113) di Falu

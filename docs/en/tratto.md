@@ -4,7 +4,7 @@
 
 Tratto turns a Bambu Lab **P1S** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
 
-Version 0.7. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
+Version 0.8. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
 
 ## Language
 
@@ -19,11 +19,22 @@ The interface is in Italian and English. Tratto follows the browser language; th
    - *Generative*: flow field, topography, ridges, Truchet, spirograph, harmonograph, moiré, maze, Schotter (a tribute to Georg Nees), rosette, tunnel, ribbons, bubbles, op‑art, cellular automata, tree, sunflower, echo (one line repeated at a constant spacing, open or as concentric outlines). The spirograph also has sliders for the wheel teeth and the pen distance. «🎲 Variation» changes the seed, «✨ Random» changes the style too.
    - *SVG*: each stroke colour becomes a group (one pen); solid shapes can be filled with hatching.
    - *Stickers ✂*: from the subject (a transparent PNG works best) a pen **drawing** file and a **cut** file with the outline and the chosen margin; or grids of circles and rectangles for labels.
+   - *Map*: a city map from OpenStreetMap (see below).
    - *Technical drawing*: a dimensioned drawing with border, title block and, if you like, graph paper (see below).
    - *Calibration*: usable‑area frame with ticks every 10 mm, pressure test with a pause at every pass, dry run.
 4. **Colours**: each group is a pen change, with name, colour and number of passes.
 5. **File**: summary of layers and pauses, download of the 3MF (and of the SVG).
 6. **Printing**: the sequence to follow and common problems.
+
+## Maps
+
+Search for a city or an address: Tratto downloads streets, railways, rivers and lakes from **OpenStreetMap** and elevation from the **Terrain Tiles** (Mapzen, AWS Open Data), then draws the map with title, country and coordinates underneath, poster style.
+
+- **Area width** from 0.3 to 8 km; when you change it the data is downloaded again on its own.
+- Layers: streets (main roads thicker, with two extra strokes alongside), service roads and footpaths, railways and trams, water, contour lines (interval in metres), buildings, border, title and coordinates.
+- Three pens, each with its own pause: **contour lines** (orange), **water** (blue), **streets and text** (black). Colours can be changed in step 4.
+- Title and subtitle can be rewritten; bottom right there is the «(C) OpenStreetMap contributors» attribution required by the ODbL licence.
+- Internet is needed: search uses Nominatim, data comes from Overpass. If elevation doesn't arrive, the map comes out without contour lines.
 
 ## Effects
 

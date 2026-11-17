@@ -7,7 +7,7 @@ Tutto insieme: l'edizione [Smart](edizione-smart.md) (server, Home Assistant, le
 È identica alla Smart, con due differenze:
 
 - usa `server/docker-compose.full.yml`, oppure imposta `FB_EDITION=full` (è anche il valore predefinito se la variabile manca);
-- nei log compare `FilamentBox v2.1.6 (full) in ascolto sulla porta 3025 · Prismatica su /prismatica/ · Tratto su /tratto/`.
+- nei log compare `FilamentBox v2.1.7 (full) in ascolto sulla porta 3025 · Prismatica su /prismatica/ · Tratto su /tratto/`.
 
 Segui la guida della [Smart](edizione-smart.md) per Docker, Home Assistant, lettore NFC e Claude.
 

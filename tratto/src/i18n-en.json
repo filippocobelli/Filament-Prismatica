@@ -317,7 +317,27 @@
 "copia sfalsata con un’altra penna": "offset copy with another pen",
 "Spostamento X (mm)": "X shift (mm)",
 "Spostamento Y (mm)": "Y shift (mm)",
-"Effetto a mano: le linee tremano appena, come disegnate a mano. Copia sfalsata: lo stesso disegno ripassato da un’altra penna, spostato di poco, come una stampa fuori registro.": "Hand‑drawn effect: lines wobble slightly, as if drawn by hand. Offset copy: the same drawing traced again by another pen, shifted a little, like a misregistered print."
+"Effetto a mano: le linee tremano appena, come disegnate a mano. Copia sfalsata: lo stesso disegno ripassato da un’altra penna, spostato di poco, come una stampa fuori registro.": "Hand‑drawn effect: lines wobble slightly, as if drawn by hand. Offset copy: the same drawing traced again by another pen, shifted a little, like a misregistered print.",
+"Mappa": "Map",
+"Città o indirizzo": "City or address",
+"es. Brescia, Piazza della Loggia": "e.g. Edinburgh, Royal Mile",
+"Cerca e scarica la mappa": "Search and download the map",
+"Sottotitolo": "Subtitle",
+"dal nome della città": "from the city name",
+"dal paese": "from the country",
+"Strade, acqua e ferrovie da © OpenStreetMap contributors (ODbL); quote dai Terrain Tiles (Mapzen, AWS Open Data). Serve la connessione a internet. Ogni strato è una penna: curve di livello, acqua, strade e testo.": "Streets, water and railways from © OpenStreetMap contributors (ODbL); elevation from Terrain Tiles (Mapzen, AWS Open Data). An internet connection is needed. Each layer is a pen: contour lines, water, streets and text.",
+"Larghezza della zona (km)": "Area width (km)",
+"strade": "streets",
+"strade principali più spesse": "thicker main roads",
+"anche vie di servizio e pedonali": "service roads and footpaths too",
+"ferrovie e tram": "railways and trams",
+"fiumi, laghi e mare": "rivers, lakes and sea",
+"curve di livello": "contour lines",
+"Distanza curve di livello (m)": "Contour interval (m)",
+"edifici (più dati da scaricare)": "buildings (more data to download)",
+"titolo e coordinate sotto la mappa": "title and coordinates below the map",
+"cornice": "border",
+"Cerca una città per scaricare la mappa.": "Search for a city to download the map."
 },
 "re": [
 [

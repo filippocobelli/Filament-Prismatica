@@ -1,5 +1,10 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.7 · Tratto 0.8
+
+- Tratto: nuova sorgente **Mappa**. Piantine di città in stile poster da OpenStreetMap (strade, ferrovie, acqua, edifici) con curve di livello dai Terrain Tiles, titolo, paese e coordinate. Tre penne: curve di livello, acqua, strade e testo.
+- Guida (italiano e inglese), sito e crediti aggiornati.
+
 ## FilamentBox 2.1.6 · Tratto 0.7
 
 - Tratto, idee da blog.zsa.io e michellechandra.com: generativo **Eco** (linea ripetuta a passo costante o contorni concentrici), stile immagine **Schizzo** (segmenti corti alla DrawingBot), **spirografo regolabile** (denti della ruota, distanza della penna).
