@@ -12,7 +12,7 @@ const MAJOR = new Set(['motorway', 'trunk', 'primary', 'secondary', 'motorway_li
 const MINOR = new Set(['tertiary', 'tertiary_link', 'residential', 'unclassified', 'living_street', 'pedestrian', 'road']);
 const SMALL = new Set(['service', 'footway', 'path', 'cycleway', 'steps', 'track', 'bridleway']);
 const RAIL = new Set(['rail', 'light_rail', 'subway', 'tram', 'narrow_gauge']);
-const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+const OVERPASS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
 
 // ---------------------------------------------------------------- rete
 async function geocode(q) {
@@ -32,16 +32,22 @@ function bboxOf(lat, lon, kmW, kmH) {
 }
 async function fetchOSM(b, o) {
   const bb = `(${b.s.toFixed(6)},${b.w.toFixed(6)},${b.n.toFixed(6)},${b.e.toFixed(6)})`;
-  const q = `[out:json][timeout:90];(way["highway"]${bb};way["railway"]${bb};way["waterway"]${bb};way["natural"="water"]${bb};relation["natural"="water"]${bb};${o && o.buildings ? `way["building"]${bb};` : ''});out geom;`;
-  let err = null;
-  for (const url of OVERPASS) {
+  const hw = '^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|pedestrian|road' + (o && o.small ? '|service|footway|path|cycleway|steps|track|bridleway' : '') + ')(_link)?$';
+  const q = `[out:json][timeout:120];(way["highway"~"${hw}"]${bb};way["railway"~"^(rail|light_rail|subway|tram|narrow_gauge)$"]${bb};way["waterway"~"^(river|canal|stream|riverbank|drain)$"]${bb};way["natural"="water"]${bb};relation["natural"="water"]${bb};${o && o.buildings ? `way["building"]${bb};` : ''});out geom qt;`;
+  // i server pubblici sono spesso carichi: provo tutti insieme e tengo la prima risposta valida
+  const ctl = OVERPASS.map(() => new AbortController());
+  const tries = OVERPASS.map((url, k) => (async () => {
+    const t = setTimeout(() => ctl[k].abort(), 150000);
     try {
-      const r = await fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      const r = await fetch(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: ctl[k].signal });
       if (!r.ok) throw new Error('Overpass ' + r.status);
-      return await r.json();
-    } catch (e) { err = e; }
-  }
-  throw err;
+      const j = await r.json(); if (!j || !Array.isArray(j.elements)) throw new Error('Overpass: risposta non valida');
+      return [k, j];
+    } finally { clearTimeout(t); }
+  })());
+  const [k, j] = await Promise.any(tries).catch((e) => { throw (e.errors && e.errors[0]) || e; });
+  ctl.forEach((c, i) => { if (i !== k) c.abort(); });
+  return j;
 }
 // quote da Terrarium (AWS Open Data): griglia n × m in metri
 async function fetchElevation(b, n) {
@@ -128,7 +134,7 @@ function build(M, o, W, H) {
     for (let L = Math.ceil(lo / step) * step; L <= hi; L += step) {
       for (const p of TR.marching(sm, n, m, L)) {
         const q = TR.simplify(TR.chaikin(p.map(([i, j]) => [x0 + (x1 - x0) * i / (n - 1), y0 + (y1 - y0) * j / (m - 1)]), 1), 0.05);
-        if (TR.pathLength(q) > 3) out.push(q);
+        const bq = TR.bbox([q]); if (TR.pathLength(q) > 3 && Math.hypot(bq.w, bq.h) > 4.5) out.push(q); // niente cerchietti di rumore
       }
     }
     const c = clip(out).filter(p => TR.pathLength(p) > 2);

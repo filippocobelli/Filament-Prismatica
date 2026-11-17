@@ -4,7 +4,7 @@
 
 Tratto turns a Bambu Lab **P1S** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
 
-Version 0.8. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
+Version 0.8.1. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
 
 ## Language
 

@@ -4,7 +4,7 @@
 
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.8. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.8.1. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Lingua
 

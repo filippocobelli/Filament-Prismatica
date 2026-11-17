@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.8 · Tratto 0.8.1
+
+- Mappe: richiesta a OpenStreetMap più leggera e inviata a tre server Overpass insieme (vince il primo che risponde); niente cerchietti di rumore nelle curve di livello. Provato dal vivo con Edimburgo.
+
 ## FilamentBox 2.1.7 · Tratto 0.8
 
 - Tratto: nuova sorgente **Mappa**. Piantine di città in stile poster da OpenStreetMap (strade, ferrovie, acqua, edifici) con curve di livello dai Terrain Tiles, titolo, paese e coordinate. Tre penne: curve di livello, acqua, strade e testo.

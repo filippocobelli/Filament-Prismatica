@@ -96,7 +96,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.8</span>
+  <span class="ver" id="ver">v0.8.1</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
@@ -387,7 +387,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.8'; // v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.8.1'; // v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -582,7 +582,7 @@ function mapResultsHTML() {
 async function mapFetch() {
   const M = S.map; if (!M) return;
   const km = P('m_km', 2), side = km * Math.max(1, S.H / S.W) * 1.05, b = MAPPA.bboxOf(M.lat, M.lon, side, side), tok = (S.mapTok = (S.mapTok || 0) + 1);
-  mapStatus(tL('Scarico la mappa di ', 'Downloading the map of ') + '<b>' + esc(M.name) + '</b>…');
+  mapStatus(tL('Scarico la mappa di ', 'Downloading the map of ') + '<b>' + esc(M.name) + '</b>… ' + tL('(i server di OpenStreetMap possono metterci fino a un minuto)', '(OpenStreetMap servers can take up to a minute)'));
   $('#busy').style.display = 'block';
   try {
     const [osm, elev] = await Promise.all([
