@@ -1,5 +1,11 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.6 · Tratto 0.7
+
+- Tratto, idee da blog.zsa.io e michellechandra.com: generativo **Eco** (linea ripetuta a passo costante o contorni concentrici), stile immagine **Schizzo** (segmenti corti alla DrawingBot), **spirografo regolabile** (denti della ruota, distanza della penna).
+- Nuovi **effetti** nel passo 4: **effetto a mano** (tremolio) e **copia sfalsata** con un'altra penna, come una stampa fuori registro.
+- Guida (italiano e inglese) e sito aggiornati.
+
 ## FilamentBox 2.1.5 · Tratto 0.6
 
 - Tratto: 9 nuovi disegni generativi presi dai classici della plotter art: **Schotter** (omaggio a Georg Nees), **Rosone**, **Tunnel**, **Nastri**, **Bolle**, **Op‑art**, **Automi cellulari**, **Albero**, **Girasole**. Ognuno con i suoi cursori e diviso tra più penne se vuoi.

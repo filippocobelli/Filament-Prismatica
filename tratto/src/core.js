@@ -397,6 +397,49 @@ function algStipple(img, W, H, o, seed) {
   }
   return pts.map(([x, y]) => { const p = []; for (let s = 0; s <= 8; s++) { const b = s / 8 * Math.PI * 2; p.push([x + dot * Math.cos(b), y + dot * Math.sin(b)]); } return p; });
 }
+// schizzo (tipo DrawingBot): tanti segmenti corti scelti dove l'immagine è più scura, che «consumano» il tono
+function algSketch(img, W, H, o, seed) {
+  const r = mulberry32(seed || 1), w = img.w, h = img.h, d = Float32Array.from(img.d), sx = W / w, sy = H / h;
+  const N = Math.max(50, o.lines || 2500), Lmax = Math.max(1, o.length || 8) / sx, dirs = 24, out = [], g = o.gamma || 1;
+  for (let i = 0; i < d.length; i++) d[i] = Math.pow(d[i], g);
+  const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? -1 : d[(y | 0) * w + (x | 0)];
+  let x = 0, y = 0, best = -1;
+  const reseed = () => { best = -1; for (let t = 0; t < 400; t++) { const a = r() * w, b = r() * h, v = at(a, b); if (v > best) { best = v; x = a; y = b; } } };
+  reseed();
+  let cur = [[x * sx, y * sy]];
+  for (let n = 0; n < N; n++) {
+    let bv = -1, ba = 0;
+    for (let k = 0; k < dirs; k++) {
+      const a = r() * Math.PI * 2, steps = Math.max(2, Math.round(Lmax)); let s = 0, c = 0;
+      for (let t = 1; t <= steps; t++) { const v = at(x + Math.cos(a) * t, y + Math.sin(a) * t); if (v < 0) break; s += v; c++; }
+      const m = c ? s / c : -1; if (m > bv) { bv = m; ba = a; }
+    }
+    if (bv < (o.stop || 0.08)) { if (cur.length > 1) out.push(cur); reseed(); if (best < (o.stop || 0.08)) break; cur = [[x * sx, y * sy]]; continue; }
+    const steps = Math.max(2, Math.round(Lmax));
+    for (let t = 1; t <= steps; t++) { const px = x + Math.cos(ba) * t, py = y + Math.sin(ba) * t; if (at(px, py) < 0) break; const i = (py | 0) * w + (px | 0); d[i] = Math.max(0, d[i] - (o.erase || 0.35)); }
+    x = Math.max(0, Math.min(w - 1, x + Math.cos(ba) * steps)); y = Math.max(0, Math.min(h - 1, y + Math.sin(ba) * steps));
+    cur.push([x * sx, y * sy]);
+    if (cur.length > 60) { out.push(cur); cur = [[x * sx, y * sy]]; }
+  }
+  if (cur.length > 1) out.push(cur);
+  return out;
+}
+// tremolio «a mano»: sposta i punti con un rumore lento
+function wobblePaths(paths, amp, seed) {
+  if (!amp) return paths;
+  const N = makeNoise((seed || 1) + 311), f = 0.06;
+  return paths.map(p => {
+    const q = [];
+    for (let i = 0; i < p.length; i++) {
+      const a = p[i];
+      if (i > 0) { const b = p[i - 1], L = Math.hypot(a[0] - b[0], a[1] - b[1]), n = Math.floor(L / 0.8); for (let k = 1; k <= n; k++) q.push([b[0] + (a[0] - b[0]) * k / (n + 1), b[1] + (a[1] - b[1]) * k / (n + 1)]); }
+      q.push(a);
+    }
+    const out = q.map(([x, y]) => [x + amp * N.fbm(x * f, y * f, 2), y + amp * N.fbm(x * f + 31.7, y * f + 17.3, 2)]);
+    if (isClosed(p, 0.01)) out[out.length - 1] = out[0].slice();
+    return simplify(out, 0.02);
+  });
+}
 function algTSP(img, W, H, o, seed) {
   const S = sampler(img, W, H), r = mulberry32(seed || 1);
   const N = o.points || 3000, pts = []; let tries = 0;
@@ -480,7 +523,8 @@ const GEN = {
   spiro(W, H, o, seed) {
     const r = mulberry32(seed), out = [];
     const Rm = Math.min(W, H) / 2 * 0.95;
-    const R = 96, rr = [23, 37, 41, 53, 29, 61, 17][Math.floor(r() * 7)], d = rr * (0.5 + r() * 0.9);
+    const R = 96, rr0 = [23, 37, 41, 53, 29, 61, 17][Math.floor(r() * 7)], d0 = 0.5 + r() * 0.9;
+    const rr = o.teeth > 0 ? Math.round(o.teeth) : rr0, d = rr * (o.arm > 0 ? o.arm : d0);
     const copies = o.copies || 3;
     for (let c = 0; c < copies; c++) {
       const rot = c * Math.PI / copies / 2, k = 1 - c * 0.12, pts = [];
@@ -687,6 +731,29 @@ const GEN = {
       out.push(p);
     }
     return clipToRect(out, W, H);
+  },
+  // una linea ripetuta tante volte a passo costante (aperta) o i suoi contorni concentrici (chiusa)
+  echo(W, H, o, seed) {
+    const r = mulberry32(seed), sp = Math.max(0.6, o.spacing || 2), out = [];
+    if (o.closed) {   // macchia chiusa e i suoi offset con Clipper
+      const n = 9, cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.16, ph = [r(), r(), r()].map(v => v * 6.28), base = [];
+      for (let k = 0; k < 160; k++) { const a = k / 160 * Math.PI * 2, rr = R * (1 + 0.35 * Math.sin(2 * a + ph[0]) + 0.2 * Math.sin(3 * a + ph[1]) + 0.12 * Math.sin(5 * a + ph[2])); base.push([cx + rr * Math.cos(a) * (W / H > 1 ? W / H : 1), cy + rr * Math.sin(a)]); }
+      const S = 1000, co = new ClipperLib.ClipperOffset(2, 0.02 * S);
+      co.AddPath(base.map(([x, y]) => ({ X: Math.round(x * S), Y: Math.round(y * S) })), ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon);
+      for (let d = -R * 0.95; d < Math.hypot(W, H); d += sp) {
+        const sol = new ClipperLib.Paths(); co.Execute(sol, d * S);
+        if (!sol.length && d > 0) break;
+        for (const q of sol) { const p = q.map(v => [v.X / S, v.Y / S]); p.push(p[0]); out.push(p); }
+      }
+      void n; return clipToRect(out, W, H);
+    }
+    const k = 6, pts = []; for (let i = 0; i < k; i++) pts.push([W * i / (k - 1), H * (0.32 + r() * 0.36)]);
+    const m = pts.length - 1, base = [];
+    for (let s = 0; s <= 300; s++) { const f = Math.min(m - 1e-9, s / 300 * m), i = Math.floor(f), u = f - i, P = (j) => pts[Math.max(0, Math.min(m, j))];
+      const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+      base.push([0, 1].map(d => 0.5 * ((2 * p1[d]) + (-p0[d] + p2[d]) * u + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * u * u + (-p0[d] + 3 * p1[d] - 3 * p2[d] + p3[d]) * u * u * u))); }
+    for (let dy = -H; dy <= H; dy += sp) out.push(base.map(([x, y]) => [x, y + dy]));
+    return clipToRect(out.map(p => simplify(p, 0.02)), W, H);
   },
 };
 
@@ -1146,7 +1213,7 @@ function splitPens(paths, n, mode, W, H, seed) {
 }
 
 const api = { P1S, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainPaths, orderPaths, bbox, clipToRect, pathLength, isClosed,
-  algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, algStipple, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
+  algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, algStipple, algSketch, wobblePaths, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
   strokesToExPolys, slabMesh, planLayers, slicesOf, buildProjectConfig, build3MF, buildSVG,
   rgbToLab, paletteKMeans, separateColors, cutByLayer, splitPens };
 if (isNode) module.exports = api; else root.TR = api;

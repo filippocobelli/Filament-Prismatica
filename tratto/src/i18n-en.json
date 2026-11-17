@@ -302,7 +302,22 @@
 "Livelli di rami": "Branch levels",
 "Apertura": "Spread",
 "Semi": "Seeds",
-"Grandezza cerchi": "Circle size"
+"Grandezza cerchi": "Circle size",
+"Schizzo": "Sketch",
+"Eco": "Echo",
+"Tanti segmenti corti che vanno dove l’immagine è più scura, come uno schizzo a matita (stile DrawingBot).": "Lots of short segments that go where the image is darkest, like a pencil sketch (DrawingBot style).",
+"Segmenti": "Segments",
+"Lunghezza segmento (mm)": "Segment length (mm)",
+"Denti della ruota (# = a caso)": "Wheel teeth (# = random)",
+"Distanza della penna (# = a caso)": "Pen distance (# = random)",
+"forma chiusa (contorni concentrici)": "closed shape (concentric outlines)",
+"Una sola linea ripetuta a passo costante: il motivo nasce dalla ripetizione.": "A single line repeated at a constant spacing: the pattern comes from the repetition.",
+"Effetti": "Effects",
+"Effetto a mano (mm)": "Hand‑drawn effect (mm)",
+"copia sfalsata con un’altra penna": "offset copy with another pen",
+"Spostamento X (mm)": "X shift (mm)",
+"Spostamento Y (mm)": "Y shift (mm)",
+"Effetto a mano: le linee tremano appena, come disegnate a mano. Copia sfalsata: lo stesso disegno ripassato da un’altra penna, spostato di poco, come una stampa fuori registro.": "Hand‑drawn effect: lines wobble slightly, as if drawn by hand. Offset copy: the same drawing traced again by another pen, shifted a little, like a misregistered print."
 },
 "re": [
 [

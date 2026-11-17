@@ -4,7 +4,7 @@
 
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.6. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.7. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Lingua
 
@@ -15,8 +15,8 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 1. **Utensile**: Stabilo point 88, POSCA, lama da taglio o penna personalizzata. Per ognuno: come montarlo, Z‑offset, velocità, Z‑hop, accelerazione e passate. I valori si salvano nel browser, utensile per utensile.
 2. **Foglio**: schema del piatto con l'area esclusa del profilo UMTS e l'area utile (≈ 206 × 199 mm). Il foglio va a **29 mm dalla parete destra** e **41 mm da quella posteriore**. Una correzione X/Y sposta tutti i file se il tratto cade fuori posto.
 3. **Disegno**:
-   - *Immagine*: tratteggio incrociato, contorni (isolinee), linee a tratto (scheletro), onde, spirale, linea continua (TSP), puntinato (stippling).
-   - *Generativo*: campo di flusso, topografia, creste, Truchet, spirografo, armonografo, moiré, labirinto, Schotter (omaggio a Georg Nees), rosone, tunnel, nastri, bolle, op‑art, automi cellulari, albero, girasole. «🎲 Variante» cambia il seme, «✨ A caso» cambia anche lo stile.
+   - *Immagine*: tratteggio incrociato, contorni (isolinee), linee a tratto (scheletro), onde, spirale, linea continua (TSP), puntinato (stippling), schizzo (segmenti corti alla DrawingBot).
+   - *Generativo*: campo di flusso, topografia, creste, Truchet, spirografo, armonografo, moiré, labirinto, Schotter (omaggio a Georg Nees), rosone, tunnel, nastri, bolle, op‑art, automi cellulari, albero, girasole, eco (una linea ripetuta a passo costante, aperta o a contorni concentrici). Lo spirografo ha anche i cursori per i denti della ruota e la distanza della penna. «🎲 Variante» cambia il seme, «✨ A caso» cambia anche lo stile.
    - *SVG*: ogni colore del tratto diventa un gruppo (una penna); le forme piene si possono riempire a tratteggio.
    - *Adesivi ✂*: dal soggetto (meglio PNG trasparente) un file **disegno** a penna e un file **taglio** con la sagoma e il margine scelto; oppure griglie di cerchi e rettangoli per etichette.
    - *Tavola tecnica*: tavola quotata con cornice, cartiglio e, se vuoi, carta millimetrata (vedi sotto).
@@ -24,6 +24,15 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 4. **Colori**: ogni gruppo è un cambio di penna, con nome, colore e numero di passate.
 5. **File**: riepilogo di strati e pause, download del 3MF (e dell'SVG).
 6. **In stampa**: la sequenza da seguire e i problemi comuni.
+
+## Effetti
+
+Nel passo 4, per qualsiasi disegno:
+
+- **Effetto a mano**: le linee tremano appena, come disegnate a mano (0–3 mm).
+- **Copia sfalsata**: lo stesso disegno ripassato da un'altra penna spostato di poco in X e Y, come una stampa fuori registro. È un gruppo in più, con la sua pausa di cambio penna.
+
+I tagli con la lama non vengono toccati.
 
 ## Più colori, più penne
 
