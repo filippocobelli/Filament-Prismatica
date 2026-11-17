@@ -2,7 +2,7 @@
 
 Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.2. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.3. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Il flusso, in sei passi
 
@@ -13,10 +13,29 @@ Versione 0.2. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto**
    - *Generativo*: campo di flusso, topografia, creste, Truchet, spirografo, armonografo, moiré, labirinto. «🎲 Variante» cambia il seme, «✨ A caso» cambia anche lo stile.
    - *SVG*: ogni colore del tratto diventa un gruppo (una penna); le forme piene si possono riempire a tratteggio.
    - *Adesivi ✂*: dal soggetto (meglio PNG trasparente) un file **disegno** a penna e un file **taglio** con la sagoma e il margine scelto; oppure griglie di cerchi e rettangoli per etichette.
+   - *Tavola tecnica*: tavola quotata con cornice, cartiglio e, se vuoi, carta millimetrata (vedi sotto).
    - *Calibrazione*: cornice dell'area utile con tacche ogni 10 mm, test di pressione con pausa a ogni passata, prova a vuoto.
 4. **Colori**: ogni gruppo è un cambio di penna, con nome, colore e numero di passate.
 5. **File**: riepilogo di strati e pause, download del 3MF (e dell'SVG).
 6. **In stampa**: la sequenza da seguire e i problemi comuni.
+
+## Tavola tecnica
+
+Disegni in stile tavola quotata, con cornice a riferimenti di zona, cartiglio (titolo, materiale, scala, autore, data) e testo a tratto singolo (font Hershey) leggibile anche con la penna da 0,4 mm.
+
+**Da foto**
+- Fino a tre foto: fronte, fianco, retro. Meglio oggetto dritto su sfondo uniforme, foto da lontano con lo zoom (meno prospettiva).
+- Inserisci l'**altezza reale** dell'oggetto: tutte le quote vengono ricalcolate in scala da lì.
+- Tratto ricava la sagoma, i dettagli interni (cursore «Dettagli interni») e le quote: larghezza e altezza totali più le larghezze nei punti caratteristici (spalle, colli) e le loro altezze dalla base (cursore «Quote di dettaglio»).
+- Le misure sono stime ricavate dalla foto.
+
+**Da STL / 3MF**
+- Carica un STL (binario o ASCII) o un 3MF, anche quelli salvati da Bambu Studio e Orca.
+- Vista frontale, dall'alto e laterale disposte con il metodo europeo (primo diedro) o americano, più la vista isometrica.
+- Spigoli vivi (angolo regolabile) e contorni; le parti nascoste tratteggiate; quote d'ingombro vere.
+- Scala scelta in automatico tra valori normalizzati (1:1, 1:2, 2:1…) e scritta nel cartiglio.
+
+Gruppi: **Griglia** (se attivata, si disegna per prima), **Disegno** (oggetto, cornice, cartiglio) e **Quote**, con le pause per cambiare penna. Con «quote con una seconda penna» spento, disegno e quote stanno nello stesso gruppo.
 
 ## Cosa c'è nel 3MF
 
@@ -56,6 +75,6 @@ Le prime volte segui le fasi di prova dell'autore (solo base, set senza penna, t
 
 ## Sviluppo
 
-- Sorgenti in `tratto/src/`: `app.html` (interfaccia), `core.js` (algoritmi, mesh, 3MF), `vendor/` (Clipper, libtess, fflate), `p1s-base.json` (profilo Orca risolto).
+- Sorgenti in `tratto/src/`: `app.html` (interfaccia), `core.js` (algoritmi, mesh, 3MF), `tavola.js` (tavole tecniche), `font-futural.json` (font Hershey a tratto), `vendor/` (Clipper, libtess, fflate), `p1s-base.json` (profilo Orca risolto).
 - `python3 tratto/src/build.py` scrive `server/public/tratto/index.html`; poi `npm run build:lite` in `tools/` aggiorna la Lite.
 - `python3 tratto/src/mkbase.py <OrcaSlicer>/resources/profiles/BBL` rigenera il profilo da una versione nuova di Orca (oggi 2.5.1).

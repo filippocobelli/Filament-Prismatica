@@ -93,7 +93,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.2</span>
+  <span class="ver" id="ver">v0.3</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Tratto è gratuito: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
@@ -156,6 +156,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       <button data-src="gen">Generativo</button>
       <button data-src="svg">SVG</button>
       <button data-src="sticker">Adesivi ✂</button>
+      <button data-src="tavola">Tavola tecnica</button>
       <button data-src="calib">Calibrazione</button>
     </div>
 
@@ -234,6 +235,44 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       <div class="note warn">Lama: usa materiale su supporto siliconato (vinile adesivo, carta adesiva) fissato con nastro. La lama deve sporgere appena più dello spessore del materiale: prova su un ritaglio.</div>
     </div>
 
+    <!-- tavola tecnica -->
+    <div class="src" data-src="tavola" hidden>
+      <div class="tabs" id="tavTabs"><button data-tav="foto" class="on">Da foto</button><button data-tav="mesh">Da STL / 3MF</button></div>
+      <div data-tav="foto">
+        <p class="small">Foto dell'oggetto dritto, su sfondo uniforme, scattata da lontano con lo zoom (meno prospettiva). Una vista è sufficiente; fianco e retro vanno affiancati alla stessa scala.</p>
+        <div class="row row3">
+          <div class="drop" id="tfDrop0" data-i="0">Fronte</div>
+          <div class="drop" id="tfDrop1" data-i="1">Fianco</div>
+          <div class="drop" id="tfDrop2" data-i="2">Retro</div>
+        </div>
+        <input type="file" id="tfFile" accept="image/*" hidden>
+        <div class="row"><label class="f">Altezza reale dell'oggetto (mm)<input type="number" id="tfRealH" value="100" min="1" step="0.5"></label><div style="display:flex;align-items:end"><button class="btn" id="tfClear" style="width:100%">Togli le foto</button></div></div>
+        <div id="tfParams"></div>
+      </div>
+      <div data-tav="mesh" hidden>
+        <div class="drop" id="tmDrop">Trascina qui un file STL o 3MF (anche il 3MF di Bambu Studio / Orca)</div>
+        <input type="file" id="tmFile" accept=".stl,.3mf" hidden>
+        <div class="row">
+          <label class="f">Asse verticale del modello<select id="tmUp"><option value="z">Z (come nello slicer)</option><option value="y">Y</option></select></label>
+          <label class="f">Disposizione delle viste<select id="tmMethod"><option value="eu">Metodo europeo (primo diedro)</option><option value="us">Metodo americano</option></select></label>
+        </div>
+        <div id="tmParams"></div>
+        <label class="chk"><input type="checkbox" id="tmHidden" checked> linee nascoste tratteggiate</label>
+        <label class="chk"><input type="checkbox" id="tmIso" checked> vista isometrica</label>
+      </div>
+      <h3>Cartiglio e foglio</h3>
+      <div class="row">
+        <label class="f">Titolo<input id="tvTitle" value=""></label>
+        <label class="f">Materiale<input id="tvMat" value=""></label>
+        <label class="f">Disegnato da<input id="tvAuthor" value=""></label>
+        <label class="f">Altezza testo quote (mm)<input type="number" id="tvTextH" value="3" min="2" max="6" step="0.5"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="tvFrame" checked> cornice con riferimenti e cartiglio</label>
+      <label class="chk"><input type="checkbox" id="tvGrid"> carta millimetrata (gruppo a parte, va disegnata per prima)</label>
+      <label class="chk"><input type="checkbox" id="tvPen2" checked> quote con una seconda penna</label>
+      <p class="small">Le misure dalla foto sono stime, ricavate in scala dall'altezza che inserisci. Dal modello 3D sono quelle vere.</p>
+    </div>
+
     <!-- calibrazione -->
     <div class="src" data-src="calib" hidden>
       <div class="tabs" id="calTabs"><button data-cal="frame" class="on">Cornice area</button><button data-cal="press">Test pressione</button><button data-cal="ghost">Prova a vuoto</button></div>
@@ -307,11 +346,13 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 
 <script>/*__LIBS__*/</script>
 <script>/*__CORE__*/</script>
+<script>window.TRATTO_FONT = /*__FONT__*/;</script>
+<script>/*__TAVOLA__*/</script>
 <script>window.BASE_P1S = /*__BASE__*/;</script>
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.2'; // v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.3'; // v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -342,7 +383,7 @@ const S = {
   tools: Object.fromEntries(Object.keys(TOOLS).map(k => [k, Object.assign({}, Object.fromEntries(KEYS.map(q => [q, TOOLS[k][q]])), (saved.tools || {})[k] || {})])),
   offX: saved.offX || 0, offY: saved.offY || 0,
   skipPurge: saved.skipPurge !== false, nozT: saved.nozT || 180, bedT: saved.bedT || 25,
-  src: 'image', alg: 'hatch', gen: 'flow', stk: 'image', cal: 'frame',
+  src: 'image', alg: 'hatch', gen: 'flow', stk: 'image', cal: 'frame', tav: 'foto', tfImgs: [null, null, null], tmMesh: null, tmName: '', tvCache: {},
   W: 180, H: 180, seed: 1,
   img: null, imgAR: 1, stkImg: null, svgDoc: null,
   params: {}, groupsMeta: [], pauseEvery: false, showTravel: false, plateView: false,
@@ -443,6 +484,14 @@ const GEN_P = {
   circles: c => { slider(c, 'g_spacing', 'Distanza cerchi (mm)', 0.8, 8, 0.1, 2.5); },
   maze: c => { slider(c, 'g_cell', 'Cella (mm)', 3, 30, 1, 8); },
 };
+function renderTavParams() {
+  const c = $('#tfParams'); c.innerHTML = '';
+  slider(c, 'tf_feat', 'Quote di dettaglio', 0, 5, 1, 3);
+  slider(c, 'tf_detail', 'Dettagli interni', 0, 1, 0.05, 0.4);
+  slider(c, 'tf_bg', 'Soglia sfondo', 0.03, 0.5, 0.01, 0.12);
+  const m = $('#tmParams'); m.innerHTML = '';
+  slider(m, 'tm_crease', 'Spigoli da (°)', 5, 80, 1, 30, v => v + '°');
+}
 function renderGenParams() { const c = $('#genParams'); c.innerHTML = ''; GEN_P[S.gen](c); }
 const CAL_HELP = {
   frame: 'Disegna la cornice dell’area utile, la croce al centro e tacche ogni 10 mm. Serve a vedere dove cade il tratto sul foglio e a regolare la correzione X/Y.',
@@ -454,10 +503,11 @@ const CAL_HELP = {
 function tabs(sel, attr, key, after) {
   $$(sel + ' button').forEach(b => b.onclick = () => { S[key] = b.dataset[attr]; $$(sel + ' button').forEach(x => x.classList.toggle('on', x === b)); after && after(); schedule(); });
 }
-tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib') { fitArea(); } });
+tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib' || S.src === 'tavola') { fitArea(); } });
 tabs('#algTabs', 'alg', 'alg', renderAlgParams);
 tabs('#genTabs', 'gen', 'gen', renderGenParams);
 tabs('#stkTabs', 'stk', 'stk', () => (S.groupsMeta = [], $$('[data-stk]')).forEach(d => { if (d.tagName === 'DIV') d.hidden = d.dataset.stk !== S.stk; }));
+tabs('#tavTabs', 'tav', 'tav', () => { S.groupsMeta = []; $$('[data-tav]').forEach(d => { if (d.tagName === 'DIV') d.hidden = d.dataset.tav !== S.tav; }); });
 tabs('#calTabs', 'cal', 'cal', () => { S.groupsMeta = []; $('#calHelp').textContent = CAL_HELP[S.cal]; });
 $('#calHelp').textContent = CAL_HELP.frame;
 $('#seed').onchange = e => { S.seed = parseInt(e.target.value) || 1; schedule(); };
@@ -510,6 +560,30 @@ pick('#svgDrop', '#svgFile', async file => {
   const host = svgHost(); host.innerHTML = ''; host.appendChild(document.importNode(svg, true));
   const bb = host.firstChild.getBBox(); S.svgAR = bb.width / bb.height || 1; fitArea();
 });
+// tavola: foto (3 viste) e mesh
+let tfSlot = 0;
+for (let i = 0; i < 3; i++) { const d = $('#tfDrop' + i);
+  d.onclick = () => { tfSlot = i; $('#tfFile').click(); };
+  d.ondragover = e => { e.preventDefault(); d.style.background = '#f4f6ff'; }; d.ondragleave = () => d.style.background = '';
+  d.ondrop = e => { e.preventDefault(); d.style.background = ''; const f = e.dataTransfer.files[0]; if (f) tfLoad(i, f); }; }
+$('#tfFile').onchange = () => { const f = $('#tfFile').files[0]; if (f) tfLoad(tfSlot, f); $('#tfFile').value = ''; };
+async function tfLoad(i, file) {
+  try { const im = await loadImage(file); S.tfImgs[i] = { im, name: file.name }; const d = $('#tfDrop' + i); d.textContent = '✓ ' + ['Fronte', 'Fianco', 'Retro'][i]; d.classList.add('has'); S.tvCache = {}; schedule(); }
+  catch (e) { toast('Immagine non leggibile'); }
+}
+$('#tfClear').onclick = () => { S.tfImgs = [null, null, null]; S.tvCache = {}; [0, 1, 2].forEach(i => { const d = $('#tfDrop' + i); d.textContent = ['Fronte', 'Fianco', 'Retro'][i]; d.classList.remove('has'); }); schedule(); };
+pick('#tmDrop', '#tmFile', async file => {
+  try {
+    const buf = await file.arrayBuffer();
+    S.tmMesh = /\.3mf$/i.test(file.name) ? TAV.parse3MF(buf) : TAV.parseSTL(buf);
+    S.tmName = file.name.replace(/\.(stl|3mf)$/i, ''); S.tvCache = {};
+    $('#tmDrop').textContent = '✓ ' + file.name + ' · ' + (S.tmMesh.T.length / 3) + ' triangoli'; $('#tmDrop').classList.add('has');
+    if (!$('#tvTitle').value) $('#tvTitle').value = S.tmName;
+    schedule();
+  } catch (e) { console.error(e); toast('File non leggibile: ' + esc(e.message)); }
+});
+['#tfRealH', '#tmUp', '#tmMethod', '#tmHidden', '#tmIso', '#tvTitle', '#tvMat', '#tvAuthor', '#tvTextH', '#tvFrame', '#tvGrid', '#tvPen2'].forEach(s => $(s).addEventListener('change', () => { if (s === '#tvAuthor') { try { localStorage.setItem('tratto.author', $(s).value); } catch (e) {} } schedule(); }));
+try { $('#tvAuthor').value = localStorage.getItem('tratto.author') || ''; } catch (e) {}
 function svgHost() { let h = $('#svgHost'); if (!h) { h = document.createElement('div'); h.id = 'svgHost'; h.style.cssText = 'position:absolute;left:-10000px;top:0;width:1000px;height:1000px;opacity:0;pointer-events:none'; document.body.appendChild(h); } return h; }
 
 // immagine → campo di tono
@@ -617,12 +691,55 @@ function computeJob() {
       }
       groups.push({ tool: 'blade', paths: TR.orderPaths(cut) });
     }
+  } else if (S.src === 'tavola') {
+    const r = tavolaGroups(W, H); if (!r) return null;
+    groups = r.groups; name = r.name;
   } else if (S.src === 'calib') {
     name = 'calibrazione-' + S.cal;
     groups = [{ tool: S.tool, paths: calibPaths(W, H, S.cal) }];
   }
   groups = groups.filter(g => (g.slices ? g.slices.some(s => s.length) : g.paths && g.paths.length));
   return { name, W, H, groups };
+}
+function imgRGBA(im, maxSide) {
+  const k = Math.min(1, maxSide / Math.max(im.naturalWidth, im.naturalHeight));
+  const w = Math.max(16, Math.round(im.naturalWidth * k)), h = Math.max(16, Math.round(im.naturalHeight * k));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(im, 0, 0, w, h);
+  return { w, h, rgba: cx.getImageData(0, 0, w, h).data };
+}
+function tavolaGroups(W, H) {
+  const o = { title: $('#tvTitle').value || (S.tav === 'mesh' ? S.tmName : '') || 'Tavola', material: $('#tvMat').value, author: $('#tvAuthor').value, frame: $('#tvFrame').checked, titleBlock: $('#tvFrame').checked, textH: Math.max(2, +$('#tvTextH').value || 3) };
+  let L;
+  if (S.tav === 'foto') {
+    const imgs = S.tfImgs.map((t, i) => t && { t, i }).filter(Boolean); if (!imgs.length) return null;
+    const realH = Math.max(1, +$('#tfRealH').value || 100);
+    const views = imgs.map(({ t, i }) => {
+      const key = 'f' + i + ':' + t.name + ':' + P('tf_detail', 0.4) + ':' + P('tf_bg', 0.12) + ':' + P('tf_feat', 3) + ':' + realH;
+      if (!S.tvCache[key]) {
+        const an = TAV.photoAnalyze(imgRGBA(t.im, 900), { detail: P('tf_detail', 0.4), bgThr: P('tf_bg', 0.12) });
+        if (!an) return null;
+        S.tvCache[key] = TAV.photoViewMM(an, realH, { detail: P('tf_detail', 0.4), features: i === 0 ? P('tf_feat', 3) : 0 });
+      }
+      return { name: ['fronte', 'fianco', 'retro'][i], view: S.tvCache[key] };
+    }).filter(Boolean);
+    if (!views.length) return null;
+    if (views[0].name !== 'fronte') views[0].view = Object.assign({}, views[0].view);
+    const o2 = Object.assign({}, o, { viewNames: views.length > 1 });
+    L = TAV.layoutPhoto(views, W, H, o2); L = TAV.layoutPhoto(views, W, H, Object.assign(o2, { scale: L.scaleLabel }));
+  } else {
+    if (!S.tmMesh) return null;
+    const key = 'm:' + S.tmName + ':' + $('#tmUp').value + ':' + P('tm_crease', 30) + ':' + $('#tmIso').checked;
+    if (!S.tvCache[key]) S.tvCache = { [key]: TAV.standardViews(S.tmMesh, { up: $('#tmUp').value, crease: P('tm_crease', 30), iso: $('#tmIso').checked }) };
+    const o2 = Object.assign({}, o, { method: $('#tmMethod').value, hidden: $('#tmHidden').checked });
+    L = TAV.layoutMesh(S.tvCache[key], W, H, o2); L = TAV.layoutMesh(S.tvCache[key], W, H, Object.assign(o2, { scale: L.scaleLabel }));
+  }
+  const pen = tool().kind === 'pen' ? S.tool : 'stabilo';
+  const drawing = TR.orderPaths([...L.frame, ...L.draw, ...(L.hidden || [])]);
+  const groups = [];
+  if ($('#tvGrid').checked) { const A = L.area; const g = TAV.grid(A.frame || { x0: 0, y0: 0, x1: W, y1: H }, 5, 5, A.titleRect); groups.push({ tool: pen, paths: [...g.minor, ...g.major], presetName: 'Griglia', presetColor: '#8fb8e8' }); }
+  if ($('#tvPen2').checked) { groups.push({ tool: pen, paths: drawing, presetName: 'Disegno', presetColor: '#1b1b1b' }); groups.push({ tool: pen, paths: TR.orderPaths(L.dims), presetName: 'Quote', presetColor: '#c0392b' }); }
+  else groups.push({ tool: pen, paths: TR.orderPaths([...drawing, ...L.dims]), presetName: 'Disegno', presetColor: '#1b1b1b' });
+  return { name: 'tavola-' + (S.tav === 'mesh' ? 'stl' : 'foto'), groups };
 }
 function insetPath(p, d) {
   // rientro semplice verso il baricentro (forme convesse)
@@ -654,11 +771,12 @@ function decorate(job) {
   job.groups.forEach((g, i) => {
     const meta = S.groupsMeta[i] || {};
     const tl = toolOf(g.tool);
-    if (!g.color || S.src !== 'svg') g.color = meta.color || (g.tool === 'blade' ? TOOLS.blade.color : (i === 0 ? tl.color : PALETTE[(pi) % PALETTE.length]));
+    if (g.presetColor) g.color = meta.color || g.presetColor;
+    else if (!g.color || S.src !== 'svg') g.color = meta.color || (g.tool === 'blade' ? TOOLS.blade.color : (i === 0 ? tl.color : PALETTE[(pi) % PALETTE.length]));
     else if (meta.color) g.color = meta.color;
     if (g.tool !== 'blade') pi++;
     g.passes = meta.passes || tl.passes;
-    g.name = meta.name || (g.tool === 'blade' ? 'Taglio' : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? 'Penna ' + (i + 1) : tl.label));
+    g.name = meta.name || g.presetName || (g.tool === 'blade' ? 'Taglio' : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? 'Penna ' + (i + 1) : tl.label));
     if (S.src === 'calib' && S.cal === 'press') g.passes = 8;
   });
   return job;
@@ -738,7 +856,7 @@ function draw() {
   ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText('area utile UMTS', X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
   ctx.textAlign = 'right'; ctx.fillText('A4 · posizione indicativa', X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
   const job = S.job;
-  if (!job) { ctx.restore(); hud(S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
+  if (!job) { ctx.restore(); hud(S.src === 'tavola' ? (S.tav === 'foto' ? 'Carica la foto della vista di fronte.' : 'Carica un file STL o 3MF.') : S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
   const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
   const tx = x => X(cx - job.W / 2 + x), ty = y => Y(cy + job.H / 2 - y);
   const ok = areaOK(job);
@@ -851,7 +969,7 @@ $('#nozT').onchange = e => { S.nozT = Math.max(170, +e.target.value || 180); per
 $('#bedT').onchange = e => { S.bedT = Math.max(20, +e.target.value || 25); persist(); };
 
 // ------------------------------------------------------------------ avvio
-renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); clampDims();
+renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderTavParams(); clampDims();
 // mostra subito un esempio generativo
 S.src = 'gen'; $$('#srcTabs button').forEach(b => b.classList.toggle('on', b.dataset.src === 'gen')); $$('.src').forEach(d => d.hidden = d.dataset.src !== 'gen');
 schedule();

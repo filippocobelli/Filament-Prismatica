@@ -10,9 +10,10 @@ libs = '\n'.join([
     '/* fflate 0.8.2 · 101arrowz · MIT */\n' + rd('vendor', 'fflate.min.js'),
 ])
 core, base, app = rd('core.js'), rd('p1s-base.json'), rd('app.html')
-for name, part in (('librerie', libs), ('core.js', core), ('profilo', base)):
+font, tavola = rd('font-futural.json'), rd('tavola.js')
+for name, part in (('librerie', libs), ('core.js', core), ('profilo', base), ('font', font), ('tavola.js', tavola)):
     if '</script' in part.lower(): raise SystemExit(name + ' contiene </script')
-out = app.replace('/*__LIBS__*/', libs, 1).replace('/*__CORE__*/', core, 1).replace('/*__BASE__*/', base, 1)
+out = app.replace('/*__LIBS__*/', libs, 1).replace('/*__CORE__*/', core, 1).replace('/*__BASE__*/', base, 1).replace('/*__FONT__*/', font, 1).replace('/*__TAVOLA__*/', tavola, 1)
 dest = os.path.join(root, 'server', 'public', 'tratto', 'index.html')
 os.makedirs(os.path.dirname(dest), exist_ok=True)
 open(dest, 'w', encoding='utf-8').write(out)

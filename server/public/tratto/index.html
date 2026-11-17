@@ -93,7 +93,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <header>
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
-  <span class="ver" id="ver">v0.2</span>
+  <span class="ver" id="ver">v0.3</span>
   <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Tratto è gratuito: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
@@ -156,6 +156,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       <button data-src="gen">Generativo</button>
       <button data-src="svg">SVG</button>
       <button data-src="sticker">Adesivi ✂</button>
+      <button data-src="tavola">Tavola tecnica</button>
       <button data-src="calib">Calibrazione</button>
     </div>
 
@@ -232,6 +233,44 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
         </div>
       </div>
       <div class="note warn">Lama: usa materiale su supporto siliconato (vinile adesivo, carta adesiva) fissato con nastro. La lama deve sporgere appena più dello spessore del materiale: prova su un ritaglio.</div>
+    </div>
+
+    <!-- tavola tecnica -->
+    <div class="src" data-src="tavola" hidden>
+      <div class="tabs" id="tavTabs"><button data-tav="foto" class="on">Da foto</button><button data-tav="mesh">Da STL / 3MF</button></div>
+      <div data-tav="foto">
+        <p class="small">Foto dell'oggetto dritto, su sfondo uniforme, scattata da lontano con lo zoom (meno prospettiva). Una vista è sufficiente; fianco e retro vanno affiancati alla stessa scala.</p>
+        <div class="row row3">
+          <div class="drop" id="tfDrop0" data-i="0">Fronte</div>
+          <div class="drop" id="tfDrop1" data-i="1">Fianco</div>
+          <div class="drop" id="tfDrop2" data-i="2">Retro</div>
+        </div>
+        <input type="file" id="tfFile" accept="image/*" hidden>
+        <div class="row"><label class="f">Altezza reale dell'oggetto (mm)<input type="number" id="tfRealH" value="100" min="1" step="0.5"></label><div style="display:flex;align-items:end"><button class="btn" id="tfClear" style="width:100%">Togli le foto</button></div></div>
+        <div id="tfParams"></div>
+      </div>
+      <div data-tav="mesh" hidden>
+        <div class="drop" id="tmDrop">Trascina qui un file STL o 3MF (anche il 3MF di Bambu Studio / Orca)</div>
+        <input type="file" id="tmFile" accept=".stl,.3mf" hidden>
+        <div class="row">
+          <label class="f">Asse verticale del modello<select id="tmUp"><option value="z">Z (come nello slicer)</option><option value="y">Y</option></select></label>
+          <label class="f">Disposizione delle viste<select id="tmMethod"><option value="eu">Metodo europeo (primo diedro)</option><option value="us">Metodo americano</option></select></label>
+        </div>
+        <div id="tmParams"></div>
+        <label class="chk"><input type="checkbox" id="tmHidden" checked> linee nascoste tratteggiate</label>
+        <label class="chk"><input type="checkbox" id="tmIso" checked> vista isometrica</label>
+      </div>
+      <h3>Cartiglio e foglio</h3>
+      <div class="row">
+        <label class="f">Titolo<input id="tvTitle" value=""></label>
+        <label class="f">Materiale<input id="tvMat" value=""></label>
+        <label class="f">Disegnato da<input id="tvAuthor" value=""></label>
+        <label class="f">Altezza testo quote (mm)<input type="number" id="tvTextH" value="3" min="2" max="6" step="0.5"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="tvFrame" checked> cornice con riferimenti e cartiglio</label>
+      <label class="chk"><input type="checkbox" id="tvGrid"> carta millimetrata (gruppo a parte, va disegnata per prima)</label>
+      <label class="chk"><input type="checkbox" id="tvPen2" checked> quote con una seconda penna</label>
+      <p class="small">Le misure dalla foto sono stime, ricavate in scala dall'altezza che inserisci. Dal modello 3D sono quelle vere.</p>
     </div>
 
     <!-- calibrazione -->
@@ -1295,11 +1334,488 @@ const api = { P1S, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainP
 if (isNode) module.exports = api; else root.TR = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
+<script>window.TRATTO_FONT = ["5|5,1 5,15;5,20 4,21 5,22 6,21 5,20","8|4,1 4,8;12,1 12,8","11|11,-3 4,29;17,-3 10,29;4,10 18,10;3,16 17,16","10|8,-3 8,26;12,-3 12,26;17,4 15,2 12,1 8,1 5,2 3,4 3,6 4,8 5,9 7,10 13,12 15,13 16,14 17,16 17,19 15,21 12,22 8,22 5,21 3,19","12|21,1 3,22;8,1 10,3 10,5 9,7 7,8 5,8 3,6 3,4 4,2 6,1 8,1 10,2 13,3 16,3 19,2 21,1;17,15 15,16 14,18 14,20 16,22 18,22 20,21 21,19 21,17 19,15 17,15","13|23,10 23,9 22,8 21,8 20,9 19,11 17,16 15,19 13,21 11,22 7,22 5,21 4,20 3,18 3,16 4,14 5,13 12,9 13,8 14,6 14,4 13,2 11,1 9,2 8,4 8,6 9,9 11,12 16,19 18,21 20,22 22,22 23,21 23,20","5|5,3 4,2 5,1 6,2 6,4 5,6 4,7","7|11,-3 9,-1 7,2 5,6 4,11 4,15 5,20 7,24 9,27 11,29","7|3,-3 5,-1 7,2 9,6 10,11 10,15 9,20 7,24 5,27 3,29","8|8,7 8,19;3,10 13,16;13,10 3,16","13|13,4 13,22;4,13 22,13","4|5,18 4,19 3,18 4,17 5,18 5,20 3,22","13|4,13 22,13","4|4,17 3,18 4,19 5,18 4,17","11|20,-3 2,29","10|9,1 6,2 4,5 3,10 3,13 4,18 6,21 9,22 11,22 14,21 16,18 17,13 17,10 16,5 14,2 11,1 9,1","10|6,5 8,4 11,1 11,22","10|4,6 4,5 5,3 6,2 8,1 12,1 14,2 15,3 16,5 16,7 15,9 13,12 3,22 17,22","10|5,1 16,1 10,9 13,9 15,10 16,11 17,14 17,16 16,19 14,21 11,22 8,22 5,21 4,20 3,18","10|13,1 3,15 18,15;13,1 13,22","10|15,1 5,1 4,10 5,9 8,8 11,8 14,9 16,11 17,14 17,16 16,19 14,21 11,22 8,22 5,21 4,20 3,18","10|16,4 15,2 12,1 10,1 7,2 5,5 4,10 4,15 5,19 7,21 10,22 11,22 14,21 16,19 17,16 17,15 16,12 14,10 11,9 10,9 7,10 5,12 4,15","10|17,1 7,22;3,1 17,1","10|8,1 5,2 4,4 4,6 5,8 7,9 11,10 14,11 16,13 17,15 17,18 16,20 15,21 12,22 8,22 5,21 4,20 3,18 3,15 4,13 6,11 9,10 13,9 15,8 16,6 16,4 15,2 12,1 8,1","10|16,8 15,11 13,13 10,14 9,14 6,13 4,11 3,8 3,7 4,4 6,2 9,1 10,1 13,2 15,4 16,8 16,13 15,18 13,21 10,22 8,22 5,21 4,19","4|4,10 3,11 4,12 5,11 4,10;4,17 3,18 4,19 5,18 4,17","4|4,10 3,11 4,12 5,11 4,10;5,18 4,19 3,18 4,17 5,18 5,20 3,22","12|20,4 4,13 20,22","13|4,10 22,10;4,16 22,16","12|4,4 20,13 4,22","9|3,6 3,5 4,3 5,2 7,1 11,1 13,2 14,3 15,5 15,7 14,9 13,10 9,12 9,15;9,20 8,21 9,22 10,21 9,20","14|18,9 17,7 15,6 12,6 10,7 9,8 8,11 8,14 9,16 11,17 14,17 16,16 17,14;12,6 10,8 9,11 9,14 10,16 11,17;18,6 17,14 17,16 19,17 21,17 23,15 24,12 24,10 23,7 22,5 20,3 18,2 15,1 12,1 9,2 7,3 5,5 4,7 3,10 3,13 4,16 5,18 7,20 9,21 12,22 15,22 18,21 20,20 21,19;19,6 18,14 18,16 19,17","9|9,1 1,22;9,1 17,22;4,15 14,15","10|4,1 4,22;4,1 13,1 16,2 17,3 18,5 18,7 17,9 16,10 13,11;4,11 13,11 16,12 17,13 18,15 18,18 17,20 16,21 13,22 4,22","11|18,6 17,4 15,2 13,1 9,1 7,2 5,4 4,6 3,9 3,14 4,17 5,19 7,21 9,22 13,22 15,21 17,19 18,17","10|4,1 4,22;4,1 11,1 14,2 16,4 17,6 18,9 18,14 17,17 16,19 14,21 11,22 4,22","9|4,1 4,22;4,1 17,1;4,11 12,11;4,22 17,22","8|4,1 4,22;4,1 17,1;4,11 12,11","11|18,6 17,4 15,2 13,1 9,1 7,2 5,4 4,6 3,9 3,14 4,17 5,19 7,21 9,22 13,22 15,21 17,19 18,17 18,14;13,14 18,14","11|4,1 4,22;18,1 18,22;4,11 18,11","4|4,1 4,22","8|12,1 12,17 11,20 10,21 8,22 6,22 4,21 3,20 2,17 2,15","10|4,1 4,22;18,1 4,15;9,10 18,22","7|4,1 4,22;4,22 16,22","12|4,1 4,22;4,1 12,22;20,1 12,22;20,1 20,22","11|4,1 4,22;4,1 18,22;18,1 18,22","11|9,1 7,2 5,4 4,6 3,9 3,14 4,17 5,19 7,21 9,22 13,22 15,21 17,19 18,17 19,14 19,9 18,6 17,4 15,2 13,1 9,1","10|4,1 4,22;4,1 13,1 16,2 17,3 18,5 18,8 17,10 16,11 13,12 4,12","11|9,1 7,2 5,4 4,6 3,9 3,14 4,17 5,19 7,21 9,22 13,22 15,21 17,19 18,17 19,14 19,9 18,6 17,4 15,2 13,1 9,1;12,18 18,24","10|4,1 4,22;4,1 13,1 16,2 17,3 18,5 18,7 17,9 16,10 13,11 4,11;11,11 18,22","10|17,4 15,2 12,1 8,1 5,2 3,4 3,6 4,8 5,9 7,10 13,12 15,13 16,14 17,16 17,19 15,21 12,22 8,22 5,21 3,19","8|8,1 8,22;1,1 15,1","11|4,1 4,16 5,19 7,21 10,22 12,22 15,21 17,19 18,16 18,1","9|1,1 9,22;17,1 9,22","12|2,1 7,22;12,1 7,22;12,1 17,22;22,1 17,22","10|3,1 17,22;17,1 3,22","9|1,1 9,11 9,22;17,1 9,11","10|17,1 3,22;3,1 17,1;3,22 17,22","7|4,-3 4,29;5,-3 5,29;4,-3 11,-3;4,29 11,29","7|0,1 14,25","7|9,-3 9,29;10,-3 10,29;3,-3 10,-3;3,29 10,29","8|8,-1 0,13;8,-1 16,13","9|0,29 18,29","4|5,6 3,8 3,10 4,11 5,10 4,9 3,10","10|15,8 15,22;15,11 13,9 11,8 8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19","9|4,1 4,22;4,11 6,9 8,8 11,8 13,9 15,11 16,14 16,16 15,19 13,21 11,22 8,22 6,21 4,19","9|15,11 13,9 11,8 8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19","10|15,1 15,22;15,11 13,9 11,8 8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19","9|3,14 15,14 15,12 14,10 13,9 11,8 8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19","7|10,1 8,1 6,2 5,5 5,22;2,8 9,8","10|15,8 15,24 14,27 13,28 11,29 8,29 6,28;15,11 13,9 11,8 8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19","10|4,1 4,22;4,12 7,9 9,8 12,8 14,9 15,12 15,22","4|3,1 4,2 5,1 4,0 3,1;4,8 4,22","5|5,1 6,2 7,1 6,0 5,1;6,8 6,25 5,28 3,29 1,29","8|4,1 4,22;14,8 4,18;8,14 15,22","4|4,1 4,22","15|4,8 4,22;4,12 7,9 9,8 12,8 14,9 15,12 15,22;15,12 18,9 20,8 23,8 25,9 26,12 26,22","10|4,8 4,22;4,12 7,9 9,8 12,8 14,9 15,12 15,22","10|8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19 16,16 16,14 15,11 13,9 11,8 8,8","9|4,8 4,29;4,11 6,9 8,8 11,8 13,9 15,11 16,14 16,16 15,19 13,21 11,22 8,22 6,21 4,19","10|15,8 15,29;15,11 13,9 11,8 8,8 6,9 4,11 3,14 3,16 4,19 6,21 8,22 11,22 13,21 15,19","6|4,8 4,22;4,14 5,11 7,9 9,8 12,8","9|14,11 13,9 10,8 7,8 4,9 3,11 4,13 6,14 11,15 13,16 14,18 14,19 13,21 10,22 7,22 4,21 3,19","7|5,1 5,18 6,21 8,22 10,22;2,8 9,8","10|4,8 4,18 5,21 7,22 10,22 12,21 15,18;15,8 15,22","8|2,8 8,22;14,8 8,22","11|3,8 7,22;11,8 7,22;11,8 15,22;19,8 15,22","9|3,8 14,22;14,8 3,22","8|2,8 8,22;14,8 8,22 6,26 4,28 2,29 1,29","9|14,8 3,22;3,8 14,8;3,22 14,22","7|9,-3 7,-2 6,-1 5,1 5,3 6,5 7,6 8,8 8,10 6,12;7,-2 6,0 6,2 7,4 8,5 9,7 9,9 8,11 4,13 8,15 9,17 9,19 8,21 7,22 6,24 6,26 7,28;6,14 8,16 8,18 7,20 6,21 5,23 5,25 6,27 7,28 9,29","4|4,-3 4,29","7|5,-3 7,-2 8,-1 9,1 9,3 8,5 7,6 6,8 6,10 8,12;7,-2 8,0 8,2 7,4 6,5 5,7 5,9 6,11 10,13 6,15 5,17 5,19 6,21 7,22 8,24 8,26 7,28;8,14 6,16 6,18 7,20 8,21 9,23 9,25 8,27 7,28 5,29","12|3,16 3,14 4,11 6,10 8,10 10,11 14,14 16,15 18,15 20,14 21,12;3,14 4,12 6,11 8,11 10,12 14,15 16,16 18,16 20,15 21,12 21,10","8|0,1 0,22 1,22 1,1 2,1 2,22 3,22 3,1 4,1 4,22 5,22 5,1 6,1 6,22 7,22 7,1 8,1 8,22 9,22 9,1 10,1 10,22 11,22 11,1 12,1 12,22 13,22 13,1 14,1 14,22 15,22 15,1 16,1 16,22"];</script>
+<script>/* Tratto — Tavole tecniche: testo a tratto (Hershey Futura Light), quote, cartiglio, cornice,
+   tavola da foto (sagoma + quote automatiche) e tavola da mesh STL/3MF (viste ortogonali + isometrica, linee nascoste).
+   Coordinate dei tratti in mm sul foglio, origine in alto a sinistra, y verso il basso. */
+(function (root) {
+'use strict';
+const isNode = typeof module !== 'undefined' && module.exports;
+const TR = root.TR || (isNode ? require('./core.js') : null);
+const fflate = root.fflate || (isNode ? require('./vendor/fflate.min.js') : null);
+const FONT_SRC = root.TRATTO_FONT || (isNode ? JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'font-futural.json'), 'utf8')) : null);
+
+// ---------------------------------------------------------------- testo a tratto
+const GLYPHS = FONT_SRC.map(s => { const [o, d] = s.split('|'); return { adv: 2 * +o, polys: d ? d.split(';').map(pl => pl.split(' ').map(p => p.split(',').map(Number))) : [] }; });
+const CAP = 21, BASE = 22; // unità Hershey: altezza maiuscole e linea di base
+function glyph(ch) { const c = ch.charCodeAt(0); return GLYPHS[c - 33] || null; }
+function textWidth(str, h) {
+  const k = h / CAP; let w = 0;
+  for (const ch of str) { if (ch === ' ') { w += 12 * k; continue; } if (ch === 'Ø' || ch === '°') { w += (ch === '°' ? 10 : 22) * k; continue; } const g = glyph(ch); w += (g ? g.adv : 16) * k; }
+  return w;
+}
+/* testo: x,y = punto di ancoraggio sulla linea di base; anchor 'l'|'c'|'r'; rot in gradi (0 o 90 antiorario) */
+function text(str, x, y, h, anchor = 'l', rot = 0) {
+  const k = h / CAP, out = []; str = String(str);
+  const W = textWidth(str, h); let cx = anchor === 'c' ? -W / 2 : anchor === 'r' ? -W : 0;
+  const a = rot * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  const put = (lx, ly) => [x + lx * ca + ly * sa, y - lx * sa + ly * ca]; // y verso il basso, rotazione antioraria a schermo
+  for (const ch of str) {
+    if (ch === ' ') { cx += 12 * k; continue; }
+    if (ch === 'Ø') { // cerchio con barra
+      const r = 8.5 * k, ox = cx + 11 * k, oy = -10.5 * k, c = [];
+      for (let i = 0; i <= 24; i++) { const t = i / 24 * Math.PI * 2; c.push(put(ox + r * Math.cos(t), oy + r * Math.sin(t))); }
+      out.push(c, [put(ox - 10 * k, oy + 10 * k), put(ox + 10 * k, oy - 10 * k)]); cx += 22 * k; continue;
+    }
+    if (ch === '°') { const r = 2.5 * k, ox = cx + 5 * k, oy = -18 * k, c = []; for (let i = 0; i <= 12; i++) { const t = i / 12 * Math.PI * 2; c.push(put(ox + r * Math.cos(t), oy + r * Math.sin(t))); } out.push(c); cx += 10 * k; continue; }
+    const g = glyph(ch); if (!g) { cx += 16 * k; continue; }
+    for (const pl of g.polys) {
+      let p = pl.map(([gx, gy]) => put(cx + gx * k, (gy - BASE) * k));
+      const xs = p.map(q => q[0]), ys = p.map(q => q[1]);
+      const ex = Math.max(...xs) - Math.min(...xs), ey = Math.max(...ys) - Math.min(...ys);
+      if (Math.max(ex, ey) < 0.5) { // puntini (: . ;) troppo piccoli per lo slicer: diventano un trattino da 0,6 mm
+        const mx = (Math.max(...xs) + Math.min(...xs)) / 2, my = (Math.max(...ys) + Math.min(...ys)) / 2; p = [[mx - 0.3 * ca, my + 0.3 * sa], [mx + 0.3 * ca, my - 0.3 * sa]];
+      }
+      out.push(p);
+    }
+    cx += g.adv * k;
+  }
+  return out;
+}
+const num = (v) => { const r = Math.round(v * 10) / 10; return (Math.abs(r - Math.round(r)) < 1e-6 ? String(Math.round(r)) : r.toFixed(1)).replace('.', ','); };
+
+// ---------------------------------------------------------------- quote
+/* quota lineare tra A e B (punti sul disegno), linea di quota spostata di `off` mm lungo la normale `side` (+1/-1).
+   Restituisce i tratti: linee di riferimento, linea di quota con frecce aperte, testo centrato sopra la linea. */
+function dim(A, B, off, label, o = {}) {
+  const h = o.textH || 3, arrow = o.arrow || 2.2, gap = 1, ext = 1.5;
+  const dx = B[0] - A[0], dy = B[1] - A[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  const nx = -uy, ny = ux; // normale a sinistra della direzione A→B (y verso il basso)
+  const P = [A[0] + nx * off, A[1] + ny * off], Q = [B[0] + nx * off, B[1] + ny * off];
+  const s = Math.sign(off) || 1, out = [];
+  out.push([[A[0] + nx * gap * s, A[1] + ny * gap * s], [P[0] + nx * ext * s, P[1] + ny * ext * s]]);
+  out.push([[B[0] + nx * gap * s, B[1] + ny * gap * s], [Q[0] + nx * ext * s, Q[1] + ny * ext * s]]);
+  out.push([P, Q]);
+  const ah = (T, dirx, diry) => { const a = 0.35; const c = Math.cos(a), sn = Math.sin(a);
+    const r1 = [dirx * c - diry * sn, dirx * sn + diry * c], r2 = [dirx * c + diry * sn, -dirx * sn + diry * c];
+    return [[T[0] + r1[0] * arrow, T[1] + r1[1] * arrow], T, [T[0] + r2[0] * arrow, T[1] + r2[1] * arrow]]; };
+  out.push(ah(P, ux, uy), ah(Q, -ux, -uy));
+  // testo: sopra la linea (lato esterno), leggibile dal basso o da destra
+  const mid = [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2];
+  let ang = Math.atan2(-uy, ux) * 180 / Math.PI; // angolo a schermo, antiorario
+  if (ang > 90.01 || ang <= -90) ang += 180;
+  if (ang > 180) ang -= 360;
+  const a = ang * Math.PI / 180; const tnx = -Math.sin(a), tny = -Math.cos(a); // "sopra" il testo
+  const T = [mid[0] + tnx * 0.8, mid[1] + tny * 0.8];
+  out.push(...text(label, T[0], T[1], h, 'c', ang));
+  return out;
+}
+function rect(x, y, w, h) { return [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]]; }
+function dashed(paths, dash = 1.6, gap = 1.0) {
+  const out = [];
+  for (const p of paths) {
+    let on = true, left = dash, cur = [p[0]];
+    for (let i = 1; i < p.length; i++) {
+      let a = p[i - 1]; const b = p[i]; let seg = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      while (seg > 1e-9) {
+        const t = Math.min(left, seg), f = t / seg; const m = [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+        if (on) cur.push(m);
+        seg -= t; left -= t; a = m;
+        if (left <= 1e-9) { if (on && cur.length > 1) out.push(cur); on = !on; left = on ? dash : gap; cur = [m]; }
+      }
+    }
+    if (on && cur.length > 1) out.push(cur);
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- foglio: cornice e cartiglio
+/* Restituisce { lines, area } dove area è il rettangolo libero per il disegno. */
+function sheet(W, H, o = {}) {
+  const lines = [], m = o.frame === false ? 2 : 6;
+  if (o.frame !== false) {
+    lines.push(rect(m, m, W - 2 * m, H - 2 * m));
+    // riferimenti di zona (numeri in alto, lettere a sinistra)
+    const nx = Math.max(2, Math.round((W - 2 * m) / 50)), ny = Math.max(2, Math.round((H - 2 * m) / 50));
+    for (let i = 1; i < nx; i++) { const x = m + (W - 2 * m) * i / nx; lines.push([[x, m], [x, m + 2]], [[x, H - m], [x, H - m - 2]]); }
+    for (let j = 1; j < ny; j++) { const y = m + (H - 2 * m) * j / ny; lines.push([[m, y], [m + 2, y]], [[W - m, y], [W - m - 2, y]]); }
+    for (let i = 0; i < nx; i++) lines.push(...text(String(nx - i), m + (W - 2 * m) * (i + 0.5) / nx, m - 1.4, 2.4, 'c'));
+    const L = 'ABCDEFGHIJ'; for (let j = 0; j < ny; j++) lines.push(...text(L[ny - 1 - j] || '', m - 3.2, m + (H - 2 * m) * (j + 0.5) / ny + 1.2, 2.4, 'c'));
+  }
+  let area = { x0: m + 3, y0: m + 3, x1: W - m - 3, y1: H - m - 3 };
+  if (o.titleBlock !== false) {
+    const bw = Math.min(96, W - 2 * m), bh = 28, bx = W - m - bw, by = H - m - bh;
+    lines.push(rect(bx, by, bw, bh));
+    const c1 = bx + bw * 0.62, r1 = by + 10, r2 = by + 19;
+    lines.push([[bx, r1], [bx + bw, r1]], [[bx, r2], [bx + bw, r2]], [[c1, r1], [c1, by + bh]]);
+    const lab = (s, x, y) => lines.push(...text(s, x + 1.2, y + 2.9, 2.1));
+    const val = (s, x, y, w, h = 3.2) => { let hh = h; while (textWidth(s, hh) > w - 2.4 && hh > 2.2) hh -= 0.2; lines.push(...text(s, x + 1.2, y + 7.6, hh)); };
+    lab('TITOLO', bx, by - 0.4); val((o.title || 'TAVOLA').toUpperCase(), bx, by + 1.2, bw, 3.6);
+    lab('MATERIALE', bx, r1); val((o.material || '-').toUpperCase(), bx, r1, c1 - bx);
+    lab('SCALA', c1, r1); val(o.scale || '-', c1, r1, bx + bw - c1);
+    lab('DISEGNATO DA', bx, r2); val((o.author || '-').toUpperCase(), bx, r2 - 0.4, c1 - bx, 3);
+    lab('DATA', c1, r2); val(o.date || new Date().toLocaleDateString('it-IT'), c1, r2 - 0.4, bx + bw - c1, 3);
+    lines.push(...text('QUOTE IN MM', bx, by - 1.6, 2.2));
+    area.blocked = { x0: bx - 3, y0: by - 4, x1: W, y1: H };
+    area.titleRect = { x0: bx, y0: by - 4, x1: bx + bw, y1: by + bh };
+  }
+  area.frame = { x0: m, y0: m, x1: W - m, y1: H - m };
+  return { lines, area };
+}
+/* carta millimetrata dentro la cornice, interrotta sul cartiglio. box = {x0,y0,x1,y1}, hole = rettangolo da saltare */
+function grid(box, step = 5, major = 5, hole = null) {
+  const minor = [], maj = [];
+  const cutV = (x) => !hole || x <= hole.x0 || x >= hole.x1 ? [[box.y0, box.y1]] : [[box.y0, hole.y0]].filter(r => r[1] - r[0] > 0.5);
+  const cutH = (y) => !hole || y <= hole.y0 || y >= hole.y1 ? [[box.x0, box.x1]] : [[box.x0, hole.x0]].filter(r => r[1] - r[0] > 0.5);
+  let i = 1;
+  for (let x = box.x0 + step; x < box.x1 - 0.01; x += step, i++) for (const [a, b] of cutV(x)) (i % major ? minor : maj).push([[x, a], [x, b]]);
+  i = 1;
+  for (let y = box.y0 + step; y < box.y1 - 0.01; y += step, i++) for (const [a, b] of cutH(y)) (i % major ? minor : maj).push([[a, y], [b, y]]);
+  return { minor: TR.orderPaths(minor), major: TR.orderPaths(maj) };
+}
+const NICE = [10, 5, 4, 2, 1.5, 1, 0.8, 0.5, 0.4, 0.25, 0.2, 0.1, 0.05, 0.04, 0.025, 0.02, 0.01];
+function niceScale(s) { for (const n of NICE) if (n <= s + 1e-9) return n; return s; }
+function scaleLabel(s) { const f = (v) => String(Math.round(v * 100) / 100).replace('.', ','); return s >= 1 ? f(s) + ':1' : '1:' + f(1 / s); }
+
+// ---------------------------------------------------------------- tavola da foto
+/* img: { w, h, rgb: Uint8ClampedArray RGBA }  → maschera, sagoma e dettagli in pixel */
+function photoAnalyze(img, o = {}) {
+  const { w, h } = img, d = img.rgba, n = w * h;
+  // colore di sfondo: mediana dei pixel di bordo
+  const bp = []; const push = (i) => bp.push([d[i * 4], d[i * 4 + 1], d[i * 4 + 2], d[i * 4 + 3]]);
+  for (let x = 0; x < w; x += 2) { push(x); push((h - 1) * w + x); }
+  for (let y = 0; y < h; y += 2) { push(y * w); push(y * w + w - 1); }
+  const med = [0, 1, 2, 3].map(c => bp.map(p => p[c]).sort((a, b) => a - b)[bp.length >> 1]);
+  const hasAlpha = med[3] < 128;
+  const thr = (o.bgThr ?? 0.12) * 441;
+  const m = new Float32Array(n), lum = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2], a = d[i * 4 + 3];
+    lum[i] = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    if (hasAlpha) m[i] = a > 128 ? 1 : 0;
+    else m[i] = a > 128 && Math.hypot(r - med[0], g - med[1], b - med[2]) > thr ? 1 : 0;
+  }
+  // pulizia: chiusura morfologica leggera + riempimento buchi collegati al bordo
+  const mb = blurBin(m, w, h, 2, 0.35);
+  const filled = fillHoles(mb, w, h);
+  const comp = largestComponents(filled, w, h, o.minFrac ?? 0.02);
+  // sagoma (contorno esterno)
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (comp[y * w + x]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  // profilo delle larghezze per riga
+  const prof = [];
+  for (let y = y0; y <= y1; y++) { let l = -1, r = -1; for (let x = x0; x <= x1; x++) if (comp[y * w + x]) { if (l < 0) l = x; r = x; } prof.push({ y, l, r, w: l < 0 ? 0 : r - l + 1 }); }
+  // dettagli interni: bordi (Sobel) dentro la sagoma erosa
+  let detail = null;
+  if ((o.detail ?? 0) > 0) {
+    const er = erode(comp, w, h, 3), e = new Float32Array(n); let mx = 0;
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x; if (!er[i]) continue;
+      const gx = lum[i - w + 1] + 2 * lum[i + 1] + lum[i + w + 1] - lum[i - w - 1] - 2 * lum[i - 1] - lum[i + w - 1];
+      const gy = lum[i + w - 1] + 2 * lum[i + w] + lum[i + w + 1] - lum[i - w - 1] - 2 * lum[i - w] - lum[i - w + 1];
+      e[i] = Math.hypot(gx, gy); if (e[i] > mx) mx = e[i];
+    }
+    if (mx > 0) for (let i = 0; i < n; i++) e[i] /= mx;
+    detail = { w, h, d: e };
+  }
+  return { w, h, mask: comp, bbox: { x0, y0, x1, y1 }, prof, detail };
+}
+function blurBin(m, w, h, r, t) { const tmp = new Float32Array(w * h), o = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) { let s = 0; for (let x = -r; x < w + r; x++) { if (x + r < w) s += m[y * w + Math.min(w - 1, x + r)]; if (x - r - 1 >= 0) s -= m[y * w + x - r - 1]; if (x >= 0 && x < w) tmp[y * w + x] = s / (2 * r + 1); } }
+  for (let x = 0; x < w; x++) { let s = 0; for (let y = -r; y < h + r; y++) { if (y + r < h) s += tmp[Math.min(h - 1, y + r) * w + x]; if (y - r - 1 >= 0) s -= tmp[(y - r - 1) * w + x]; if (y >= 0 && y < h) o[y * w + x] = s / (2 * r + 1) > t ? 1 : 0; } }
+  return o; }
+function fillHoles(m, w, h) { const out = new Uint8Array(w * h).fill(1), st = [];
+  const seed = (x, y) => { const i = y * w + x; if (!m[i] && out[i]) { out[i] = 0; st.push(i); } };
+  for (let x = 0; x < w; x++) { seed(x, 0); seed(x, h - 1); } for (let y = 0; y < h; y++) { seed(0, y); seed(w - 1, y); }
+  while (st.length) { const i = st.pop(), x = i % w, y = (i / w) | 0; if (x > 0) seed(x - 1, y); if (x < w - 1) seed(x + 1, y); if (y > 0) seed(x, y - 1); if (y < h - 1) seed(x, y + 1); }
+  return out; }
+function largestComponents(m, w, h, minFrac) { const lab = new Int32Array(w * h), sizes = [0]; let id = 0;
+  for (let i = 0; i < w * h; i++) if (m[i] && !lab[i]) { id++; let sz = 0; const st = [i]; lab[i] = id;
+    while (st.length) { const j = st.pop(); sz++; const x = j % w, y = (j / w) | 0; for (const k of [x > 0 ? j - 1 : -1, x < w - 1 ? j + 1 : -1, y > 0 ? j - w : -1, y < h - 1 ? j + w : -1]) if (k >= 0 && m[k] && !lab[k]) { lab[k] = id; st.push(k); } }
+    sizes.push(sz); }
+  const big = Math.max(...sizes); const keep = sizes.map(s => s >= big * minFrac);
+  const out = new Uint8Array(w * h); for (let i = 0; i < w * h; i++) if (lab[i] && keep[lab[i]]) out[i] = 1; return out; }
+function erode(m, w, h, r) { const o = new Uint8Array(w * h);
+  for (let y = r; y < h - r; y++) for (let x = r; x < w - r; x++) { let ok = 1; for (let k = -r; k <= r && ok; k++) if (!m[(y + k) * w + x] || !m[y * w + x + k]) ok = 0; o[y * w + x] = ok; }
+  return o; }
+/* livelli caratteristici: estremi locali del profilo delle larghezze (spalle, colli) */
+function featureLevels(prof, nWant) {
+  if (!nWant || prof.length < 8) return [];
+  const H = prof.length, maxW = Math.max(...prof.map(p => p.w));
+  const sm = prof.map((p, i) => { let s = 0, c = 0; for (let k = -3; k <= 3; k++) { const q = prof[i + k]; if (q) { s += q.w; c++; } } return s / c; });
+  const cand = [];
+  for (let i = 4; i < H - 4; i++) {
+    const a = sm[i - 4], b = sm[i], c = sm[i + 4];
+    if ((b >= a && b >= c) || (b <= a && b <= c)) {
+      // prominenza: differenza con i minimi/massimi nell'intorno
+      let lo = b, hi = b; for (let k = Math.max(0, i - H / 6 | 0); k < Math.min(H, i + H / 6 | 0); k++) { lo = Math.min(lo, sm[k]); hi = Math.max(hi, sm[k]); }
+      const prom = (b >= a ? b - lo : hi - b) / maxW;
+      if (prom > 0.06) cand.push({ i, prom });
+    }
+  }
+  cand.sort((p, q) => q.prom - p.prom);
+  const pick = [];
+  for (const c of cand) {
+    if (Math.abs(prof[c.i].w - maxW) < maxW * 0.02) continue; // la larghezza massima è già quotata in basso
+    if (pick.some(p => Math.abs(p.i - c.i) < H * 0.08 || Math.abs(prof[p.i].w - prof[c.i].w) < maxW * 0.04)) continue;
+    pick.push(c); if (pick.length >= nWant) break;
+  }
+  return pick.map(p => prof[p.i]).sort((a, b) => a.y - b.y);
+}
+/* vista da foto in mm reali: sagoma, dettagli, profilo. realH = altezza reale dell'oggetto (mm) */
+function photoViewMM(an, realH, o = {}) {
+  const { x0, y0, x1, y1 } = an.bbox, pxH = y1 - y0 + 1, k = realH / pxH;
+  const toMM = (p) => [(p[0] - x0) * k, (p[1] - y0) * k];
+  const f = new Float32Array(an.w * an.h); for (let i = 0; i < f.length; i++) f[i] = an.mask[i];
+  const bl = blurF(f, an.w, an.h);
+  const outline = TR.algContours({ w: an.w, h: an.h, d: bl }, an.w, an.h, { levels: 1, threshold: 0.5, blur: 0, minLen: 4, simplify: 0.4 })
+    .map(p => TR.simplify(p.map(toMM), realH / 600));
+  let details = [];
+  if (an.detail) {
+    const thr = 1 - (o.detail ?? 0.4) * 0.85;
+    details = TR.algCenterline(an.detail, an.w, an.h, { threshold: Math.max(0.08, thr * 0.6), minLen: 6, blur: 0 }).map(p => TR.simplify(p.map(toMM), realH / 250));
+  }
+  const prof = an.prof.map(p => ({ y: (p.y - y0 + 0.5) * k, l: (p.l - x0) * k, r: (p.r - x0 + 1) * k, w: p.w * k }));
+  const W = (x1 - x0 + 1) * k;
+  return { W, H: realH, outline, details, prof, feats: featureLevels(prof, o.features ?? 3) };
+}
+function blurF(f, w, h) { const o = new Float32Array(w * h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { let s = 0, c = 0; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) { const xx = x + i, yy = y + j; if (xx >= 0 && yy >= 0 && xx < w && yy < h) { s += f[yy * w + xx]; c++; } } o[y * w + x] = s / c; } return o; }
+
+/* Impagina 1..3 viste da foto sul foglio W×H con quote. views: [{name, view}] (view da photoViewMM, stessa altezza reale) */
+function layoutPhoto(views, W, H, o = {}) {
+  const sh = sheet(W, H, o), A = sh.area;
+  const nF = views[0] ? views[0].view.feats.length : 0, step = 7;
+  const padL = 14, padB = 14, padT = 6 + nF * step, padR = 6 + nF * step, gapX = 18;
+  const blockedH = A.blocked ? (A.y1 - A.blocked.y0) : 0;
+  const totalRealW = views.reduce((s, v) => s + v.view.W, 0), realH = views[0].view.H;
+  const availW = (A.x1 - A.x0) - padL - padR - gapX * (views.length - 1) - 4;
+  const availH = (A.y1 - A.y0) - padT - padB - blockedH * 0.0 - 4;
+  let s = Math.min(availW / totalRealW, availH / realH);
+  // il cartiglio occupa l'angolo in basso a destra: se il disegno ci finisce sopra, limita l'altezza
+  if (A.blocked) {
+    const widthUsed = (k) => padL + padR + gapX * (views.length - 1) + totalRealW * k;
+    if (A.x0 + widthUsed(s) > A.blocked.x0) s = Math.min(s, Math.max(((A.blocked.y0 - A.y0) - padT - padB - 12) / realH, 0.01));
+  }
+  s = o.exactScale ? s : niceScale(s);
+  const draw = [], dims = [];
+  const usedW = padL + padR + gapX * (views.length - 1) + totalRealW * s;
+  const rightLimit = (A.blocked && A.y0 + padT + realH * s + padB > A.blocked.y0) ? A.blocked.x0 : A.x1;
+  let x = A.x0 + Math.max(0, ((rightLimit - A.x0) - usedW) / 2) + padL; const yTop = A.y0 + padT;
+  const T = (vx, vy, p) => [vx + p[0] * s, vy + p[1] * s];
+  views.forEach((v, vi) => {
+    const V = v.view, vx = x, vy = yTop;
+    for (const p of V.outline) draw.push(p.map(q => T(vx, vy, q)));
+    for (const p of V.details) draw.push(p.map(q => T(vx, vy, q)));
+    const L = vx, R = vx + V.W * s, B = vy + V.H * s;
+    // larghezza totale sotto
+    dims.push(...dim([L, B], [R, B], 8, num(V.W), o));
+    // altezza totale a sinistra (solo prima vista)
+    if (vi === 0) dims.push(...dim([L, B], [L, vy], -9, num(V.H), o));
+    // quote di dettaglio: larghezze sopra, altezze a destra (prima vista)
+    if (vi === 0) V.feats.forEach((f, fi) => {
+      const yy = vy + f.y * s, xl = vx + f.l * s, xr = vx + f.r * s;
+      dims.push(...dim([xl, yy], [xr, yy], (vy - yy) - 6 - fi * step, num(f.w), o));
+      dims.push(...dim([xr, B], [xr, yy], (R - xr) + 6 + fi * step, num(V.H - f.y), o));
+    });
+    if (views.length > 1 || o.viewNames) draw.push(...text((v.name || '').toUpperCase(), (L + R) / 2, B + 14, 2.6, 'c'));
+    x = R + gapX + (vi === 0 ? padR : 0);
+  });
+  return { draw, dims, frame: sh.lines, area: A, scale: s, scaleLabel: scaleLabel(s) };
+}
+
+// ---------------------------------------------------------------- mesh: STL / 3MF
+function parseSTL(buf) {
+  const u8 = new Uint8Array(buf), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  const isBin = u8.length >= 84 && 84 + dv.getUint32(80, true) * 50 === u8.length;
+  const P = [];
+  if (isBin) { const n = dv.getUint32(80, true); for (let i = 0; i < n; i++) { const o = 84 + i * 50 + 12; for (let k = 0; k < 9; k++) P.push(dv.getFloat32(o + k * 4, true)); } }
+  else { const t = new TextDecoder().decode(u8); const re = /vertex\s+([-+\d.eE]+)\s+([-+\d.eE]+)\s+([-+\d.eE]+)/g; let m; while ((m = re.exec(t))) P.push(+m[1], +m[2], +m[3]); }
+  return weld(P);
+}
+function weld(P) {
+  let mn = [Infinity, Infinity, Infinity], mx = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < P.length; i += 3) for (let k = 0; k < 3; k++) { mn[k] = Math.min(mn[k], P[i + k]); mx[k] = Math.max(mx[k], P[i + k]); }
+  const q = Math.max(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) * 1e-6 || 1e-6;
+  const map = new Map(), V = [], T = [];
+  for (let i = 0; i < P.length; i += 3) {
+    const key = Math.round(P[i] / q) + ',' + Math.round(P[i + 1] / q) + ',' + Math.round(P[i + 2] / q);
+    let id = map.get(key); if (id === undefined) { id = V.length / 3; V.push(P[i], P[i + 1], P[i + 2]); map.set(key, id); } T.push(id);
+  }
+  const T2 = []; for (let i = 0; i < T.length; i += 3) if (T[i] !== T[i + 1] && T[i + 1] !== T[i + 2] && T[i] !== T[i + 2]) T2.push(T[i], T[i + 1], T[i + 2]);
+  return { V: new Float64Array(V), T: new Uint32Array(T2) };
+}
+function parse3MF(buf) {
+  const files = fflate.unzipSync(new Uint8Array(buf));
+  const dec = (k) => new TextDecoder().decode(files[k]);
+  const models = {}; for (const k of Object.keys(files)) if (/\.model$/i.test(k)) models['/' + k.replace(/^\//, '')] = dec(k);
+  const mainKey = Object.keys(models).find(k => /3D\/3dmodel\.model$/i.test(k)) || Object.keys(models)[0];
+  const objs = {}; // path#id -> { mesh:{V,T}?, comps:[{path,id,tr}] }
+  const parseTr = (s) => s ? s.trim().split(/\s+/).map(Number) : [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
+  for (const [path, xml] of Object.entries(models)) {
+    const reObj = /<object\b([^>]*)>([\s\S]*?)<\/object>/g; let m;
+    while ((m = reObj.exec(xml))) {
+      const id = (/\bid="([^"]+)"/.exec(m[1]) || [])[1]; const body = m[2]; const o = { comps: [] };
+      const vs = body.match(/<vertex\b[^>]*>/g);
+      if (vs) {
+        const V = []; for (const v of vs) { V.push(+/x="([^"]+)"/.exec(v)[1], +/y="([^"]+)"/.exec(v)[1], +/z="([^"]+)"/.exec(v)[1]); }
+        const T = []; for (const t of body.match(/<triangle\b[^>]*>/g) || []) T.push(+/v1="(\d+)"/.exec(t)[1], +/v2="(\d+)"/.exec(t)[1], +/v3="(\d+)"/.exec(t)[1]);
+        o.mesh = { V, T };
+      }
+      const reC = /<component\b([^>]*)\/?>/g; let c;
+      while ((c = reC.exec(body))) { const a = c[1]; o.comps.push({ path: ((/p:path="([^"]+)"/.exec(a) || [])[1]) || path, id: (/objectid="([^"]+)"/.exec(a) || [])[1], tr: parseTr((/transform="([^"]+)"/.exec(a) || [])[1]) }); }
+      objs[path + '#' + id] = o;
+    }
+  }
+  const mul = (a, b) => { // 3x4 (riga: m00 m01 m02 m10 ... tx ty tz nella convenzione 3MF: x' = x*m00 + y*m10 + z*m20 + m30)
+    const A = [[a[0], a[1], a[2]], [a[3], a[4], a[5]], [a[6], a[7], a[8]], [a[9], a[10], a[11]]], B = [[b[0], b[1], b[2]], [b[3], b[4], b[5]], [b[6], b[7], b[8]], [b[9], b[10], b[11]]];
+    const r = []; for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) r.push(A[i][0] * B[0][j] + A[i][1] * B[1][j] + A[i][2] * B[2][j] + (i === 3 ? B[3][j] : 0)); return r; };
+  const P = [];
+  const emit = (key, tr, depth) => { const o = objs[key]; if (!o || depth > 8) return;
+    if (o.mesh) { const { V, T } = o.mesh; for (const vi of T) { const x = V[vi * 3], y = V[vi * 3 + 1], z = V[vi * 3 + 2]; P.push(x * tr[0] + y * tr[3] + z * tr[6] + tr[9], x * tr[1] + y * tr[4] + z * tr[7] + tr[10], x * tr[2] + y * tr[5] + z * tr[8] + tr[11]); } }
+    for (const c of o.comps) emit(c.path + '#' + c.id, mul(c.tr, tr), depth + 1); };
+  const main = models[mainKey]; const reI = /<item\b([^>]*)\/?>/g; let it, any = false;
+  while ((it = reI.exec(main))) { any = true; const a = it[1]; emit(mainKey + '#' + (/objectid="([^"]+)"/.exec(a) || [])[1], parseTr((/transform="([^"]+)"/.exec(a) || [])[1]), 0); }
+  if (!any) for (const k of Object.keys(objs)) if (k.startsWith(mainKey)) emit(k, parseTr(), 0);
+  if (!P.length) throw new Error('Nessuna mesh trovata nel 3MF');
+  return weld(P);
+}
+
+/* edge topology */
+function meshEdges(mesh) {
+  const { V, T } = mesh, nT = T.length / 3, N = new Float64Array(nT * 3);
+  for (let f = 0; f < nT; f++) {
+    const a = T[f * 3] * 3, b = T[f * 3 + 1] * 3, c = T[f * 3 + 2] * 3;
+    const ux = V[b] - V[a], uy = V[b + 1] - V[a + 1], uz = V[b + 2] - V[a + 2], vx = V[c] - V[a], vy = V[c + 1] - V[a + 1], vz = V[c + 2] - V[a + 2];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const L = Math.hypot(nx, ny, nz) || 1;
+    N[f * 3] = nx / L; N[f * 3 + 1] = ny / L; N[f * 3 + 2] = nz / L;
+  }
+  const map = new Map(), E = [];
+  for (let f = 0; f < nT; f++) for (let k = 0; k < 3; k++) {
+    let a = T[f * 3 + k], b = T[f * 3 + (k + 1) % 3]; if (a > b) [a, b] = [b, a];
+    const key = a * 4294967296 + b; let e = map.get(key);
+    if (e === undefined) { e = E.length; E.push({ a, b, f: [f] }); map.set(key, e); } else E[e].f.push(f);
+  }
+  return { N, E };
+}
+/* vista ortografica: dir = direzione di vista (verso la scena), u = destra, v = alto (vettori unitari) */
+function projectView(mesh, topo, dir, u, v, o = {}) {
+  const { V, T } = mesh, nV = V.length / 3, { N, E } = topo;
+  const sx = new Float64Array(nV), sy = new Float64Array(nV), sz = new Float64Array(nV);
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (let i = 0; i < nV; i++) { const x = V[i * 3], y = V[i * 3 + 1], z = V[i * 3 + 2];
+    sx[i] = x * u[0] + y * u[1] + z * u[2]; sy[i] = x * v[0] + y * v[1] + z * v[2]; sz[i] = x * dir[0] + y * dir[1] + z * dir[2];
+    x0 = Math.min(x0, sx[i]); x1 = Math.max(x1, sx[i]); y0 = Math.min(y0, sy[i]); y1 = Math.max(y1, sy[i]); z0 = Math.min(z0, sz[i]); z1 = Math.max(z1, sz[i]); }
+  const Wd = x1 - x0 || 1, Hd = y1 - y0 || 1, R = (o.res || 1400) / Math.max(Wd, Hd);
+  const bw = Math.ceil(Wd * R) + 3, bh = Math.ceil(Hd * R) + 3, zb = new Float32Array(bw * bh).fill(Infinity);
+  const PX = (i) => (sx[i] - x0) * R + 1, PY = (i) => (y1 - sy[i]) * R + 1;
+  // z-buffer (profondità: più piccolo = più vicino)
+  for (let f = 0; f < T.length / 3; f++) {
+    const a = T[f * 3], b = T[f * 3 + 1], c = T[f * 3 + 2];
+    const ax = PX(a), ay = PY(a), bx = PX(b), by = PY(b), cx = PX(c), cy = PY(c);
+    const minx = Math.max(0, Math.floor(Math.min(ax, bx, cx))), maxx = Math.min(bw - 1, Math.ceil(Math.max(ax, bx, cx)));
+    const miny = Math.max(0, Math.floor(Math.min(ay, by, cy))), maxy = Math.min(bh - 1, Math.ceil(Math.max(ay, by, cy)));
+    const den = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(den) < 1e-12) continue;
+    for (let y = miny; y <= maxy; y++) for (let x = minx; x <= maxx; x++) {
+      const px = x + 0.5, py = y + 0.5;
+      const w1 = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / den, w2 = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / den, w3 = 1 - w1 - w2;
+      if (w1 < -1e-4 || w2 < -1e-4 || w3 < -1e-4) continue;
+      const z = w1 * sz[a] + w2 * sz[b] + w3 * sz[c]; const k = y * bw + x; if (z < zb[k]) zb[k] = z;
+    }
+  }
+  const cosT = Math.cos((o.crease ?? 30) * Math.PI / 180), eps = (z1 - z0) * 0.004 + 1.5 / R;
+  const vis = [], hid = [];
+  const zmax3 = (x, y) => { let m = -Infinity; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) { const xx = x + i, yy = y + j; if (xx >= 0 && yy >= 0 && xx < bw && yy < bh) { const z = zb[yy * bw + xx]; m = Math.max(m, z === Infinity ? 1e30 : z); } } return m; };
+  for (const e of E) {
+    let keep = false;
+    if (e.f.length === 1) keep = true;
+    else if (e.f.length >= 2) {
+      const f1 = e.f[0], f2 = e.f[1];
+      const d1 = N[f1 * 3] * dir[0] + N[f1 * 3 + 1] * dir[1] + N[f1 * 3 + 2] * dir[2], d2 = N[f2 * 3] * dir[0] + N[f2 * 3 + 1] * dir[1] + N[f2 * 3 + 2] * dir[2];
+      const dot = N[f1 * 3] * N[f2 * 3] + N[f1 * 3 + 1] * N[f2 * 3 + 1] + N[f1 * 3 + 2] * N[f2 * 3 + 2];
+      if (dot < cosT) keep = true; else if ((d1 < 0) !== (d2 < 0)) keep = true;
+    }
+    if (!keep) continue;
+    const ax = PX(e.a), ay = PY(e.a), bx = PX(e.b), by = PY(e.b), L = Math.hypot(bx - ax, by - ay);
+    if (L < 0.3) continue;
+    const n = Math.max(2, Math.ceil(L / 0.7)); let run = null, runVis = null;
+    for (let s = 0; s <= n; s++) {
+      const t = s / n, px = ax + (bx - ax) * t, py = ay + (by - ay) * t, z = sz[e.a] + (sz[e.b] - sz[e.a]) * t;
+      const isVis = z <= zmax3(Math.floor(px), Math.floor(py)) + eps;
+      const pt = [sx[e.a] + (sx[e.b] - sx[e.a]) * t - x0, y1 - (sy[e.a] + (sy[e.b] - sy[e.a]) * t)];
+      if (runVis === null || isVis !== runVis) { if (run && run.length > 1) (runVis ? vis : hid).push(run); run = run ? [run[run.length - 1], pt] : [pt]; runVis = isVis; }
+      else run.push(pt);
+    }
+    if (run && run.length > 1) (runVis ? vis : hid).push(run);
+  }
+  const clean = (ps) => TR.chainPaths(ps.map(p => [p[0], p[p.length - 1]]), Math.max(Wd, Hd) * 2e-4).map(p => TR.simplify(p, Math.max(Wd, Hd) * 1e-4));
+  return { W: Wd, H: Hd, vis: clean(vis), hid: clean(hid) };
+}
+/* viste standard: up = 'z' | 'y'. Metodo europeo (primo diedro): pianta sotto, vista da sinistra a destra. */
+function standardViews(mesh, o = {}) {
+  const topo = meshEdges(mesh);
+  const Zup = (o.up || 'z') === 'z';
+  // assi del mondo: X destra, Y profondità (verso il retro), Z alto
+  const X = [1, 0, 0], Y = Zup ? [0, 1, 0] : [0, 0, -1], Z = Zup ? [0, 0, 1] : [0, 1, 0];
+  const neg = (a) => a.map(x => -x);
+  const opt = { crease: o.crease, res: o.res };
+  const front = projectView(mesh, topo, Y, X, Z, opt);              // dal davanti (guardo verso +Y)
+  const top = projectView(mesh, topo, neg(Z), X, Y, opt);           // dall'alto: su = retro
+  const left = projectView(mesh, topo, X, neg(Y), Z, opt);          // da sinistra (guardo verso +X): destra = -Y
+  const views = { front, top, left };
+  if (o.iso !== false) {
+    const dir = norm(add(add(scale(X, -1), Y), scale(Z, -1)));
+    const u = norm(add(X, Y)); const v = norm(cross(u, dir));
+    views.iso = projectView(mesh, topo, dir, u, v, opt); views.iso.hid = [];
+  }
+  return views;
+}
+const add = (a, b) => a.map((x, i) => x + b[i]), scale = (a, k) => a.map(x => x * k), norm = (a) => { const L = Math.hypot(...a) || 1; return a.map(x => x / L); }, cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+/* impaginazione delle viste da mesh */
+function layoutMesh(views, W, H, o = {}) {
+  const sh = sheet(W, H, o), A = sh.area, f = views.front, t = views.top, l = views.left, iso = views.iso;
+  const dimSp = 13, gap = 10;
+  const american = o.method === 'us';
+  const availW = (A.x1 - A.x0) - 2 * dimSp - gap, availH = (A.y1 - A.y0) - 2 * dimSp - gap;
+  let s = Math.min(availW / (f.W + l.W), availH / (f.H + t.H));
+  s = niceScale(s * 0.98);
+  const draw = [], hidden = [], dims = [];
+  const cellW1 = f.W * s, cellH1 = f.H * s;
+  const ox = A.x0 + dimSp, oy = A.y0 + dimSp;
+  const place = (view, x, y, sc) => { for (const p of view.vis) draw.push(p.map(q => [x + q[0] * sc, y + q[1] * sc])); if (o.hidden !== false) for (const p of view.hid) hidden.push(p.map(q => [x + q[0] * sc, y + q[1] * sc])); };
+  const fx = ox, fy = american ? oy + t.H * s + gap + dimSp * 0.6 : oy;
+  const tx = fx, ty = american ? oy : fy + cellH1 + gap + dimSp * 0.6;
+  const lx = fx + cellW1 + gap + dimSp * 0.6, ly = fy;
+  const sideX = american ? lx : lx; // in metodo americano la vista da destra va a destra: usiamo la stessa vista specchiata
+  place(f, fx, fy, s);
+  place(t, tx, ty, s);
+  if (american) { const lv = { W: l.W, H: l.H, vis: l.vis.map(p => p.map(q => [l.W - q[0], q[1]])), hid: l.hid.map(p => p.map(q => [l.W - q[0], q[1]])) }; place(lv, sideX, ly, s); }
+  else place(l, sideX, ly, s);
+  // quote d'ingombro
+  dims.push(...dim([fx, fy + f.H * s], [fx + f.W * s, fy + f.H * s], 7, num(f.W), o));
+  dims.push(...dim([fx, fy + f.H * s], [fx, fy], -8, num(f.H), o));
+  dims.push(...dim([tx, ty + t.H * s], [tx, ty], -8, num(t.H), o));
+  dims.push(...dim([sideX, ly + l.H * s], [sideX + l.W * s, ly + l.H * s], 7, num(l.W), o));
+  // isometrica nell'angolo libero
+  if (iso) {
+    let ix0 = sideX, iy0 = ty, ix1 = A.x1, iy1 = A.blocked ? A.blocked.y0 - 2 : A.y1;
+    if (iy1 - iy0 < 30) { iy0 = ly + l.H * s + 14; }
+    const si = Math.min((ix1 - ix0) / iso.W, (iy1 - iy0) / iso.H) * 0.9;
+    if (si > 0) place({ W: iso.W, H: iso.H, vis: iso.vis, hid: [] }, ix0 + ((ix1 - ix0) - iso.W * si) / 2, iy0 + ((iy1 - iy0) - iso.H * si) / 2, si);
+  }
+  return { draw, hidden: dashed(hidden), dims, frame: sh.lines, area: A, scale: s, scaleLabel: scaleLabel(s) };
+}
+
+const TAV = { text, textWidth, dim, sheet, grid, dashed, num, niceScale, scaleLabel, photoAnalyze, photoViewMM, layoutPhoto, parseSTL, parse3MF, meshEdges, projectView, standardViews, layoutMesh, weld };
+if (isNode) module.exports = TAV; else root.TAV = TAV;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
 <script>window.BASE_P1S = {"machine":{"nozzle_diameter":["0.4"],"printer_variant":"0.4","auxiliary_fan":"1","best_object_pos":"0.5x0.5","default_filament_profile":["Bambu PLA Basic @BBL P1S 0.4 nozzle"],"default_print_profile":"0.20mm Standard @BBL X1C","deretraction_speed":["30","30"],"extruder_clearance_height_to_lid":"90","extruder_clearance_height_to_rod":"34","extruder_clearance_max_radius":"68","extruder_clearance_dist_to_rod":"33","extruder_colour":["#018001"],"enable_long_retraction_when_cut":"2","enable_pre_heating":"0","extruder_height_gap":"0","extruder_offset":["0x2"],"fan_direction":"left","gcode_flavor":"marlin","grab_length":["0"],"group_algo_with_time":"0","extruder_max_nozzle_count":["1"],"hotend_cooling_rate":["2","2"],"hotend_heating_rate":["2","2"],"long_retractions_when_cut":["0","0"],"machine_load_filament_time":"29","machine_max_acceleration_e":["5000","5000","5000","5000"],"machine_max_acceleration_extruding":["20000","20000","20000","20000"],"machine_max_acceleration_retracting":["5000","5000","5000","5000"],"machine_max_acceleration_x":["20000","20000","20000","20000"],"machine_max_acceleration_y":["20000","20000","20000","20000"],"machine_max_acceleration_z":["500","500","500","500"],"machine_max_force_Y":"0","machine_bed_mass_Y":"0","machine_max_printed_mass":"0","machine_max_jerk_e":["2.5","2.5","2.5","2.5"],"machine_max_jerk_x":["9","9","9","9"],"machine_max_jerk_y":["9","9","9","9"],"machine_max_jerk_z":["3","3","3","3"],"machine_max_speed_e":["30","30","30","30"],"machine_max_speed_x":["500","500","500","500"],"machine_max_speed_y":["500","500","500","500"],"machine_max_speed_z":["20","20","20","20"],"machine_min_extruding_rate":["0"],"machine_min_travel_rate":["0"],"machine_prepare_compensation_time":"260","machine_switch_extruder_time":"0","machine_unload_filament_time":"28","machine_hotend_change_time":"0","master_extruder_id":"1","max_layer_height":["0.28"],"min_layer_height":["0.08"],"nozzle_height":"4.2","nozzle_flush_dataset":["0","0"],"print_in_clockwise":"0","printable_height":"250","printer_settings_id":"","printer_structure":"corexy","printer_technology":"FFF","retract_before_wipe":["0%","0%"],"retract_length_toolchange":["2","2"],"retract_restart_extra":["0","0"],"retract_restart_extra_toolchange":["0","0"],"retract_when_changing_layer":["1","1"],"retraction_distances_when_cut":["18","18"],"retraction_length":["0.8","0.8"],"retraction_minimum_travel":["1","1"],"retraction_speed":["30","30"],"scan_first_layer":"0","single_extruder_multi_material":"1","support_air_filtration":"1","support_cooling_filter":"0","support_fast_purge_mode":"0","cooling_filter_enabled":"0","support_chamber_temp_control":"0","support_object_skip_flush":"0","wipe":["1","1"],"wrapping_exclude_area":[],"z_hop":["0.4","0.4"],"upward_compatible_machine":["Bambu Lab P1P 0.4 nozzle","Bambu Lab X1 0.4 nozzle","Bambu Lab X1 Carbon 0.4 nozzle","Bambu Lab X1E 0.4 nozzle","Bambu Lab A1 0.4 nozzle","Bambu Lab H2D 0.4 nozzle","Bambu Lab H2D Pro 0.4 nozzle","Bambu Lab H2S 0.4 nozzle","Bambu Lab P2S 0.4 nozzle","Bambu Lab H2C 0.4 nozzle","Bambu Lab X2D 0.4 nozzle","Bambu Lab A2L 0.4 nozzle"],"machine_start_gcode":";===== machine: P1S-0.4 ========================\n;===== date: 20251031 =====================\n;===== turn on the HB fan & MC board fan =================\nM104 S75 ;set extruder temp to turn on the HB fan and prevent filament oozing from nozzle\nM710 A1 S255 ;turn on MC fan by default(P1S)\n;===== reset machine status =================\nM290 X40 Y40 Z2.6666666\nG91\nM17 Z0.4 ; lower the z-motor current\nG380 S2 Z30 F300 ; G380 is same as G38; lower the hotbed , to prevent the nozzle is below the hotbed\nG380 S2 Z-25 F300 ;\nG1 Z5 F300;\nG90\nM17 X1.2 Y1.2 Z0.75 ; reset motor current to default\nM960 S5 P1 ; turn on logo lamp\nG90\nM220 S100 ;Reset Feedrate\nM221 S100 ;Reset Flowrate\nM73.2   R1.0 ;Reset left time magnitude\nM1002 set_gcode_claim_speed_level : 5\nM221 X0 Y0 Z0 ; turn off soft endstop to prevent protential logic problem\nG29.1 Z{+0.0} ; clear z-trim value first\nM204 S10000 ; init ACC set to 10m/s^2\n\n;===== heatbed preheat ====================\nM1002 gcode_claim_action:54\nM140 S[bed_temperature_initial_layer_single] ;set bed temp\nM190 S[bed_temperature_initial_layer_single] ;wait for bed temp\n\n\n\n;=============turn on fans to prevent PLA jamming=================\n{if filament_type[initial_extruder]==\"PLA\"}\n    {if (bed_temperature[initial_extruder] >45)||(bed_temperature_initial_layer[initial_extruder] >45)}\n    M106 P3 S180\n    {endif};Prevent PLA from jamming\n{endif}\nM106 P2 S100 ; turn on big fan ,to cool down toolhead\n\n;===== prepare print temperature and material ==========\nM104 S[nozzle_temperature_initial_layer] ;set extruder temp\nG91\nG0 Z10 F1200\nG90\nG28 X\nM975 S1 ; turn on\nG1 X60 F12000\nG1 Y245\nG1 Y265 F3000\nM620 M\nM620 S[initial_extruder]A   ; switch material if AMS exist\n    M109 S[nozzle_temperature_initial_layer]\n    G1 X120 F12000\n\n    G1 X20 Y50 F12000\n    G1 Y-3\n    T[initial_extruder]\n    G1 X54 F12000\n    G1 Y265\n    M400\nM621 S[initial_extruder]A\nM620.1 E F{flush_volumetric_speeds[initial_no_support_extruder]/2.4053*60} T{flush_temperatures[initial_no_support_extruder]}\n\n\nM412 S1 ; ===turn on filament runout detection===\n\nM109 S250 ;set nozzle to common flush temp\nM106 P1 S0\nG92 E0\nG1 E50 F200\nM400\nM104 S[nozzle_temperature_initial_layer]\nG92 E0\nG1 E50 F200\nM400\nM106 P1 S255\nG92 E0\nG1 E5 F300\nM109 S{nozzle_temperature_initial_layer[initial_extruder]-20} ; drop nozzle temp, make filament shink a bit\nG92 E0\nG1 E-0.5 F300\n\nG1 X70 F9000\nG1 X76 F15000\nG1 X65 F15000\nG1 X76 F15000\nG1 X65 F15000; shake to put down garbage\nG1 X80 F6000\nG1 X95 F15000\nG1 X80 F15000\nG1 X165 F15000; wipe and shake\nM400\nM106 P1 S0\n;===== prepare print temperature and material end =====\n\n\n;===== wipe nozzle ===============================\nM1002 gcode_claim_action : 14\nM975 S1\nM106 S255\nG1 X65 Y230 F18000\nG1 Y264 F6000\nM109 S{nozzle_temperature_initial_layer[initial_extruder]-20}\nG1 X100 F18000 ; first wipe mouth\n\nG0 X135 Y253 F20000  ; move to exposed steel surface edge\nG28 Z P0 T300; home z with low precision,permit 300deg temperature\nG29.2 S0 ; turn off ABL\nG0 Z5 F20000\n\nG1 X60 Y265\nG92 E0\nG1 E-0.5 F300 ; retrack more\nG1 X100 F5000; second wipe mouth\nG1 X70 F15000\nG1 X100 F5000\nG1 X70 F15000\nG1 X100 F5000\nG1 X70 F15000\nG1 X100 F5000\nG1 X70 F15000\nG1 X90 F5000\nG0 X128 Y261 Z-1.5 F20000  ; move to exposed steel surface and stop the nozzle\nM104 S140 ; set temp down to heatbed acceptable\nM106 S255 ; turn on fan (G28 has turn off fan)\n\nM221 S; push soft endstop status\nM221 Z0 ;turn off Z axis endstop\nG0 Z0.5 F20000\nG0 X125 Y259.5 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y262.5\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y260.0\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y262.0\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y260.5\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y261.5\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 Z0.5 F20000\nG0 X125 Y261.0\nG0 Z-1.01\nG0 X131 F211\nG0 X124\nG0 X128\nG2 I0.5 J0 F300\nG2 I0.5 J0 F300\nG2 I0.5 J0 F300\nG2 I0.5 J0 F300\n\nM109 S140 ; wait nozzle temp down to heatbed acceptable\nG2 I0.5 J0 F3000\nG2 I0.5 J0 F3000\nG2 I0.5 J0 F3000\nG2 I0.5 J0 F3000\n\nM221 R; pop softend status\nG1 Z10 F1200\nM400\nG1 Z10\nG1 F30000\nG1 X230 Y15\nG29.2 S1 ; turn on ABL\n;G28 ; home again after hard wipe mouth\nM106 S0 ; turn off fan , too noisy\n;===== wipe nozzle end ================================\n\n\n;===== bed leveling ==================================\nM1002 judge_flag g29_before_print_flag\nM622 J1\n\n    M1002 gcode_claim_action : 1\n    G29 A X{first_layer_print_min[0]} Y{first_layer_print_min[1]} I{first_layer_print_size[0]} J{first_layer_print_size[1]}\n    M400\n    M500 ; save cali data\n\nM623\n;===== bed leveling end ================================\n\n;===== home after wipe mouth============================\nM1002 judge_flag g29_before_print_flag\nM622 J0\n\n    M1002 gcode_claim_action : 13\n    G28\n\nM623\n;===== home after wipe mouth end =======================\n\nM975 S1 ; turn on vibration supression\n\n\n;=============turn on fans to prevent PLA jamming=================\n{if filament_type[initial_extruder]==\"PLA\"}\n    {if (bed_temperature[initial_extruder] >45)||(bed_temperature_initial_layer[initial_extruder] >45)}\n    M106 P3 S180\n    {endif};Prevent PLA from jamming\n{endif}\nM106 P2 S100 ; turn on big fan ,to cool down toolhead\n\n\nM104 S{nozzle_temperature_initial_layer[initial_extruder]} ; set extrude temp earlier, to reduce wait time\n\n;===== mech mode fast check============================\nG1 X128 Y128 Z10 F20000\nM400 P200\nM970.3 Q1 A7 B30 C80  H15 K0\nM974 Q1 S2 P0\n\nG1 X128 Y128 Z10 F20000\nM400 P200\nM970.3 Q0 A7 B30 C90 Q0 H15 K0\nM974 Q0 S2 P0\n\nM975 S1\nG1 F30000\nG1 X230 Y15\nG28 X ; re-home XY\n;===== fmech mode fast check============================\n\n\n;===== nozzle load line ===============================\nM975 S1\nG90\nM83\nT1000\nG1 X18.0 Y1.0 Z0.8 F18000;Move to start position\nM109 S{nozzle_temperature_initial_layer[initial_extruder]}\nG1 Z0.2\nG0 E2 F300\nG0 X240 E15 F{outer_wall_volumetric_speed/(0.3*0.5)     * 60}\nG0 Y11 E0.700 F{outer_wall_volumetric_speed/(0.3*0.5)/ 4 * 60}\nG0 X239.5\nG0 E0.2\nG0 Y1.5 E0.700\nG0 X18 E15 F{outer_wall_volumetric_speed/(0.3*0.5)     * 60}\nM400\n\n;===== for Textured PEI Plate , lower the nozzle as the nozzle was touching topmost of the texture when homing ==\n;curr_bed_type={curr_bed_type}\n{if curr_bed_type==\"Textured PEI Plate\"}\nG29.1 Z{-0.04} ; for Textured PEI Plate\n{endif}\n;========turn off light and wait extrude temperature =============\nM1002 gcode_claim_action : 0\nM106 S0 ; turn off fan\nM106 P2 S0 ; turn off big fan\nM106 P3 S0 ; turn off chamber fan\n\nM975 S1 ; turn on mech mode supression\n","machine_end_gcode":";===== date: 20230428 =====================\nM400 ; wait for buffer to clear\nG92 E0 ; zero the extruder\nG1 E-0.8 F1800 ; retract\nG1 Z{max_layer_z + 0.5} F900 ; lower z a little\nG1 X65 Y245 F12000 ; move to safe pos \nG1 Y265 F3000\n\nG1 X65 Y245 F12000\nG1 Y265 F3000\nM140 S0 ; turn off bed\nM106 S0 ; turn off fan\nM106 P2 S0 ; turn off remote part cooling fan\nM106 P3 S0 ; turn off chamber cooling fan\n\nG1 X100 F12000 ; wipe\n; pull back filament to AMS\nM620 S255\nG1 X20 Y50 F12000\nG1 Y-3\nT255\nG1 X65 F12000\nG1 Y265\nG1 X100 F12000 ; wipe\nM621 S255\nM104 S0 ; turn off hotend\n\nM622.1 S1 ; for prev firware, default turned on\nM1002 judge_flag timelapse_record_flag\nM622 J1\n    M400 ; wait all motion done\n    M991 S0 P-1 ;end smooth timelapse at safe pos\n    M400 S3 ;wait for last picture to be taken\nM623; end of \"timelapse_record_flag\"\n\nM400 ; wait all motion done\nM17 S\nM17 Z0.4 ; lower z motor current to reduce impact if there is something in the bottom\n{if (max_layer_z + 100.0) < 250}\n    G1 Z{max_layer_z + 100.0} F600\n    G1 Z{max_layer_z +98.0}\n{else}\n    G1 Z250 F600\n    G1 Z248\n{endif}\nM400 P100\nM17 R ; restore z current\n\nM220 S100  ; Reset feedrate magnitude\nM201.2 K1.0 ; Reset acc magnitude\nM73.2   R1.0 ;Reset left time magnitude\nM1002 set_gcode_claim_speed_level : 0\n\nM17 X0.8 Y0.8 Z0.5 ; lower motor current to 45% power\n","time_lapse_gcode":";========Date 20250206========\n; SKIPPABLE_START\n; SKIPTYPE: timelapse\nM622.1 S1 ; for prev firmware, default turned on\nM1002 judge_flag timelapse_record_flag\nM622 J1\n{if timelapse_type == 0} ; timelapse without wipe tower\nM971 S11 C10 O0\nM1004 S5 P1  ; external shutter\n{elsif timelapse_type == 1} ; timelapse with wipe tower\nG92 E0\nG1 X65 Y245 F20000 ; move to safe pos\nG17\nG2 Z{layer_z} I0.86 J0.86 P1 F20000\nG1 Y265 F3000\nM400\nM1004 S5 P1  ; external shutter\nM400 P300\nM971 S11 C11 O0\nG92 E0\nG1 X100 F5000\nG1 Y255 F20000\n{endif}\nM623\n; SKIPPABLE_END","wrapping_detection_gcode":"","change_filament_gcode":";=P1S 20251031=\nM620 S[next_extruder]A\nM204 S9000\nG1 Z{max_layer_z + 3.0} F1200\n\nG1 X70 F21000\nG1 Y245\nG1 Y265 F3000\nM400\nM106 P1 S0\nM106 P2 S0\n{if old_filament_temp > 142 && next_extruder < 255}\nM104 S[old_filament_temp]\n{endif}\n{if long_retractions_when_cut[previous_extruder]}\nM620.11 S1 I[previous_extruder] E-{retraction_distances_when_cut[previous_extruder]} F{flush_volumetric_speeds[previous_extruder]/2.4053*60}\n{else}\nM620.11 S0\n{endif}\nM400\nG1 X90 F3000\nG1 Y255 F4000\nG1 X100 F5000\nG1 X120 F15000\nG1 X20 Y50 F21000\nG1 Y-3\n{if toolchange_count == 2}\n; get travel path for change filament\nM620.1 X[travel_point_1_x] Y[travel_point_1_y] F21000 P0\nM620.1 X[travel_point_2_x] Y[travel_point_2_y] F21000 P1\nM620.1 X[travel_point_3_x] Y[travel_point_3_y] F21000 P2\n{endif}\nM620.1 E F{flush_volumetric_speeds[previous_extruder]/2.4053*60} T{flush_temperatures[previous_extruder]}\nT[next_extruder]\nM620.1 E F{flush_volumetric_speeds[next_extruder]/2.4053*60} T{flush_temperatures[next_extruder]}\n\n{if next_extruder < 255}\n{if long_retractions_when_cut[previous_extruder]}\nM620.11 S1 I[previous_extruder] E{retraction_distances_when_cut[previous_extruder]} F{flush_volumetric_speeds[previous_extruder]/2.4053*60}\nM628 S1\nG92 E0\nG1 E{retraction_distances_when_cut[previous_extruder]} F{flush_volumetric_speeds[previous_extruder]/2.4053*60}\nM400\nM629 S1\n{else}\nM620.11 S0\n{endif}\nG92 E0\n{if flush_length_1 > 1}\nM83\n; FLUSH_START\n; always use highest temperature to flush\nM400\n{if filament_type[next_extruder] == \"PETG\"}\nM109 S260\n{elsif filament_type[next_extruder] == \"PVA\"}\nM109 S210\n{else}\nM109 S{flush_temperatures[next_extruder]}\n{endif}\n{if flush_length_1 > 23.7}\nG1 E23.7 F{flush_volumetric_speeds[previous_extruder]/2.4053*60} ; do not need pulsatile flushing for start part\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{flush_volumetric_speeds[previous_extruder]/2.4053*60}\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{(flush_length_1 - 23.7) * 0.02} F50\nG1 E{(flush_length_1 - 23.7) * 0.23} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\n{else}\nG1 E{flush_length_1} F{flush_volumetric_speeds[previous_extruder]/2.4053*60}\n{endif}\n; FLUSH_END\nG1 E-[old_retract_length_toolchange] F1800\nG1 E[old_retract_length_toolchange] F300\n{endif}\n\n{if flush_length_2 > 1}\n\nG91\nG1 X3 F12000; move aside to extrude\nG90\nM83\n\n; FLUSH_START\nG1 E{flush_length_2 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_2 * 0.02} F50\nG1 E{flush_length_2 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_2 * 0.02} F50\n; FLUSH_END\nG1 E-[new_retract_length_toolchange] F1800\nG1 E[new_retract_length_toolchange] F300\n{endif}\n\n{if flush_length_3 > 1}\n\nG91\nG1 X3 F12000; move aside to extrude\nG90\nM83\n\n; FLUSH_START\nG1 E{flush_length_3 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_3 * 0.02} F50\nG1 E{flush_length_3 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_3 * 0.02} F50\n; FLUSH_END\nG1 E-[new_retract_length_toolchange] F1800\nG1 E[new_retract_length_toolchange] F300\n{endif}\n\n{if flush_length_4 > 1}\n\nG91\nG1 X3 F12000; move aside to extrude\nG90\nM83\n\n; FLUSH_START\nG1 E{flush_length_4 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_4 * 0.02} F50\nG1 E{flush_length_4 * 0.18} F{flush_volumetric_speeds[next_extruder]/2.4053*60}\nG1 E{flush_length_4 * 0.02} F50\n; FLUSH_END\n{endif}\n; FLUSH_START\nM400\nM109 S[new_filament_temp]\nG1 E2 F{flush_volumetric_speeds[next_extruder]/2.4053*60} ;Compensate for filament spillage during waiting temperature\n; FLUSH_END\nM400\nG92 E0\nG1 E-[new_retract_length_toolchange] F1800\nM106 P1 S255\nM400 S3\n\nG1 X70 F5000\nG1 X90 F3000\nG1 Y255 F4000\nG1 X105 F5000\nG1 Y265 F5000\nG1 X70 F10000\nG1 X100 F5000\nG1 X70 F10000\nG1 X100 F5000\n\nG1 X70 F10000\nG1 X80 F15000\nG1 X60\nG1 X80\nG1 X60\nG1 X80 ; shake to put down garbage\nG1 X100 F5000\nG1 X165 F15000; wipe and shake\nG1 Y256 ; move Y to aside, prevent collision\nM400\nG1 Z{max_layer_z + 3.0} F3000\n{if layer_z <= (initial_layer_print_height + 0.001)}\nM204 S[initial_layer_acceleration]\n{else}\nM204 S[default_acceleration]\n{endif}\n{else}\nG1 X[x_after_toolchange] Y[y_after_toolchange] Z[z_after_toolchange] F12000\n{endif}\nM621 S[next_extruder]A\n","use_3mf":"1","bed_exclude_area":["0x0","18x0","18x28","0x28"],"default_nozzle_volume_type":["Standard"],"extruder_printable_area":[],"extruder_printable_height":[],"extruder_type":["Direct Drive"],"extruder_variant_list":["Direct Drive Standard,Direct Drive High Flow"],"head_wrap_detect_zone":[],"machine_max_acceleration_travel":["9000","9000","9000","9000"],"nozzle_volume":["107","107"],"physical_extruder_map":["0"],"printable_area":["0x0","256x0","256x256","0x256"],"printer_extruder_id":["1","1"],"printer_extruder_variant":["Direct Drive Standard","Direct Drive High Flow"],"retract_lift_above":["0","0"],"retract_lift_below":["249","249"],"wipe_distance":["2","2"],"z_hop_types":["Auto Lift","Auto Lift"],"layer_change_gcode":"; layer num/total_layer_count: {layer_num+1}/[total_layer_count]\n; update layer progress\nM73 L{layer_num+1}\nM991 S0 P{layer_num} ;notify layer change","machine_pause_gcode":"M400 U1","printer_model":"Bambu Lab P1S","farthest_point_timelapse":"1"},"process":{"bottom_shell_layers":"3","bottom_color_penetration_layers":"3","bottom_shell_thickness":"0","bottom_surface_pattern":"monotonic","bottom_surface_density":"100","bridge_flow":"1","bridge_no_support":"0","bridge_speed":["50","50"],"brim_object_gap":"0.1","brim_width":"5","circle_compensation_manual_offset":"0","default_acceleration":["10000","10000"],"detect_floating_vertical_shell":"1","detect_overhang_wall":"1","detect_thin_wall":"0","draft_shield":"disabled","elefant_foot_compensation":"0.15","enable_arc_fitting":"1","enable_prime_tower":"1","enable_support":"0","enable_circle_compensation":"0","enable_wrapping_detection":"0","filename_format":"{input_filename_base}_{filament_type[0]}_{print_time}.gcode","gap_infill_speed":["250","250"],"infill_combination":"0","infill_direction":"45","infill_wall_overlap":"15%","monotonic_travel_into_wall":"0.0","initial_layer_line_width":"0.5","initial_layer_infill_line_width":"0.5","initial_layer_print_height":"0.2","initial_layer_speed":["50","50"],"inner_wall_line_width":"0.45","inner_wall_speed":["300","400"],"interface_shells":"0","internal_solid_infill_line_width":"0.42","internal_solid_infill_speed":["250","350"],"ironing_flow":"10%","ironing_inset":"0.21","ironing_spacing":"0.15","ironing_speed":"30","ironing_type":"no ironing","infill_lock_depth":"1.0","initial_layer_travel_acceleration":["6000","6000"],"infill_shift_step":"0.4","infill_rotate_step":"0","layer_height":"0.2","layer_time_smoothing":"0","layer_time_smoothing_threshold":"30","line_width":"0.42","locked_skin_infill_pattern":"crosszag","locked_skeleton_infill_pattern":"zigzag","max_bridge_length":"0","max_travel_detour_distance":"0","avoid_crossing_wall_includes_support":"0","minimum_sparse_infill_area":"15","only_one_wall_top":"1","outer_wall_line_width":"0.42","outer_wall_speed":["200","350"],"override_filament_scarf_seam_setting":"0","pre_start_fan_time":["0"],"prime_tower_width":"35","print_sequence":"by layer","print_settings_id":"","prime_tower_brim_width":"3","prime_tower_enable_framework":"0","prime_tower_lift_speed":"90","prime_tower_lift_height":"-1","prime_tower_max_speed":"90","prime_tower_flat_ironing":"0","raft_layers":"0","reduce_crossing_wall":"0","reduce_infill_retraction":"1","resolution":"0.012","scarf_angle_threshold":"155","seam_position":"aligned","seam_placement_away_from_overhangs":"0","skirt_distance":"2","skirt_per_object":"1","skirt_height":"1","skirt_loops":"0","sparse_infill_density":"15%","fill_multiline":"1","skeleton_infill_density":"15%","skin_infill_density":"15%","sparse_infill_line_width":"0.45","skin_infill_line_width":"0.45","skin_infill_depth":"2.0","skeleton_infill_line_width":"0.45","sparse_infill_pattern":"grid","sparse_infill_speed":["270","370"],"spiral_mode":"0","standby_temperature_delta":"-5","support_base_pattern":"default","support_base_pattern_spacing":"2.5","support_bottom_z_distance":"0.2","support_expansion":"0","support_filament":"0","support_interface_bottom_layers":"2","support_interface_filament":"0","support_interface_loop_pattern":"0","support_interface_pattern":"auto","support_interface_spacing":"0.5","support_interface_speed":["80","80"],"support_interface_top_layers":"2","support_line_width":"0.42","support_object_xy_distance":"0.35","support_on_build_plate_only":"0","support_speed":["150","150"],"support_style":"default","support_threshold_angle":"30","support_top_z_distance":"0.2","support_type":"tree(auto)","enable_support_ironing":"0","support_ironing_pattern":"zig-zag","support_ironing_speed":"30","support_ironing_flow":"10%","support_ironing_spacing":"0.15","support_ironing_inset":"0.0","support_ironing_direction":"0","seam_slope_type":"none","seam_slope_start_height":"10%","seam_slope_gap":"0","seam_slope_min_length":"10","symmetric_infill_y_axis":"0","sparse_infill_lattice_angle_1":"-45","sparse_infill_lattice_angle_2":"45","top_shell_layers":"5","top_color_penetration_layers":"5","top_shell_thickness":"1.0","top_surface_line_width":"0.42","top_surface_pattern":"monotonicline","top_surface_density":"100","top_surface_speed":["200","300"],"top_solid_infill_flow_ratio":["1","1"],"travel_acceleration":["10000","10000"],"travel_short_distance_acceleration":["250","250"],"travel_speed":["500","500"],"tree_support_branch_angle":"45","tree_support_branch_diameter":"2","tree_support_wall_count":"-1","wall_generator":"classic","wall_infill_order":"inner wall/outer wall/infill","wall_loops":"2","wipe_tower_no_sparse_layers":"0","xy_contour_compensation":"0","xy_hole_compensation":"0","z_direction_outwall_speed_continuous":"0","enable_tower_interface_features":"0","sparse_infill_filament":"0","wall_filament":"0","solid_infill_filament":"0","infill_instead_top_bottom_surfaces":"0","fuzzy_skin":"none","fuzzy_skin_thickness":"0.3","fuzzy_skin_point_distance":"0.8","fuzzy_skin_first_layer":"0","fuzzy_skin_noise_type":"classic","fuzzy_skin_mode":"displacement","fuzzy_skin_scale":"1.0","fuzzy_skin_octaves":"4","fuzzy_skin_persistence":"0.5","enable_overhang_speed":["1","1"],"enable_height_slowdown":["0","0"],"initial_layer_acceleration":["500","500"],"initial_layer_infill_speed":["105","105"],"inner_wall_acceleration":["0","0"],"outer_wall_acceleration":["5000","5000"],"overhang_1_4_speed":["0","0"],"overhang_2_4_speed":["50","50"],"overhang_3_4_speed":["30","30"],"overhang_4_4_speed":["10","10"],"print_extruder_id":["1","1"],"print_extruder_variant":["Direct Drive Standard","Direct Drive High Flow"],"slowdown_start_height":["0","0"],"slowdown_start_speed":["1000","1000"],"slowdown_start_acc":["100000","100000"],"slowdown_end_height":["400","400"],"slowdown_end_speed":["1000","1000"],"slowdown_end_acc":["100000","100000"],"small_perimeter_speed":["50%","50%"],"small_perimeter_threshold":["0","0"],"sparse_infill_acceleration":["100%","100%"],"top_surface_acceleration":["2000","2000"],"travel_speed_z":["0","0"],"vertical_shell_speed":["80%","80%"]},"filament":{"activate_air_filtration":["0"],"additional_cooling_fan_speed":["70"],"chamber_temperatures":["0"],"circle_compensation_speed":["200"],"close_fan_the_first_x_layers":["1"],"close_additional_fan_first_x_layers":["1"],"complete_print_exhaust_fan_speed":["70"],"cool_plate_temp":["35"],"cool_plate_temp_initial_layer":["35"],"counter_coef_1":["0"],"counter_coef_2":["0.008"],"counter_coef_3":["-0.041"],"counter_limit_max":["0.033"],"counter_limit_min":["-0.035"],"diameter_limit":["50"],"during_print_exhaust_fan_speed":["70"],"eng_plate_temp":["0"],"eng_plate_temp_initial_layer":["0"],"fan_cooling_layer_time":["100"],"fan_max_speed":["100"],"fan_min_speed":["100"],"filament_adaptive_volumetric_speed":["0"],"filament_extruder_compatibility":["0"],"filament_cooling_before_tower":["0"],"filament_preheat_temperature_delta":["0"],"filament_tower_interface_pre_extrusion_dist":["10"],"filament_tower_interface_pre_extrusion_length":["0"],"filament_tower_ironing_area":["4"],"filament_tower_interface_purge_volume":["20"],"filament_tower_interface_print_temp":["-1"],"filament_cost":["20"],"filament_density":["1.24"],"filament_deretraction_speed":["nil"],"filament_dev_ams_drying_ams_limitations":["1","0"],"filament_dev_ams_drying_heat_distortion_temperature":["45"],"filament_dev_ams_drying_temperature":["45","45","45","45"],"filament_dev_ams_drying_time":["12","12","12","12"],"filament_dev_chamber_drying_bed_temperature":["70"],"filament_dev_chamber_drying_time":["12.0"],"filament_dev_drying_cooling_temperature":["45"],"filament_dev_drying_softening_temperature":["50"],"filament_diameter":["1.75"],"filament_extruder_variant":["Direct Drive Standard"],"filament_flow_ratio":["0.98"],"filament_flush_temp":["0"],"filament_flush_temp_fast":["0"],"filament_flush_volumetric_speed":["0"],"filament_is_support":["0"],"filament_long_retractions_when_cut":["nil"],"filament_long_retractions_when_ec":["nil"],"filament_max_volumetric_speed":["12"],"filament_metal_stickiness":["None"],"filament_minimal_purge_on_wipe_tower":["15"],"filament_pre_cooling_temperature":["0"],"filament_pre_cooling_temperature_nc":["0"],"filament_prime_volume":["45"],"filament_prime_volume_nc":["60"],"filament_printable":["3"],"filament_ramming_travel_time_nc":["0"],"filament_ramming_volumetric_speed":["-1"],"filament_ramming_volumetric_speed_nc":["-1"],"filament_retract_before_wipe":["nil"],"filament_retract_restart_extra":["nil"],"filament_retract_when_changing_layer":["nil"],"filament_retraction_distances_when_cut":["nil"],"filament_retraction_distances_when_ec":["nil"],"filament_retraction_length":["nil"],"filament_retraction_minimum_travel":["nil"],"filament_retraction_speed":["nil"],"filament_scarf_seam_type":["none"],"filament_settings_id":[""],"filament_shrink":["100%"],"filament_soluble":["0"],"filament_type":["PLA"],"filament_vendor":["Generic"],"filament_wipe":["nil"],"filament_wipe_distance":["nil"],"filament_z_hop":["nil"],"filament_z_hop_types":["nil"],"full_fan_speed_layer":["0"],"additional_fan_full_speed_layer":["0"],"filament_scarf_height":["10%"],"filament_scarf_gap":["15%"],"filament_scarf_length":["10"],"filament_ramming_travel_time":["0"],"filament_retract_length_nc":["14"],"filament_enable_overhang_speed":["1"],"filament_overhang_1_4_speed":["0"],"filament_overhang_2_4_speed":["50"],"filament_overhang_3_4_speed":["30"],"filament_overhang_4_4_speed":["10"],"filament_overhang_totally_speed":["10"],"filament_bridge_speed":["25"],"filament_change_length":["10"],"filament_velocity_adaptation_factor":["1"],"hot_plate_temp":["55"],"hot_plate_temp_initial_layer":["55"],"filament_ingredients_safe":"1","filament_emission_safe":"1","filament_contact_safe":"1","hole_coef_1":["0"],"hole_coef_2":["-0.008"],"hole_coef_3":["0.23415"],"hole_limit_max":["0.22"],"hole_limit_min":["0.088"],"impact_strength_z":["10.0"],"long_retractions_when_ec":["0"],"no_slow_down_for_cooling_on_outwalls":["0"],"nozzle_temperature":["220"],"nozzle_temperature_initial_layer":["220"],"nozzle_temperature_range_high":["240"],"nozzle_temperature_range_low":["190"],"overhang_fan_speed":["100"],"overhang_fan_threshold":["50%"],"override_process_overhang_speed":["0"],"reduce_fan_stop_start_freq":["1"],"required_nozzle_HRC":["3"],"retraction_distances_when_ec":["0"],"slow_down_for_layer_cooling":["1"],"cooling_slowdown_logic":["uniform_cooling"],"cooling_perimeter_transition_distance":["10"],"slow_down_layer_time":["8"],"slow_down_min_speed":["20"],"supertack_plate_temp":["45"],"supertack_plate_temp_initial_layer":["45"],"temperature_vitrification":["45"],"textured_plate_temp":["55"],"textured_plate_temp_initial_layer":["55"],"volumetric_speed_coefficients":["0 0 0 0 0 0"],"filament_start_gcode":["; filament start gcode\n{if  (bed_temperature[current_extruder] >55)||(bed_temperature_initial_layer[current_extruder] >55)}M106 P3 S200\n{elsif(bed_temperature[current_extruder] >50)||(bed_temperature_initial_layer[current_extruder] >50)}M106 P3 S150\n{elsif(bed_temperature[current_extruder] >45)||(bed_temperature_initial_layer[current_extruder] >45)}M106 P3 S50\n{endif}\n\n{if activate_air_filtration[current_extruder] && support_air_filtration}\nM106 P3 S{during_print_exhaust_fan_speed_num[current_extruder]} \n{endif}"],"filament_end_gcode":["; filament end gcode \n\n"],"filament_adhesiveness_category":["100"]},"names":{"machine":"Bambu Lab P1S 0.4 nozzle","process":"0.20mm Standard @BBL X1C","filament":"Generic PLA"},"filament_id":"OFDSrzZ8","print_compatible_printers":["Bambu Lab X1 Carbon 0.4 nozzle","Bambu Lab X1 0.4 nozzle","Bambu Lab P1S 0.4 nozzle","Bambu Lab X1E 0.4 nozzle"]};</script>
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.2'; // v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.3'; // v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
 function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
@@ -1330,7 +1846,7 @@ const S = {
   tools: Object.fromEntries(Object.keys(TOOLS).map(k => [k, Object.assign({}, Object.fromEntries(KEYS.map(q => [q, TOOLS[k][q]])), (saved.tools || {})[k] || {})])),
   offX: saved.offX || 0, offY: saved.offY || 0,
   skipPurge: saved.skipPurge !== false, nozT: saved.nozT || 180, bedT: saved.bedT || 25,
-  src: 'image', alg: 'hatch', gen: 'flow', stk: 'image', cal: 'frame',
+  src: 'image', alg: 'hatch', gen: 'flow', stk: 'image', cal: 'frame', tav: 'foto', tfImgs: [null, null, null], tmMesh: null, tmName: '', tvCache: {},
   W: 180, H: 180, seed: 1,
   img: null, imgAR: 1, stkImg: null, svgDoc: null,
   params: {}, groupsMeta: [], pauseEvery: false, showTravel: false, plateView: false,
@@ -1431,6 +1947,14 @@ const GEN_P = {
   circles: c => { slider(c, 'g_spacing', 'Distanza cerchi (mm)', 0.8, 8, 0.1, 2.5); },
   maze: c => { slider(c, 'g_cell', 'Cella (mm)', 3, 30, 1, 8); },
 };
+function renderTavParams() {
+  const c = $('#tfParams'); c.innerHTML = '';
+  slider(c, 'tf_feat', 'Quote di dettaglio', 0, 5, 1, 3);
+  slider(c, 'tf_detail', 'Dettagli interni', 0, 1, 0.05, 0.4);
+  slider(c, 'tf_bg', 'Soglia sfondo', 0.03, 0.5, 0.01, 0.12);
+  const m = $('#tmParams'); m.innerHTML = '';
+  slider(m, 'tm_crease', 'Spigoli da (°)', 5, 80, 1, 30, v => v + '°');
+}
 function renderGenParams() { const c = $('#genParams'); c.innerHTML = ''; GEN_P[S.gen](c); }
 const CAL_HELP = {
   frame: 'Disegna la cornice dell’area utile, la croce al centro e tacche ogni 10 mm. Serve a vedere dove cade il tratto sul foglio e a regolare la correzione X/Y.',
@@ -1442,10 +1966,11 @@ const CAL_HELP = {
 function tabs(sel, attr, key, after) {
   $$(sel + ' button').forEach(b => b.onclick = () => { S[key] = b.dataset[attr]; $$(sel + ' button').forEach(x => x.classList.toggle('on', x === b)); after && after(); schedule(); });
 }
-tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib') { fitArea(); } });
+tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib' || S.src === 'tavola') { fitArea(); } });
 tabs('#algTabs', 'alg', 'alg', renderAlgParams);
 tabs('#genTabs', 'gen', 'gen', renderGenParams);
 tabs('#stkTabs', 'stk', 'stk', () => (S.groupsMeta = [], $$('[data-stk]')).forEach(d => { if (d.tagName === 'DIV') d.hidden = d.dataset.stk !== S.stk; }));
+tabs('#tavTabs', 'tav', 'tav', () => { S.groupsMeta = []; $$('[data-tav]').forEach(d => { if (d.tagName === 'DIV') d.hidden = d.dataset.tav !== S.tav; }); });
 tabs('#calTabs', 'cal', 'cal', () => { S.groupsMeta = []; $('#calHelp').textContent = CAL_HELP[S.cal]; });
 $('#calHelp').textContent = CAL_HELP.frame;
 $('#seed').onchange = e => { S.seed = parseInt(e.target.value) || 1; schedule(); };
@@ -1498,6 +2023,30 @@ pick('#svgDrop', '#svgFile', async file => {
   const host = svgHost(); host.innerHTML = ''; host.appendChild(document.importNode(svg, true));
   const bb = host.firstChild.getBBox(); S.svgAR = bb.width / bb.height || 1; fitArea();
 });
+// tavola: foto (3 viste) e mesh
+let tfSlot = 0;
+for (let i = 0; i < 3; i++) { const d = $('#tfDrop' + i);
+  d.onclick = () => { tfSlot = i; $('#tfFile').click(); };
+  d.ondragover = e => { e.preventDefault(); d.style.background = '#f4f6ff'; }; d.ondragleave = () => d.style.background = '';
+  d.ondrop = e => { e.preventDefault(); d.style.background = ''; const f = e.dataTransfer.files[0]; if (f) tfLoad(i, f); }; }
+$('#tfFile').onchange = () => { const f = $('#tfFile').files[0]; if (f) tfLoad(tfSlot, f); $('#tfFile').value = ''; };
+async function tfLoad(i, file) {
+  try { const im = await loadImage(file); S.tfImgs[i] = { im, name: file.name }; const d = $('#tfDrop' + i); d.textContent = '✓ ' + ['Fronte', 'Fianco', 'Retro'][i]; d.classList.add('has'); S.tvCache = {}; schedule(); }
+  catch (e) { toast('Immagine non leggibile'); }
+}
+$('#tfClear').onclick = () => { S.tfImgs = [null, null, null]; S.tvCache = {}; [0, 1, 2].forEach(i => { const d = $('#tfDrop' + i); d.textContent = ['Fronte', 'Fianco', 'Retro'][i]; d.classList.remove('has'); }); schedule(); };
+pick('#tmDrop', '#tmFile', async file => {
+  try {
+    const buf = await file.arrayBuffer();
+    S.tmMesh = /\.3mf$/i.test(file.name) ? TAV.parse3MF(buf) : TAV.parseSTL(buf);
+    S.tmName = file.name.replace(/\.(stl|3mf)$/i, ''); S.tvCache = {};
+    $('#tmDrop').textContent = '✓ ' + file.name + ' · ' + (S.tmMesh.T.length / 3) + ' triangoli'; $('#tmDrop').classList.add('has');
+    if (!$('#tvTitle').value) $('#tvTitle').value = S.tmName;
+    schedule();
+  } catch (e) { console.error(e); toast('File non leggibile: ' + esc(e.message)); }
+});
+['#tfRealH', '#tmUp', '#tmMethod', '#tmHidden', '#tmIso', '#tvTitle', '#tvMat', '#tvAuthor', '#tvTextH', '#tvFrame', '#tvGrid', '#tvPen2'].forEach(s => $(s).addEventListener('change', () => { if (s === '#tvAuthor') { try { localStorage.setItem('tratto.author', $(s).value); } catch (e) {} } schedule(); }));
+try { $('#tvAuthor').value = localStorage.getItem('tratto.author') || ''; } catch (e) {}
 function svgHost() { let h = $('#svgHost'); if (!h) { h = document.createElement('div'); h.id = 'svgHost'; h.style.cssText = 'position:absolute;left:-10000px;top:0;width:1000px;height:1000px;opacity:0;pointer-events:none'; document.body.appendChild(h); } return h; }
 
 // immagine → campo di tono
@@ -1605,12 +2154,55 @@ function computeJob() {
       }
       groups.push({ tool: 'blade', paths: TR.orderPaths(cut) });
     }
+  } else if (S.src === 'tavola') {
+    const r = tavolaGroups(W, H); if (!r) return null;
+    groups = r.groups; name = r.name;
   } else if (S.src === 'calib') {
     name = 'calibrazione-' + S.cal;
     groups = [{ tool: S.tool, paths: calibPaths(W, H, S.cal) }];
   }
   groups = groups.filter(g => (g.slices ? g.slices.some(s => s.length) : g.paths && g.paths.length));
   return { name, W, H, groups };
+}
+function imgRGBA(im, maxSide) {
+  const k = Math.min(1, maxSide / Math.max(im.naturalWidth, im.naturalHeight));
+  const w = Math.max(16, Math.round(im.naturalWidth * k)), h = Math.max(16, Math.round(im.naturalHeight * k));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(im, 0, 0, w, h);
+  return { w, h, rgba: cx.getImageData(0, 0, w, h).data };
+}
+function tavolaGroups(W, H) {
+  const o = { title: $('#tvTitle').value || (S.tav === 'mesh' ? S.tmName : '') || 'Tavola', material: $('#tvMat').value, author: $('#tvAuthor').value, frame: $('#tvFrame').checked, titleBlock: $('#tvFrame').checked, textH: Math.max(2, +$('#tvTextH').value || 3) };
+  let L;
+  if (S.tav === 'foto') {
+    const imgs = S.tfImgs.map((t, i) => t && { t, i }).filter(Boolean); if (!imgs.length) return null;
+    const realH = Math.max(1, +$('#tfRealH').value || 100);
+    const views = imgs.map(({ t, i }) => {
+      const key = 'f' + i + ':' + t.name + ':' + P('tf_detail', 0.4) + ':' + P('tf_bg', 0.12) + ':' + P('tf_feat', 3) + ':' + realH;
+      if (!S.tvCache[key]) {
+        const an = TAV.photoAnalyze(imgRGBA(t.im, 900), { detail: P('tf_detail', 0.4), bgThr: P('tf_bg', 0.12) });
+        if (!an) return null;
+        S.tvCache[key] = TAV.photoViewMM(an, realH, { detail: P('tf_detail', 0.4), features: i === 0 ? P('tf_feat', 3) : 0 });
+      }
+      return { name: ['fronte', 'fianco', 'retro'][i], view: S.tvCache[key] };
+    }).filter(Boolean);
+    if (!views.length) return null;
+    if (views[0].name !== 'fronte') views[0].view = Object.assign({}, views[0].view);
+    const o2 = Object.assign({}, o, { viewNames: views.length > 1 });
+    L = TAV.layoutPhoto(views, W, H, o2); L = TAV.layoutPhoto(views, W, H, Object.assign(o2, { scale: L.scaleLabel }));
+  } else {
+    if (!S.tmMesh) return null;
+    const key = 'm:' + S.tmName + ':' + $('#tmUp').value + ':' + P('tm_crease', 30) + ':' + $('#tmIso').checked;
+    if (!S.tvCache[key]) S.tvCache = { [key]: TAV.standardViews(S.tmMesh, { up: $('#tmUp').value, crease: P('tm_crease', 30), iso: $('#tmIso').checked }) };
+    const o2 = Object.assign({}, o, { method: $('#tmMethod').value, hidden: $('#tmHidden').checked });
+    L = TAV.layoutMesh(S.tvCache[key], W, H, o2); L = TAV.layoutMesh(S.tvCache[key], W, H, Object.assign(o2, { scale: L.scaleLabel }));
+  }
+  const pen = tool().kind === 'pen' ? S.tool : 'stabilo';
+  const drawing = TR.orderPaths([...L.frame, ...L.draw, ...(L.hidden || [])]);
+  const groups = [];
+  if ($('#tvGrid').checked) { const A = L.area; const g = TAV.grid(A.frame || { x0: 0, y0: 0, x1: W, y1: H }, 5, 5, A.titleRect); groups.push({ tool: pen, paths: [...g.minor, ...g.major], presetName: 'Griglia', presetColor: '#8fb8e8' }); }
+  if ($('#tvPen2').checked) { groups.push({ tool: pen, paths: drawing, presetName: 'Disegno', presetColor: '#1b1b1b' }); groups.push({ tool: pen, paths: TR.orderPaths(L.dims), presetName: 'Quote', presetColor: '#c0392b' }); }
+  else groups.push({ tool: pen, paths: TR.orderPaths([...drawing, ...L.dims]), presetName: 'Disegno', presetColor: '#1b1b1b' });
+  return { name: 'tavola-' + (S.tav === 'mesh' ? 'stl' : 'foto'), groups };
 }
 function insetPath(p, d) {
   // rientro semplice verso il baricentro (forme convesse)
@@ -1642,11 +2234,12 @@ function decorate(job) {
   job.groups.forEach((g, i) => {
     const meta = S.groupsMeta[i] || {};
     const tl = toolOf(g.tool);
-    if (!g.color || S.src !== 'svg') g.color = meta.color || (g.tool === 'blade' ? TOOLS.blade.color : (i === 0 ? tl.color : PALETTE[(pi) % PALETTE.length]));
+    if (g.presetColor) g.color = meta.color || g.presetColor;
+    else if (!g.color || S.src !== 'svg') g.color = meta.color || (g.tool === 'blade' ? TOOLS.blade.color : (i === 0 ? tl.color : PALETTE[(pi) % PALETTE.length]));
     else if (meta.color) g.color = meta.color;
     if (g.tool !== 'blade') pi++;
     g.passes = meta.passes || tl.passes;
-    g.name = meta.name || (g.tool === 'blade' ? 'Taglio' : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? 'Penna ' + (i + 1) : tl.label));
+    g.name = meta.name || g.presetName || (g.tool === 'blade' ? 'Taglio' : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? 'Penna ' + (i + 1) : tl.label));
     if (S.src === 'calib' && S.cal === 'press') g.passes = 8;
   });
   return job;
@@ -1726,7 +2319,7 @@ function draw() {
   ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText('area utile UMTS', X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
   ctx.textAlign = 'right'; ctx.fillText('A4 · posizione indicativa', X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
   const job = S.job;
-  if (!job) { ctx.restore(); hud(S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
+  if (!job) { ctx.restore(); hud(S.src === 'tavola' ? (S.tav === 'foto' ? 'Carica la foto della vista di fronte.' : 'Carica un file STL o 3MF.') : S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
   const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
   const tx = x => X(cx - job.W / 2 + x), ty = y => Y(cy + job.H / 2 - y);
   const ok = areaOK(job);
@@ -1839,7 +2432,7 @@ $('#nozT').onchange = e => { S.nozT = Math.max(170, +e.target.value || 180); per
 $('#bedT').onchange = e => { S.bedT = Math.max(20, +e.target.value || 25); persist(); };
 
 // ------------------------------------------------------------------ avvio
-renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); clampDims();
+renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderTavParams(); clampDims();
 // mostra subito un esempio generativo
 S.src = 'gen'; $$('#srcTabs button').forEach(b => b.classList.toggle('on', b.dataset.src === 'gen')); $$('.src').forEach(d => d.hidden = d.dataset.src !== 'gen');
 schedule();

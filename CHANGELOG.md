@@ -1,5 +1,10 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.1 · Tratto 0.3
+
+- Tratto: nuova sorgente **Tavola tecnica**. *Da foto*: sagoma, dettagli interni e quote automatiche in scala dall'altezza reale, fino a tre viste. *Da STL/3MF*: viste frontale, dall'alto e laterale (metodo europeo o americano), isometrica, linee nascoste tratteggiate e quote d'ingombro.
+- Cornice con riferimenti di zona, cartiglio (titolo, materiale, scala, autore, data) e carta millimetrata facoltativa, con testo a tratto singolo (font Hershey) adatto al plotter.
+
 ## FilamentBox 2.1.0 · Prismatica 1.13 · Tratto 0.2
 
 - Nuova voce **Tratto** nella barra in basso (edizioni Full e Lite): usa una Bambu Lab P1S come plotter a penna o da taglio con il kit UMTS. Da immagine, SVG, disegni generativi, adesivi (disegno + taglio) e file di calibrazione crea un 3MF per Orca Slicer con il profilo UMTS e le pause per montare, cambiare e togliere il modulo. Guida: [docs/tratto.md](docs/tratto.md).
