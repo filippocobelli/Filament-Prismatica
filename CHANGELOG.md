@@ -1,5 +1,10 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.9 · Prismatica 1.12
+
+- Il colore di ogni pezzo si decide su 25 punti distribuiti su tutto il triangolo (prima 7 vicino al centro): niente più pezzi scuri sparsi lungo i contorni sottili.
+- Nuova opzione **Linee sottili**: *Togli* (predefinita, ogni pezzo prende il colore che occupa più spazio, i contorni più fini di un pezzo spariscono) oppure *Rinforza* (il colore più scuro diventa un contorno continuo, largo un pezzo, ovunque la linea passi).
+
 ## FilamentBox 2.0.8 · Prismatica 1.11
 
 - Switch **Libreria completa** in Prismatica: oltre ai tuoi filamenti usa il catalogo Bambu Lab di tutti i materiali (PLA, PETG, ABS, ASA, PC, PA, TPU; esclusi supporti, multicolore, traslucidi e fosforescenti), per una gamma di colori più ampia. I filamenti da comprare sono segnati con 🛒; a parità di resa Prismatica preferisce quelli che hai e le finiture normali.

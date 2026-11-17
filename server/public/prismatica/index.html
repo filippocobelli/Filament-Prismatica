@@ -128,7 +128,7 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.11</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.12</span></div>
   <div class="stats" id="stats"></div>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
@@ -184,6 +184,8 @@ label.btn{display:inline-block;text-align:center}
       <label class="field"><span>Numero di colori <output id="kO">3</output></span><input type="range" id="k" min="2" max="8" step="1" value="3"></label>
       <p class="note" id="kHint" hidden></p>
       <div class="pal" id="pal"></div>
+      <label class="field"><span>Linee sottili (contorni più fini di un pezzo)</span>
+        <select id="lines"><option value="clean">Togli: ogni pezzo prende il colore che occupa di più</option><option value="keep">Rinforza: contorno scuro continuo, largo un pezzo</option></select></label>
       <button class="btn small" id="repal" type="button">Ricalcola i colori dall'immagine</button>
     </div>
   </details>
@@ -689,7 +691,7 @@ function meshVolume(t) {
 if (typeof module !== 'undefined') module.exports = { SQ3, mulberry, sideFromCount, buildLayout, unionBoundary, buildPiece, transformTris, tileFrame, buildFrameTile, plateSlots, meshVolume, PROFILES, insetConvex, areaOf };
 
 
-const VERSION = 'v1.11'; // v1.11: switch «Libreria completa» (catalogo Bambu Lab di tutti i materiali, anche filamenti da comprare, per una gamma di colori più ampia), scelta dei filamenti per gruppi di colore dell'immagine (le zone piccole ma distinte non si perdono), mix solo tra filamenti posseduti dello stesso materiale, pulsante «← FilamentBox» più robusto · v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.12'; // v1.12: colore di ogni pezzo deciso su 25 punti distribuiti su tutto il triangolo (prima 7 vicino al centro) e opzione «Linee sottili»: togliere i contorni più sottili di un pezzo oppure renderli continui · v1.11: switch «Libreria completa» (catalogo Bambu Lab di tutti i materiali, anche filamenti da comprare, per una gamma di colori più ampia), scelta dei filamenti per gruppi di colore dell'immagine (le zone piccole ma distinte non si perdono), mix solo tra filamenti posseduti dello stesso materiale, pulsante «← FilamentBox» più robusto · v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
@@ -812,7 +814,7 @@ function P() {
     dirMode: $('dirMode').value, twist: num('twist', 70), cx: num('cx', 50) / 100, cy: num('cy', 50) / 100, angle: num('angle', 90), jitter: num('jitter', 0),
     bedW: bw, bedD: bd, margin: num('margin', 6), gap: num('gap', 3), frameOn: $('frameOn').checked, frameT: num('frameT', 3), rib: num('rib', 1.6), tol: num('tol', 0.15), flangeT: num('flangeT', 1.2),
     frameColor: $('frameColor').value, engrave: $('engrave').checked, segs: num('segs', 14),
-    palSrc: $('palSrc').value, bg: $('bgColor').value, mat: $('matFilter').value, fullLib: $('fullLib').checked, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
+    palSrc: $('palSrc').value, bg: $('bgColor').value, mat: $('matFilter').value, fullLib: $('fullLib').checked, lines: $('lines').value, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
   };
 }
 function pieceOpts(p) {
@@ -852,6 +854,7 @@ function updateKHint(p) {
   kh.innerHTML = p.k >= S.kSug ? `Per questa immagine ne servono circa ${S.kSug}.` : `Per questa immagine ne servono circa ${S.kSug}: con meno colori alcune zone si fondono. <button type="button" id="kUse">Usa ${S.kSug}</button>`;
   const ku = $('kUse'); if (ku) ku.onclick = () => { $('k').value = S.kSug; schedule('palette'); };
 }
+function nearestIdx(l, pal) { let b = 0, bd = Infinity; for (let k = 0; k < pal.length; k++) { const d = d2(l, pal[k]); if (d < bd) { bd = d; b = k; } } return b; }
 function labAt(x, y, p) { const I = S.img; const px = Math.min(I.gw - 1, Math.max(0, Math.floor(x / p.W * I.gw))), py = Math.min(I.gh - 1, Math.max(0, Math.floor((1 - y / p.H) * I.gh))); const o = (py * I.gw + px) * 3; return [I.lab[o], I.lab[o + 1], I.lab[o + 2]]; }
 function blumAt(x, y, p) {
   const I = S.img; const fx = Math.min(I.bw - 1.001, Math.max(0, x / p.W * I.bw - 0.5)), fy = Math.min(I.bh - 1.001, Math.max(0, (1 - y / p.H) * I.bh - 0.5));
@@ -928,13 +931,26 @@ function computeCells(p) {
   const pal = S.palette.map(c => rgbToLab(hexToRgb(c.hex)));
   const cxm = p.cx * p.W, cym = p.cy * p.H, dmax = Math.hypot(Math.max(cxm, p.W - cxm), Math.max(cym, p.H - cym));
   const counts = new Array(pal.length).fill(0);
+  // «Rinforza»: il colore più scuro della tavolozza (se è davvero scuro) diventa il contorno; i punti guardano
+  // anche i pixel accanto, così una linea sottile viene presa in tutti i pezzi che attraversa e non solo in alcuni
+  let dark = -1;
+  if (p.lines === 'keep' && pal.length > 2) { dark = pal.reduce((m, l, i) => l[0] < pal[m][0] ? i : m, 0); if (pal[dark][0] > 40) dark = -1; }
+  const pxW = p.W / S.img.gw, pxH = p.H / S.img.gh, NB = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
   for (const c of L.cells) {
-    const votes = new Array(pal.length).fill(0); let Lsum = 0;
-    const pts = [c.c]; for (const v of c.verts) { pts.push([c.c[0] + (v[0] - c.c[0]) * 0.55, c.c[1] + (v[1] - c.c[1]) * 0.55]); }
-    for (let i = 0; i < 3; i++) { const a = c.verts[i], b = c.verts[(i + 1) % 3]; pts.push([c.c[0] + ((a[0] + b[0]) / 2 - c.c[0]) * 0.6, c.c[1] + ((a[1] + b[1]) / 2 - c.c[1]) * 0.6]); }
+    const votes = new Array(pal.length).fill(0); let Lsum = 0, darkHits = 0;
+    // 25 punti distribuiti uniformemente su tutto il triangolo (griglia baricentrica 5×5)
+    const pts = [], [A, B, C] = c.verts, N = 5;
+    const at = (u, v) => [A[0] * u + B[0] * v + C[0] * (1 - u - v), A[1] * u + B[1] * v + C[1] * (1 - u - v)];
+    for (let i = 0; i < N; i++) for (let j = 0; j < N - i; j++) { pts.push(at((i + 1 / 3) / N, (j + 1 / 3) / N)); if (i + j < N - 1) pts.push(at((i + 2 / 3) / N, (j + 2 / 3) / N)); }
     const la = [0, 0, 0];
-    for (const q of pts) { const l = labAt(q[0], q[1], p); Lsum += l[0]; la[0] += l[0]; la[1] += l[1]; la[2] += l[2]; let b = 0, bd = Infinity; for (let k = 0; k < pal.length; k++) { const d = d2(l, pal[k]); if (d < bd) { bd = d; b = k; } } votes[b] += (q === c.c ? 1.5 : 1); }
-    c.color = votes.indexOf(Math.max(...votes)); counts[c.color]++;
+    for (const q of pts) {
+      const l = labAt(q[0], q[1], p); Lsum += l[0]; la[0] += l[0]; la[1] += l[1]; la[2] += l[2];
+      const b = nearestIdx(l, pal); votes[b]++;
+      if (dark >= 0) { let hit = b === dark; for (let o = 0; !hit && o < 8; o++) hit = nearestIdx(labAt(q[0] + NB[o][0] * pxW, q[1] + NB[o][1] * pxH, p), pal) === dark; if (hit) darkHits++; }
+    }
+    c.color = votes.indexOf(Math.max(...votes));
+    if (dark >= 0 && darkHits >= 2) c.color = dark; // la linea scura attraversa il pezzo: diventa contorno
+    counts[c.color]++;
     c.lum = Lsum / pts.length / 100; c.labAvg = la.map(v => v / pts.length);
     const rnd = mulberry(c.id * 7919 + 13);
     // direzione
