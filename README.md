@@ -2,7 +2,7 @@
 
 **FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero.
 
-Versione **2.0.7** · Prismatica **1.10**
+Versione **2.0.8** · Prismatica **1.11**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 

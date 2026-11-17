@@ -1,5 +1,12 @@
 # Storico delle versioni
 
+## FilamentBox 2.0.8 · Prismatica 1.11
+
+- Switch **Libreria completa** in Prismatica: oltre ai tuoi filamenti usa il catalogo Bambu Lab di tutti i materiali (PLA, PETG, ABS, ASA, PC, PA, TPU; esclusi supporti, multicolore, traslucidi e fosforescenti), per una gamma di colori più ampia. I filamenti da comprare sono segnati con 🛒; a parità di resa Prismatica preferisce quelli che hai e le finiture normali.
+- Scelta dei filamenti per gruppi di colore dell'immagine: una zona piccola ma distinta non viene più sacrificata per due sfumature dello stesso colore, e un colore che non serve viene lasciato fuori invece di finire con 0 pezzi.
+- Il color mixing combina solo filamenti che hai e dello stesso materiale.
+- Il pulsante «← FilamentBox» porta sempre alla cartella di FilamentBox.
+
 ## FilamentBox 2.0.7 · Prismatica 1.10
 
 Versioni allineate: Prismatica mostra anche la versione di FilamentBox in cui è inclusa («v1.10 · FilamentBox 2.0.7»), e la pagina del progetto mostra entrambe («v2.0.7 · Prismatica 1.10»).

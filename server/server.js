@@ -1,5 +1,6 @@
-// FilamentBox server — v2.0.7
+// FilamentBox server — v2.0.8
 // CHANGELOG
+// v2.0.8 — solo versione: Prismatica 1.11 (libreria completa dei filamenti)
 // v2.0.7 — solo versione: Prismatica 1.10 (mostra anche la versione di FilamentBox)
 // v2.0.6 — solo versione: Prismatica 1.9 (immagini più fedeli)
 // v2.0.5 — solo versione: Prismatica 1.8 (sincronizzazione più robusta)
@@ -31,7 +32,7 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3025;
-const VERSION = '2.0.7';
+const VERSION = '2.0.8';
 const EDITION = (process.env.FB_EDITION || 'full').toLowerCase() === 'smart' ? 'smart' : 'full';
 const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica'];
 const DB_PATH = path.join(__dirname, 'db.json');

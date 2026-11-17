@@ -86,6 +86,7 @@ label.card:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 
 .mixrow .mixnote{grid-column:1 / -1;margin:0;font-size:12px;color:var(--muted);line-height:1.4}
 .mixrow.rec .mixnote,.mixrow.on .mixnote{color:var(--warn)}
 .mixsw{display:flex;gap:3px;justify-self:end}.mixsw i{width:22px;height:14px;border-radius:3px;border:1px solid var(--line);display:block}
+.libsw{margin-top:10px}
 .switch{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);cursor:pointer}
 .switch input{appearance:none;width:30px;height:17px;border-radius:9px;background:var(--line);position:relative;cursor:pointer;margin:0;transition:background .15s}
 .switch input::after{content:"";position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:left .15s}
@@ -127,7 +128,7 @@ label.btn{display:inline-block;text-align:center}
 </head>
 <body>
 <header>
-  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.10</span></div>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a><div class="brand"><h1>Prismatica</h1><span class="ver" id="ver">v1.11</span></div>
   <div class="stats" id="stats"></div>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Prismatica è gratuita: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
 </header>
@@ -176,6 +177,8 @@ label.btn{display:inline-block;text-align:center}
           <label class="field"><span>Materiale</span><select id="matFilter"><option value="">Tutti</option></select></label>
           <label class="field"><span>Minimo residuo (g)</span><input type="number" id="minG" value="50" min="0" max="5000" step="10"></label>
         </div>
+        <label class="switch libsw"><input type="checkbox" id="fullLib"><span>Libreria completa</span></label>
+        <p class="note">Aggiunge tutto il catalogo Bambu Lab, anche i filamenti che non hai: PLA, PETG, ABS, ASA, PC, PA e TPU. Così hai più colori a disposizione. Quelli da comprare sono segnati con 🛒.</p>
         <div class="invbtns"><button class="btn small" id="invReload" type="button">Aggiorna inventario</button><label class="btn small" for="invFile">Carica elenco JSON</label><input type="file" id="invFile" accept=".json,application/json" hidden></div>
       </div>
       <label class="field"><span>Numero di colori <output id="kO">3</output></span><input type="range" id="k" min="2" max="8" step="1" value="3"></label>
@@ -686,7 +689,7 @@ function meshVolume(t) {
 if (typeof module !== 'undefined') module.exports = { SQ3, mulberry, sideFromCount, buildLayout, unionBoundary, buildPiece, transformTris, tileFrame, buildFrameTile, plateSlots, meshVolume, PROFILES, insetConvex, areaOf };
 
 
-const VERSION = 'v1.10'; // v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
+const VERSION = 'v1.11'; // v1.11: switch «Libreria completa» (catalogo Bambu Lab di tutti i materiali, anche filamenti da comprare, per una gamma di colori più ampia), scelta dei filamenti per gruppi di colore dell'immagine (le zone piccole ma distinte non si perdono), mix solo tra filamenti posseduti dello stesso materiale, pulsante «← FilamentBox» più robusto · v1.10: accanto alla versione di Prismatica compare quella di FilamentBox in cui è inclusa, come sulla pagina del progetto · v1.9: immagini più fedeli: parti trasparenti con colore di sfondo scelto (prima diventavano nere), sfondo a scacchi «finto trasparente» riconosciuto, numero di colori consigliato e impostato da solo a ogni immagine, campionamento più morbido · v1.8: sincronizzazione con FilamentBox più robusta (controllo ogni 15 s anche con SSE attivo, riconnessione eventi, aggiornamento al ritorno sulla scheda) · v1.7: link Ko-fi per le donazioni · v1.6: edizione Lite di FilamentBox (inventario nel browser, aggiornamenti via BroadcastChannel), link di ritorno a FilamentBox, testi senza riferimenti personali · v1.5: dima con fascia di sovrapposizione e crocini, mappa dei fogli, A4/A3/Letter, risparmio inchiostro · v1.4: integrata in FilamentBox (/api/spools + eventi SSE, slot AMS nei mix) · v1.3: color mixing Bambu per colore (switch, filamenti da caricare, stima spurgo) · v1.2: inventario FilamentBox aggiornato in tempo reale · v1.1: palette dai filamenti disponibili
 const INVENTORY_URL = window.PRISMATICA_INVENTORY_URL || '/api/spools';
 const EVENTS_URL = window.PRISMATICA_EVENTS_URL || '/api/events';
 const INVENTORY_POLL_MS = window.PRISMATICA_POLL_MS || 15000;
@@ -809,7 +812,7 @@ function P() {
     dirMode: $('dirMode').value, twist: num('twist', 70), cx: num('cx', 50) / 100, cy: num('cy', 50) / 100, angle: num('angle', 90), jitter: num('jitter', 0),
     bedW: bw, bedD: bd, margin: num('margin', 6), gap: num('gap', 3), frameOn: $('frameOn').checked, frameT: num('frameT', 3), rib: num('rib', 1.6), tol: num('tol', 0.15), flangeT: num('flangeT', 1.2),
     frameColor: $('frameColor').value, engrave: $('engrave').checked, segs: num('segs', 14),
-    palSrc: $('palSrc').value, bg: $('bgColor').value, mat: $('matFilter').value, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
+    palSrc: $('palSrc').value, bg: $('bgColor').value, mat: $('matFilter').value, fullLib: $('fullLib').checked, minG: num('minG', 50), paper: $('paper').value, inkSave: $('inkSave').checked,
   };
 }
 function pieceOpts(p) {
@@ -856,8 +859,28 @@ function blumAt(x, y, p) {
   const a = I.blum[y0 * w + x0], b = I.blum[y0 * w + x0 + 1], c = I.blum[(y0 + 1) * w + x0], d = I.blum[(y0 + 1) * w + x0 + 1];
   return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + d * tx) * ty;
 }
+// catalogo Bambu Lab (da vendor/bambu-colors.js, inserito da build.py): [hex, materiale, finitura, nome colore]
+const CATALOG_RAW = [["#FF6A13","PLA","PLA Basic","Orange"],["#FF9016","PLA","PLA Basic","Pumpkin Orange"],["#5B6579","PLA","PLA Basic","Blue Grey"],["#0086D6","PLA","PLA Basic","Cyan"],["#0A2989","PLA","PLA Basic","Blue"],["#0056B8","PLA","PLA Basic","Cobalt Blue"],["#00B1B7","PLA","PLA Basic","Turquoise"],["#8E9089","PLA","PLA Basic","Gray"],["#A6A9AA","PLA","PLA Basic","Silver"],["#D1D3D5","PLA","PLA Basic","Light Gray"],["#545454","PLA","PLA Basic","Dark Gray"],["#005F61","PLA","PLA Basic","Green"],["#3F8E43","PLA","PLA Basic","Mistletoe Green"],["#00AE42","PLA","PLA Basic","Bambu Green"],["#BECF00","PLA","PLA Basic","Bright Green"],["#000000","PLA","PLA Basic","Black"],["#9CDBD9","PLA","PLA Basic","Arctic Whisper"],["#307FE2","PLA","PLA Basic","Ocean to Meadow"],["#E94B3C","PLA","PLA Basic","Solar Breeze"],["#F78F77","PLA","PLA Basic","Pink Citrus"],["#B6FF43","PLA","PLA Basic","Mint Lime"],["#6FCAEF","PLA","PLA Basic","Blueberry Bubblegum"],["#CE4406","PLA","PLA Basic","Dusk Glare"],["#E7C1D5","PLA","PLA Basic","Cotton Candy Cloud"],["#9D432C","PLA","PLA Basic","Brown"],["#6F5034","PLA","PLA Basic","Cocoa Brown"],["#F7E6DE","PLA","PLA Basic","Beige"],["#F55A74","PLA","PLA Basic","Pink"],["#5E43B7","PLA","PLA Basic","Purple"],["#EC008C","PLA","PLA Basic","Magenta"],["#482960","PLA","PLA Basic","Indigo Purple"],["#C12E1F","PLA","PLA Basic","Red"],["#9D2235","PLA","PLA Basic","Maroon Red"],["#F5547C","PLA","PLA Basic","Hot Pink"],["#FFFFFF","PLA","PLA Basic","Jade White"],["#F4EE2A","PLA","PLA Basic","Yellow"],["#847D48","PLA","PLA Basic","Bronze"],["#E4BD68","PLA","PLA Basic","Gold"],["#FEC600","PLA","PLA Basic","Sunflower Yellow"],["#F99963","PLA","PLA Matte","Mandarin Orange"],["#56B7E6","PLA","PLA Matte","Sky Blue"],["#0078BF","PLA","PLA Matte","Marine Blue"],["#A3D8E1","PLA","PLA Matte","Ice Blue"],["#042F56","PLA","PLA Matte","Dark Blue"],["#757575","PLA","PLA Matte","Nardo Gray"],["#9B9EA0","PLA","PLA Matte","Ash Gray"],["#C2E189","PLA","PLA Matte","Apple Green"],["#61C680","PLA","PLA Matte","Grass Green"],["#68724D","PLA","PLA Matte","Dark Green"],["#000000","PLA","PLA Matte","Charcoal"],["#4D3324","PLA","PLA Matte","Dark Chocolate"],["#D3B7A7","PLA","PLA Matte","Latte Brown"],["#7D6556","PLA","PLA Matte","Dark Brown"],["#AE835B","PLA","PLA Matte","Caramel"],["#E8AFCF","PLA","PLA Matte","Sakura Pink"],["#AE96D4","PLA","PLA Matte","Lilac Purple"],["#DE4343","PLA","PLA Matte","Scarlet Red"],["#B15533","PLA","PLA Matte","Terracotta"],["#950051","PLA","PLA Matte","Plum"],["#BB3D43","PLA","PLA Matte","Dark Red"],["#FFFFFF","PLA","PLA Matte","Ivory White"],["#CBC6B8","PLA","PLA Matte","Bone White"],["#F7D959","PLA","PLA Matte","Lemon Yellow"],["#E8DBB7","PLA","PLA Matte","Desert Tan"],["#39699E","PLA","PLA Metal","Cobalt Blue Metallic"],["#43403D","PLA","PLA Metal","Iron Gray Metallic"],["#1D7C6A","PLA","PLA Metal","Oxide Green Metallic"],["#AA6443","PLA","PLA Metal","Copper Brown Metallic"],["#B39B84","PLA","PLA Metal","Iridium Gold Metallic"],["#A8C6EE","PLA","PLA Silk+","Baby Blue"],["#008BDA","PLA","PLA Silk+","Blue"],["#5F6367","PLA","PLA Silk+","Titan Gray"],["#C8C8C8","PLA","PLA Silk+","Silver"],["#018814","PLA","PLA Silk+","Candy Green"],["#96DCB9","PLA","PLA Silk+","Mint"],["#8671CB","PLA","PLA Silk+","Purple"],["#D02727","PLA","PLA Silk+","Candy Red"],["#BA9594","PLA","PLA Silk+","Rose Gold"],["#F7ADA6","PLA","PLA Silk+","Pink"],["#FFFFFF","PLA","PLA Silk+","White"],["#F3CFB2","PLA","PLA Silk+","Champagne"],["#F4A925","PLA","PLA Silk+","Gold"],["#F7F3F0","PLA","PLA Marble","White Marble"],["#CC330A","PLA","PLA Marble","Red Granite"],["#483D8B","PLA","PLA Sparkle","Royal Purple Sparkle"],["#8E9089","PLA","PLA Sparkle","Slate Gray Sparkle"],["#3F5443","PLA","PLA Sparkle","Alpine Green Sparkle"],["#2D2B28","PLA","PLA Sparkle","Onyx Black Sparkle"],["#792B36","PLA","PLA Sparkle","Crimson Red Sparkle"],["#CEA629","PLA","PLA Sparkle","Classic Gold Sparkle"],["#FF7F41","PLA","PLA Tough","Orange"],["#0085AD","PLA","PLA Tough","Light Blue"],["#6667AB","PLA","PLA Tough","Lavender Blue"],["#898D8D","PLA","PLA Tough","Silver"],["#C00D1E","PLA","PLA Tough","Vermilion Red"],["#FEDB00","PLA","PLA Tough","Yellow"],["#DC3A27","PLA","PLA Tough+","Orange"],["#009BD8","PLA","PLA Tough+","Cyan"],["#AFB1AE","PLA","PLA Tough+","Gray"],["#959698","PLA","PLA Tough+","Silver"],["#000000","PLA","PLA Tough+","Black"],["#FFFFFF","PLA","PLA Tough+","White"],["#F4D53F","PLA","PLA Tough+","Yellow"],["#000000","PLA","PLA Aero","Black Aero"],["#FFFFFF","PLA","PLA Aero","White Aero"],["#594177","PLA","PLA Galaxy","Purple"],["#3B665E","PLA","PLA Galaxy","Green"],["#424379","PLA","PLA Galaxy","Nebulae"],["#684A43","PLA","PLA Galaxy","Brown"],["#918669","PLA","PLA Wood","Classic Birch"],["#4F3F24","PLA","PLA Wood","Black Walnut"],["#995F11","PLA","PLA Wood","Clay Brown"],["#3F231C","PLA","PLA Wood","Rosewood"],["#D6CCA3","PLA","PLA Wood","White Oak"],["#C98935","PLA","PLA Wood","Ochre Yellow"],["#4DAFDA","PLA","PLA Lite","Cyan"],["#004EA8","PLA","PLA Lite","Blue"],["#999D9D","PLA","PLA Lite","Gray"],["#000000","PLA","PLA Lite","Black"],["#ECC3B2","PLA","PLA Lite","Matte Beige"],["#C6001A","PLA","PLA Lite","Red"],["#FFFFFF","PLA","PLA Lite","White"],["#EFE255","PLA","PLA Lite","Yellow"],["#6E88BC","PLA","PLA-CF","Jeans Blue"],["#4D5054","PLA","PLA-CF","Lava Gray"],["#000000","PLA","PLA-CF","Black"],["#69398E","PLA","PLA-CF","Iris Purple"],["#951E23","PLA","PLA-CF","Burgundy Red"],["#FF6A13","ABS","ABS","Orange"],["#0A2CA5","ABS","ABS","Blue"],["#489FDF","ABS","ABS","Azure"],["#0C2340","ABS","ABS","Navy Blue"],["#87909A","ABS","ABS","Silver"],["#00AE42","ABS","ABS","Bambu Green"],["#789D4A","ABS","ABS","Olive"],["#000000","ABS","ABS","Black"],["#D32941","ABS","ABS","Red"],["#FFFFFF","ABS","ABS","White"],["#FFB81C","ABS","ABS","Yellow"],["#FFC72C","ABS","ABS","Tangerine Yellow"],["#2140B4","ASA","ASA","Blue"],["#8A949E","ASA","ASA","Gray"],["#00A6A0","ASA","ASA","Green"],["#000000","ASA","ASA","Black"],["#E02928","ASA","ASA","Red"],["#FFFFFF","ASA","ASA","White"],["#E9E4D9","ASA","ASA Aero","White Aero"],["#F48438","ABS","ABS-GF","Orange"],["#000000","ABS","ABS-GF","Black"],["#FFFFFF","ABS","ABS-GF","White"],["#000000","ASA","ASA-CF","Black"],["#000000","PC","PC","Black"],["#FFFFFF","PC","PC","White"],["#A8A8AA","PC","PC FR","Grey"],["#000000","PC","PC FR","Black"],["#FFFFFF","PC","PC FR","White"],["#FF671F","PETG","PETG Basic","Orange"],["#001489","PETG","PETG Basic","Reflex Blue"],["#9EA2A2","PETG","PETG Basic","Gray"],["#7F7E83","PETG","PETG Basic","Gray"],["#009639","PETG","PETG Basic","Green"],["#034638","PETG","PETG Basic","Pine Green"],["#7CD82B","PETG","PETG Basic","Lime Green"],["#000000","PETG","PETG Basic","Black"],["#4F2C1D","PETG","PETG Basic","Dark Brown"],["#D6001C","PETG","PETG Basic","Red"],["#FFFFFF","PETG","PETG Basic","White"],["#FCE300","PETG","PETG Basic","Yellow"],["#DBC8B6","PETG","PETG Basic","Dark Beige"],["#F75403","PETG","PETG HF","Orange"],["#002E96","PETG","PETG HF","Blue"],["#1F79E5","PETG","PETG HF","Lake Blue"],["#ADB1B2","PETG","PETG HF","Gray"],["#515151","PETG","PETG HF","Dark Gray"],["#00AE42","PETG","PETG HF","Green"],["#6EE53C","PETG","PETG HF","Lime Green"],["#39541A","PETG","PETG HF","Forest Green"],["#000000","PETG","PETG HF","Black"],["#875718","PETG","PETG HF","Peanut Brown"],["#BC0900","PETG","PETG HF","Red"],["#FFFFFF","PETG","PETG HF","White"],["#FFD00B","PETG","PETG HF","Yellow"],["#F9DFB9","PETG","PETG HF","Cream"],["#324585","PETG","PETG-CF","Indigue Blue"],["#565656","PETG","PETG-CF","Titan Gray"],["#16B08E","PETG","PETG-CF","Malachite Green"],["#000000","PETG","PETG-CF","Black"],["#583061","PETG","PETG-CF","Violet Purple"],["#9F332A","PETG","PETG-CF","Brick Red"],["#000000","PA","PAHT-CF","Black"],["#EAEAE4","PA","PA6-GF","White"],["#C5ED48","PA","PA6-GF","Lime"],["#000000","PA","PA6-GF","Black"],["#5898DD","TPU","TPU for AMS","Blue"],["#939393","TPU","TPU for AMS","Gray"],["#90FF1A","TPU","TPU for AMS","Neon Green"],["#000000","TPU","TPU for AMS","Black"],["#ED0000","TPU","TPU for AMS","Red"],["#FFFFFF","TPU","TPU for AMS","White"]];
+let CATALOG = null;
+function catalog() {
+  if (!CATALOG) CATALOG = CATALOG_RAW.map(([hex, material, finish, cname]) => ({ id: 'cat:' + hex + material + finish, name: `Bambu Lab ${finish} ${cname}`, material, hex, grams: null, lab: rgbToLab(hexToRgb(hex)), ams: [], spools: 0, buy: true }));
+  return CATALOG;
+}
+const SPECIAL = /Silk|Metal|Sparkle|Galaxy|Marble|Wood|Aero|-CF|-GF|Glow/;
+const baseMat = (m) => String(m || '').toUpperCase().split(/[\s\-+]/)[0];
+function fillMatOptions(first) {
+  const lib = $('fullLib').checked, mats = [...new Set(S.inv.map(f => f.material).concat(lib ? catalog().map(f => f.material) : []).filter(Boolean))].sort();
+  const ms = $('matFilter'), cur = ms.value;
+  ms.innerHTML = '<option value="">Tutti</option>' + mats.map(m => `<option>${escH(m)}</option>`).join('');
+  if (mats.includes(cur)) ms.value = cur; else if (first && !lib && mats.includes('PLA')) ms.value = 'PLA'; else ms.value = '';
+}
+function wantKOf(p) { return p.palSrc === 'inv' && (S.inv.length || p.fullLib) ? Math.min(p.k, Math.max(2, invCandidates(p).length)) : p.k; }
 function invCandidates(p) {
-  return S.inv.filter(f => f.grams == null || f.grams >= p.minG).filter(f => !p.mat || f.material === p.mat);
+  const own = S.inv.filter(f => f.grams == null || f.grams >= p.minG).filter(f => !p.mat || f.material === p.mat);
+  if (!p.fullLib) return own;
+  // libreria completa: catalogo intero, tranne i colori che hai già nello stesso materiale
+  const extra = catalog().filter(f => (!p.mat || f.material === p.mat) && !own.some(o => baseMat(o.material) === f.material && d2(o.lab, f.lab) < 9));
+  return own.concat(extra);
 }
 function computePalette(p) {
   const I = S.img, n = I.gw * I.gh, step = Math.max(1, Math.floor(n / 7000)), smp = [];
@@ -865,18 +888,30 @@ function computePalette(p) {
   S.palFromInv = false;
   const cand = p.palSrc === 'inv' ? invCandidates(p) : [];
   if (p.palSrc === 'inv' && cand.length >= 2) {
-    // scelta greedy dei k filamenti che rappresentano meglio l'immagine
-    const k = Math.min(p.k, cand.length), best = new Float64Array(smp.length).fill(Infinity), chosen = [];
-    for (let step2 = 0; step2 < k; step2++) {
-      let bi = -1, bt = Infinity;
+    // prima si trovano i k gruppi di colore dell'immagine e a ciascuno (dal più esteso) si dà il filamento più vicino:
+    // così anche una zona piccola ma distinta (es. un dettaglio bianco) ha il suo filamento. Se due gruppi vogliono lo
+    // stesso filamento, i posti rimasti vanno ai filamenti che migliorano di più la resa (e solo se la migliorano davvero).
+    const k = Math.min(p.k, cand.length), cents = kmeans(smp, k, 7), size = new Array(k).fill(0);
+    for (const q of smp) { let b = 0, bd = Infinity; for (let c = 0; c < k; c++) { const d = d2(q, cents[c]); if (d < bd) { bd = d; b = c; } } size[b]++; }
+    const pen = cand.map(f => f.buy ? 49 + (SPECIAL.test(f.name) ? 36 : 0) : 0); // a parità di resa: prima i tuoi, poi le finiture normali
+    const chosen = [];
+    for (const ci of cents.map((c, i) => i).sort((a, b) => size[b] - size[a])) {
+      let bi = -1, bd = Infinity;
+      for (let c = 0; c < cand.length; c++) { const d = d2(cents[ci], cand[c].lab) + pen[c]; if (d < bd) { bd = d; bi = c; } }
+      if (!chosen.includes(bi)) chosen.push(bi);
+    }
+    const best = smp.map(q => Math.min(...chosen.map(c => d2(q, cand[c].lab))));
+    while (chosen.length < k) {
+      let bi = -1, bg = 0;
       for (let c = 0; c < cand.length; c++) {
         if (chosen.includes(c)) continue;
-        let t = 0; const L = cand[c].lab;
-        for (let i = 0; i < smp.length; i++) t += Math.min(best[i], d2(smp[i], L));
-        if (t < bt) { bt = t; bi = c; }
+        let g = 0; const L = cand[c].lab; for (let i = 0; i < smp.length; i++) { const d = d2(smp[i], L); if (d < best[i]) g += best[i] - d; }
+        g -= pen[c] * smp.length * 0.02; if (g > bg) { bg = g; bi = c; }
       }
+      if (bi < 0 || bg < smp.length * 4) break; // nessun filamento migliora davvero: meglio un colore in meno
       chosen.push(bi); for (let i = 0; i < smp.length; i++) best[i] = Math.min(best[i], d2(smp[i], cand[bi].lab));
     }
+    S.palWant = wantKOf(p);
     S.palette = chosen.map(c => cand[c]).sort((a, b) => b.lab[0] - a.lab[0]).map(f => ({ lab: f.lab, hex: f.hex, name: f.name, inv: f }));
     S.palFromInv = true; S.paletteKey = ''; dedupeNames(); return;
   }
@@ -932,8 +967,9 @@ function linOf(hex) { return hexToRgb(hex).map(srgbLin); }
 function mixColor(lins, w) { const t = w.reduce((a, b) => a + b, 0), out = [0, 0, 0]; lins.forEach((l, i) => { for (let k = 0; k < 3; k++) out[k] += l[k] * w[i] / t; }); return rgbToHex(out.map(linSrgb)); }
 function computeMixes(p) {
   const prev = new Map(S.palette.map((c, i) => [i, c.mixOn]));
-  const cand = p.palSrc === 'inv' ? invCandidates(p) : [];
-  const lins = cand.map(f => linOf(f.hex));
+  const cand = p.palSrc === 'inv' ? invCandidates(p).filter(f => !f.buy) : []; // il mix si fa con i filamenti che hai
+  const lins = cand.map(f => linOf(f.hex)), bm = cand.map(f => baseMat(f.material));
+  const sameMat = (idx) => idx.every(j => bm[j] === bm[idx[0]]); // strati alternati solo dello stesso materiale
   S.palette.forEach((c, i) => {
     const cells = S.layout.cells.filter(x => x.color === i);
     c.mix = null; c.pureDE = null;
@@ -942,7 +978,7 @@ function computeMixes(p) {
     c.target = tg; c.pureDE = Math.sqrt(d2(tg, c.lab));
     if (!S.palFromInv || cand.length < 2) return;
     let best = null;
-    const tryMix = (idx, w) => { const hex = mixColor(idx.map(j => lins[j]), w), lab = rgbToLab(hexToRgb(hex)), de = Math.sqrt(d2(tg, lab)); if (!best || de < best.de) best = { idx, w, hex, lab, de }; };
+    const tryMix = (idx, w) => { if (!sameMat(idx)) return; const hex = mixColor(idx.map(j => lins[j]), w), lab = rgbToLab(hexToRgb(hex)), de = Math.sqrt(d2(tg, lab)); if (!best || de < best.de) best = { idx, w, hex, lab, de }; };
     for (let a = 0; a < cand.length; a++) for (let b = a + 1; b < cand.length; b++) {
       for (const w of RATIOS2) tryMix([a, b], w);
       if (cand.length <= 40) for (let d = b + 1; d < cand.length; d++) for (const w of RATIOS3) tryMix([a, b, d], w);
@@ -1107,15 +1143,20 @@ const SHAPES = [
 $('shapes').innerHTML = SHAPES.map(([v, n, d], i) => `<label class="card"><input type="radio" name="shape" value="${v}" id="shape-${v}" ${i === 0 ? 'checked' : ''}><svg viewBox="0 0 52 30" aria-hidden="true"><path d="${d}" fill="${'#E2484F'}"/><path d="M0 28.5H52" stroke="#5CC3D0" stroke-width="2"/></svg>${n}</label>`).join('');
 
 const gramsNeeded = (i) => S.volByColor && S.volByColor[i] != null ? S.volByColor[i] / 1000 * 1.24 * 0.6 * 1.1 : null; // ~60% del pieno + 10% scarto
+function optList(opts) {
+  const o = (f, j) => `<option value="${j}">${f.buy ? '🛒 ' : ''}${escH(f.name)}${f.material ? ' · ' + escH(f.material) : ''}${f.grams != null ? ' · ' + Math.round(f.grams) + ' g' : ''}</option>`;
+  const own = opts.map((f, j) => f.buy ? '' : o(f, j)).join(''), buy = opts.map((f, j) => f.buy ? o(f, j) : '').join('');
+  return buy ? `<optgroup label="I tuoi filamenti">${own}</optgroup><optgroup label="Da comprare (catalogo Bambu Lab)">${buy}</optgroup>` : own;
+}
 function renderPalette() {
   const p = P();
-  const key = (S.palFromInv ? 'inv' : 'img') + S.palette.length + '|' + S.inv.length;
+  const key = (S.palFromInv ? 'inv' : 'img') + S.palette.length + '|' + S.inv.length + '|' + p.fullLib + '|' + p.mat;
   const box = $('pal');
   if (S.paletteKey !== key) {
     S.paletteKey = key;
     const opts = invCandidates(p);
     box.innerHTML = S.palette.map((c, i) => S.palFromInv
-      ? `<div class="sw f"><span class="dot" id="pd${i}"></span><select id="ps${i}" aria-label="Filamento ${i + 1}">${opts.map((f, j) => `<option value="${j}">${escH(f.name)}${f.material ? ' · ' + escH(f.material) : ''}${f.grams != null ? ' · ' + Math.round(f.grams) + ' g' : ''}</option>`).join('')}</select><span class="ct" id="pt${i}"></span><div class="mixrow" id="pm${i}" hidden><label class="switch"><input type="checkbox" id="px${i}"><span>Mix Bambu</span></label><span class="mixsw" id="pmc${i}"></span><p class="mixnote" id="pmn${i}"></p></div></div>`
+      ? `<div class="sw f"><span class="dot" id="pd${i}"></span><select id="ps${i}" aria-label="Filamento ${i + 1}">${optList(opts)}</select><span class="ct" id="pt${i}"></span><div class="mixrow" id="pm${i}" hidden><label class="switch"><input type="checkbox" id="px${i}"><span>Mix Bambu</span></label><span class="mixsw" id="pmc${i}"></span><p class="mixnote" id="pmn${i}"></p></div></div>`
       : `<div class="sw"><input type="color" id="pc${i}" value="${c.hex}" aria-label="Colore ${i + 1}"><span class="nm" id="pn${i}"></span><span class="ct" id="pt${i}"></span></div>`).join('');
     S.palette.forEach((c, i) => {
       if (S.palFromInv) {
@@ -1133,7 +1174,7 @@ function renderPalette() {
       ct.textContent = `${n} pz · ` + parts.map(({ x, need }) => `${x.f.name.split(' ').slice(-1)[0]} ≈${Math.round(need)}${x.f.grams != null ? '/' + Math.round(x.f.grams) : ''} g`).join(' · ');
       ct.classList.toggle('short', parts.some(({ x, need }) => x.f.grams != null && need > x.f.grams));
     } else {
-      ct.textContent = `${n} pz` + (g != null ? ` · ≈${Math.round(g)} g` : '') + (have != null ? ` / ${Math.round(have)} g` : '');
+      ct.textContent = `${n} pz` + (g != null ? ` · ≈${Math.round(g)} g` : '') + (have != null ? ` / ${Math.round(have)} g` : '') + (c.inv && c.inv.buy ? ' · 🛒 da comprare' : '');
       ct.classList.toggle('short', have != null && g != null && g > have);
     }
     ct.title = have != null && g != null && g > have ? 'Filamento insufficiente per questo colore' : '';
@@ -1204,15 +1245,13 @@ function setInventory(list, source, live) {
   if (sig === S.invSig) return; // nessun cambiamento
   const first = !S.invSig; S.invSig = sig;
   S.inv = list;
-  const mats = [...new Set(list.map(f => f.material).filter(Boolean))].sort();
-  const ms = $('matFilter'), cur = ms.value;
-  ms.innerHTML = '<option value="">Tutti</option>' + mats.map(m => `<option>${escH(m)}</option>`).join('');
-  if (mats.includes(cur)) ms.value = cur; else if (first && mats.includes('PLA')) ms.value = 'PLA';
+  fillMatOptions(first);
   if (first || !S.palFromInv) { schedule('palette'); return; }
   // aggiornamento dal vivo: si tengono i filamenti scelti e si aggiornano solo i grammi
   const byKey = new Map(list.map(f => [invKey(f), f]));
   const p = P(); let lost = false;
   for (const c of S.palette) {
+    if (c.inv && c.inv.buy) continue; // dal catalogo: non cambia con l'inventario
     const f = c.inv && byKey.get(invKey(c.inv));
     if (!f || (f.grams != null && f.grams < p.minG)) lost = true; else c.inv = f;
   }
@@ -1306,8 +1345,8 @@ function run() {
   const p = P(); updateOutputs(p);
   try {
     if (LEV[lvl] >= 3) sampleImage(p); else updateKHint(p);
-    const wantK = p.palSrc === 'inv' && S.inv.length ? Math.min(p.k, Math.max(2, invCandidates(p).length)) : p.k;
-    if (LEV[lvl] >= 2 || S.palette.length !== wantK || (p.palSrc === 'inv') !== !!S.palFromInv && (p.palSrc !== 'inv' || invCandidates(p).length >= 2)) computePalette(p);
+    const wantK = wantKOf(p);
+    if (LEV[lvl] >= 2 || (S.palFromInv ? S.palWant : S.palette.length) !== wantK || (p.palSrc === 'inv') !== !!S.palFromInv && (p.palSrc !== 'inv' || invCandidates(p).length >= 2)) computePalette(p);
     if (LEV[lvl] >= 1) { computeCells(p); computeMixes(p); computePlates(p); fillPlateSel(); }
     if (S.view === 'art') buildArtView(p); else if (S.view === 'plate') buildPlateView(p); else buildMapView(p);
     if (S.view !== 'art' && S.volPieces == null) S.volPieces = 0;
@@ -1318,12 +1357,15 @@ function run() {
 }
 
 // eventi
-const lvlFor = { W: 'all', H: 'all', bgColor: 'all', k: 'palette', frameColor: 'view', paper: 'view', inkSave: 'view', palSrc: 'palette', matFilter: 'palette', minG: 'palette' };
+const lvlFor = { W: 'all', H: 'all', bgColor: 'all', fullLib: 'palette', k: 'palette', frameColor: 'view', paper: 'view', inkSave: 'view', palSrc: 'palette', matFilter: 'palette', minG: 'palette' };
 document.querySelectorAll('aside input, aside select').forEach(el => {
   if (el.id === 'imgFile' || el.id === 'invFile' || /^p[cs]\d/.test(el.id)) return;
   el.addEventListener('input', () => schedule(lvlFor[el.id] || 'cells'));
 });
 $('repal').addEventListener('click', () => schedule('palette'));
+$('fullLib').addEventListener('change', () => { if ($('fullLib').checked) $('matFilter').value = ''; fillMatOptions(false); schedule('palette'); });
+// «← FilamentBox»: torna alla pagina di FilamentBox (cartella sopra Prismatica)
+$('fbBack').addEventListener('click', (e) => { e.preventDefault(); location.assign(new URL(location.protocol === 'file:' ? '../index.html' : '../', location.href).href); });
 $('invReload').addEventListener('click', () => loadInventory(true));
 $('invFile').addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; try { clearTimeout(invTimer); S.invSig = null; setInventory(normalizeInventory(JSON.parse(await f.text())), f.name, false); $('palSrc').value = 'inv'; } catch (err) { $('invStatus').textContent = 'File non valido: serve un JSON con un elenco di filamenti (colore esadecimale, nome, materiale, grammi).'; } });
 $('imgFile').addEventListener('change', (e) => e.target.files[0] && loadFile(e.target.files[0]));
