@@ -1,5 +1,11 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.0 · Prismatica 1.13 · Tratto 0.2
+
+- Nuova voce **Tratto** nella barra in basso (edizioni Full e Lite): usa una Bambu Lab P1S come plotter a penna o da taglio con il kit UMTS. Da immagine, SVG, disegni generativi, adesivi (disegno + taglio) e file di calibrazione crea un 3MF per Orca Slicer con il profilo UMTS e le pause per montare, cambiare e togliere il modulo. Guida: [docs/tratto.md](docs/tratto.md).
+- Il server serve Tratto su `/tratto/` (non nell'edizione Smart, come Prismatica).
+- Tratto mostra la versione della suite («v0.2 · FilamentBox 2.1.0») e il pulsante «← FilamentBox».
+
 ## FilamentBox 2.0.10 · Prismatica 1.13
 
 - I filamenti flessibili (TPU, TPE e simili) non vengono più proposti per i colori, né dall'inventario né dal catalogo.

@@ -2,6 +2,7 @@
 // Uso:  cd tools && npm install && npm run build:lite
 // - inserisce edition.js + local-api.js (le API diventano locali, dati in localStorage)
 // - Prismatica: three.js viene incluso nel file, così funziona anche offline e da file://
+// - Tratto: è già un file unico senza dipendenze esterne, viene copiato così com'è
 // - aggiunge sw.js per installarla come app (PWA) quando è servita via https
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,7 +20,7 @@ fs.cpSync(SRC, OUT, { recursive: true });
 
 // 1) edizione + API locale
 fs.writeFileSync(path.join(OUT, 'edition.js'),
-  `// FilamentBox Lite v${VERSION} — generato da tools/build-lite.mjs\nwindow.FB_EDITION = { name: 'lite', version: '${VERSION}', features: ['prismatica', 'local'] };\n`);
+  `// FilamentBox Lite v${VERSION} — generato da tools/build-lite.mjs\nwindow.FB_EDITION = { name: 'lite', version: '${VERSION}', features: ['prismatica', 'tratto', 'local'] };\n`);
 fs.copyFileSync(path.join(HERE, 'lite', 'local-api.js'), path.join(OUT, 'local-api.js'));
 
 const indexPath = path.join(OUT, 'index.html');
@@ -42,6 +43,10 @@ pris = pris.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '');
 pris = pris.replace(mod[0], () => `<script>\n${bundle}\n</script>`);
 pris = pris.replace('<head>', '<head>\n<script src="../edition.js"></script>\n<script src="../local-api.js"></script>');
 fs.writeFileSync(prisPath, pris);
+
+// 2b) Tratto: edition.js per il pulsante «← FilamentBox» e la versione della suite anche da file://
+const trattoPath = path.join(OUT, 'tratto', 'index.html');
+if (fs.existsSync(trattoPath)) fs.writeFileSync(trattoPath, fs.readFileSync(trattoPath, 'utf8').replace('<head>', '<head>\n<script src="../edition.js"></script>'));
 
 // 3) service worker: cache dei file per uso offline
 const files = [];

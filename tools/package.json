@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build:lite": "node build-lite.mjs",
-    "build:prismatica": "python3 ../prismatica/src/build.py"
+    "build:prismatica": "python3 ../prismatica/src/build.py",
+    "build:tratto": "python3 ../tratto/src/build.py"
   },
   "devDependencies": {
     "esbuild": "0.24.2",

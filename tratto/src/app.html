@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tratto · plotter e taglio UMTS</title>
+<style>
+:root{
+  --bg:#f3f1ec; --panel:#fffdf9; --ink:#1d2433; --muted:#6a7080; --line:#e2ded5; --accent:#2747c9; --accent-soft:#e7ecff;
+  --warn:#9a5b00; --warn-bg:#fff4e0; --ok:#1d7a46; --ok-bg:#e6f5ec; --danger:#a3212b; --danger-bg:#fdeaea;
+  --r:10px; --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 var(--font)}
+header{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:18px;margin:0;letter-spacing:.2px;white-space:nowrap}
+header .ver{white-space:nowrap}
+header h1 b{color:var(--accent)}
+header .ver{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:1px 8px}
+header .sub{color:var(--muted);font-size:13px}
+header .sp{flex:1}
+.back{font:600 13px var(--font);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 9px;background:#fff}
+.back:hover{border-color:var(--ink)}
+.kofi{font:600 12px var(--font);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff;white-space:nowrap}
+.kofi:hover{border-color:var(--accent);color:var(--accent)}
+[hidden]{display:none !important}
+main{display:grid;grid-template-columns:420px 1fr;height:calc(100% - 53px)}
+aside{overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
+.steps{display:flex;gap:4px;padding:10px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2;flex-wrap:wrap}
+.steps button{flex:1;min-width:52px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 4px;font:12px var(--font);color:var(--muted);cursor:pointer}
+.steps button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.steps button .n{display:block;font-weight:700;font-size:13px}
+section.step{display:none;padding:14px 16px 28px}
+section.step.on{display:block}
+h2{font-size:16px;margin:4px 0 10px}
+h3{font-size:13px;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+p{margin:6px 0}
+.small{font-size:12px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{border:1.5px solid var(--line);border-radius:var(--r);padding:10px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.card b{display:block;font-size:13px}
+.card span{font-size:12px;color:var(--muted)}
+.card.on{border-color:var(--accent);background:var(--accent-soft)}
+.guide{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin:10px 0}
+.guide ol,.guide ul{margin:6px 0;padding-left:20px}
+.guide li{margin:3px 0}
+.note{border-radius:8px;padding:8px 10px;margin:8px 0;font-size:13px}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.ok{background:var(--ok-bg);color:var(--ok)}
+.note.danger{background:var(--danger-bg);color:var(--danger)}
+.note.info{background:var(--accent-soft);color:#1f3596}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin:6px 0}
+.row3{grid-template-columns:1fr 1fr 1fr}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+label.f input,label.f select{font:14px var(--font);padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);width:100%}
+label.chk{display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0}
+.rng{display:grid;grid-template-columns:110px 1fr 46px;align-items:center;gap:8px;margin:5px 0;font-size:12px;color:var(--muted)}
+.rng input{width:100%}
+.rng output{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 10px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px;font:13px var(--font);cursor:pointer;color:var(--ink)}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font:600 13px var(--font);cursor:pointer;color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.drop{border:1.5px dashed #c9c3b6;border-radius:var(--r);padding:14px;text-align:center;background:#fff;cursor:pointer;color:var(--muted)}
+.drop.has{border-style:solid;color:var(--ink)}
+.groups .g{display:grid;grid-template-columns:28px 1fr 64px 70px;gap:6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px;background:#fff;margin:5px 0}
+.groups input[type=color]{width:28px;height:28px;border:0;padding:0;background:none}
+.groups input{font:13px var(--font);padding:5px 6px;border:1px solid var(--line);border-radius:6px;width:100%}
+.groups .meta{grid-column:2/5;font-size:11px;color:var(--muted)}
+.view{position:relative;overflow:hidden}
+canvas#pv{position:absolute;inset:0;width:100%;height:100%}
+.hud{position:absolute;left:14px;bottom:12px;background:rgba(255,253,249,.94);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--muted);max-width:min(520px,calc(100% - 28px))}
+.hud b{color:var(--ink)}
+.vtools{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+.vtools button{border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:8px;padding:5px 9px;font:12px var(--font);cursor:pointer}
+.vtools button.on{background:var(--ink);color:#fff}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:9px 14px;font-size:13px;display:none;max-width:90%;z-index:5}
+.busy{position:absolute;right:14px;bottom:12px;background:var(--ink);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;display:none}
+table.pz{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+table.pz td{border-top:1px solid var(--line);padding:5px 4px;vertical-align:top}
+table.pz td:first-child{white-space:nowrap;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:8px;background:#fff;padding:6px 10px;margin:8px 0}
+details summary{cursor:pointer;font-weight:600;font-size:13px}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;font-size:12px;background:#fff}
+.plate svg{width:100%;height:auto;display:block}
+@media (max-width:860px){ header{gap:8px;padding:8px 12px} header .sub,header .h1sub{display:none} main{grid-template-columns:1fr;grid-template-rows:auto 60vh;height:auto} aside{border-right:0} .view{height:60vh;order:-1} }
+</style>
+</head>
+<body>
+<header>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
+  <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
+  <span class="ver" id="ver">v0.2</span>
+  <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
+  <span class="sp"></span>
+  <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Tratto è gratuito: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
+</header>
+<main>
+<aside>
+  <nav class="steps" id="steps">
+    <button data-s="0" class="on"><span class="n">1</span>Utensile</button>
+    <button data-s="1"><span class="n">2</span>Foglio</button>
+    <button data-s="2"><span class="n">3</span>Disegno</button>
+    <button data-s="3"><span class="n">4</span>Colori</button>
+    <button data-s="4"><span class="n">5</span>File</button>
+    <button data-s="5"><span class="n">6</span>In stampa</button>
+  </nav>
+
+  <!-- 1 UTENSILE -->
+  <section class="step on" id="s0">
+    <h2>Che utensile monti sull'UMTS?</h2>
+    <div class="cards" id="toolCards"></div>
+    <div class="guide" id="toolGuide"></div>
+    <h3>Taratura di questo utensile</h3>
+    <div class="row">
+      <label class="f">Z‑offset (mm)<input type="number" id="tZ" step="0.1"></label>
+      <label class="f">Velocità (mm/s)<input type="number" id="tSpeed" step="5" min="5" max="500"></label>
+      <label class="f">Z‑hop spostamenti (mm)<input type="number" id="tHop" step="0.5" min="1" max="6"></label>
+      <label class="f">Accelerazione (mm/s²)<input type="number" id="tAcc" step="500" min="200" max="10000"></label>
+      <label class="f">Larghezza tratto (anteprima, mm)<input type="number" id="tW" step="0.1" min="0.1" max="3"></label>
+      <label class="f">Passate predefinite<input type="number" id="tPass" step="1" min="1" max="8"></label>
+    </div>
+    <p class="small">Fonti: <a href="https://makerworld.com/it/models/2029113" target="_blank" rel="noopener">UMTS di Falu su MakerWorld</a> · <a href="https://makerworld.com/it/models/3564112" target="_blank" rel="noopener">remix taglio di rostkuchen</a>.</p>
+    <p class="small">I valori si salvano in questo browser per ciascun utensile. Regola fine dello Z‑offset: <b>preme troppo</b> → aumenta (17,0 → 17,5); <b>non tocca o segno tenue</b> → diminuisci (17,0 → 16,5).</p>
+    <div class="btns"><button class="btn" id="tReset">Ripristina valori del profilo UMTS</button><button class="btn pri" data-go="1">Avanti: il foglio →</button></div>
+  </section>
+
+  <!-- 2 FOGLIO -->
+  <section class="step" id="s1">
+    <h2>Posiziona il foglio</h2>
+    <div class="plate guide" id="plateSvg"></div>
+    <div class="guide">
+      <ol>
+        <li>Il foglio va sempre nello stesso punto, perché la punta non coincide con l'ugello: <b>29 mm dalla parete destra</b> e <b>41 mm dalla parete posteriore</b> (margini pubblicati per UMTS su X1/P1).</li>
+        <li>Per la ripetibilità stampa una <b>dima di allineamento</b> con questi margini: appoggiala, allinea il foglio, toglila.</li>
+        <li>Fissa gli angoli con nastro di carta (indispensabile con POSCA e con la lama).</li>
+        <li>L'area utile è ≈ <b>206 × 199 mm</b> nella parte alta di un A4, larga quanto il foglio: il centro dell'area cade al centro della larghezza A4.</li>
+      </ol>
+    </div>
+    <div class="note warn">Prima volta? Fai il file <b>Calibrazione → Cornice area</b> (passo 3) e controlla dove cade il tratto sul foglio. Se è spostato, correggi qui sotto: lo spostamento vale per tutti i file.</div>
+    <div class="row">
+      <label class="f">Correzione X (mm, + = verso destra)<input type="number" id="offX" step="0.5" value="0"></label>
+      <label class="f">Correzione Y (mm, + = verso il retro)<input type="number" id="offY" step="0.5" value="0"></label>
+    </div>
+    <div class="btns"><button class="btn pri" data-go="2">Avanti: il disegno →</button></div>
+  </section>
+
+  <!-- 3 DISEGNO -->
+  <section class="step" id="s2">
+    <h2>Cosa disegni (o tagli)?</h2>
+    <div class="tabs" id="srcTabs">
+      <button data-src="image" class="on">Immagine</button>
+      <button data-src="gen">Generativo</button>
+      <button data-src="svg">SVG</button>
+      <button data-src="sticker">Adesivi ✂</button>
+      <button data-src="calib">Calibrazione</button>
+    </div>
+
+    <div class="row">
+      <label class="f">Larghezza (mm)<input type="number" id="dimW" step="1" min="10" value="180"></label>
+      <label class="f">Altezza (mm)<input type="number" id="dimH" step="1" min="10" value="180"></label>
+    </div>
+    <div class="btns" style="margin-top:0"><button class="btn" id="fitArea">Adatta all'area utile</button><label class="chk" style="margin:0"><input type="checkbox" id="lockAR" checked> mantieni proporzioni</label></div>
+
+    <!-- immagine -->
+    <div class="src" data-src="image">
+      <div class="drop" id="imgDrop">Trascina qui un'immagine o <u>sceglila</u> (JPG, PNG)</div>
+      <input type="file" id="imgFile" accept="image/*" hidden>
+      <h3>Stile</h3>
+      <div class="tabs" id="algTabs">
+        <button data-alg="hatch" class="on">Tratteggio</button>
+        <button data-alg="contours">Contorni</button>
+        <button data-alg="centerline">Linee a tratto</button>
+        <button data-alg="waves">Onde</button>
+        <button data-alg="spiral">Spirale</button>
+        <button data-alg="tsp">Linea continua</button>
+      </div>
+      <p class="small" id="algHelp"></p>
+      <div id="algParams"></div>
+      <h3>Regolazioni immagine</h3>
+      <div id="imgParams"></div>
+    </div>
+
+    <!-- generativo -->
+    <div class="src" data-src="gen" hidden>
+      <div class="tabs" id="genTabs">
+        <button data-gen="flow" class="on">Campo di flusso</button>
+        <button data-gen="topo">Topografia</button>
+        <button data-gen="ridges">Creste</button>
+        <button data-gen="truchet">Truchet</button>
+        <button data-gen="spiro">Spirografo</button>
+        <button data-gen="harmono">Armonografo</button>
+        <button data-gen="circles">Moiré</button>
+        <button data-gen="maze">Labirinto</button>
+      </div>
+      <div class="row"><label class="f">Seme<input type="number" id="seed" value="1"></label><div style="display:flex;align-items:end;gap:6px"><button class="btn pri" id="dice" style="flex:1">🎲 Variante</button><button class="btn" id="surprise" style="flex:1">✨ A caso</button></div></div>
+      <div id="genParams"></div>
+    </div>
+
+    <!-- svg -->
+    <div class="src" data-src="svg" hidden>
+      <div class="drop" id="svgDrop">Trascina qui un file SVG o <u>sceglilo</u></div>
+      <input type="file" id="svgFile" accept=".svg,image/svg+xml" hidden>
+      <p class="small">Ogni colore del tratto diventa un gruppo (una penna). Le linee sono seguite al centro, come nel file.</p>
+      <label class="chk"><input type="checkbox" id="svgFill"> riempi le forme piene con tratteggio</label>
+      <div class="rng"><span>Passo tratteggio</span><input type="range" id="svgHatch" min="0.6" max="4" step="0.1" value="1.2"><output></output></div>
+    </div>
+
+    <!-- adesivi -->
+    <div class="src" data-src="sticker" hidden>
+      <div class="note info">Due file dallo stesso disegno: prima la <b>penna</b> disegna il soggetto, poi cambi il modulo con la <b>lama</b> e tagli la sagoma. Non muovere il foglio tra i due: la posizione è identica.</div>
+      <div class="tabs" id="stkTabs"><button data-stk="image" class="on">Da immagine</button><button data-stk="shapes">Forme / etichette</button></div>
+      <div data-stk="image">
+        <div class="drop" id="stkDrop">Immagine del soggetto (meglio PNG con sfondo trasparente)</div>
+        <input type="file" id="stkFile" accept="image/*" hidden>
+        <label class="f" style="margin-top:8px">Disegno con la penna<select id="stkDraw"><option value="none">nessuno (solo taglio)</option><option value="contours">contorni</option><option value="centerline">linee a tratto</option><option value="hatch" selected>tratteggio</option></select></label>
+        <div class="rng"><span>Margine taglio</span><input type="range" id="stkMargin" min="0" max="8" step="0.5" value="2"><output></output></div>
+        <div class="rng"><span>Soglia sfondo</span><input type="range" id="stkBg" min="0.02" max="0.6" step="0.01" value="0.1"><output></output></div>
+        <label class="chk"><input type="checkbox" id="stkOuter" checked> taglia solo il contorno esterno</label>
+      </div>
+      <div data-stk="shapes" hidden>
+        <div class="row row3">
+          <label class="f">Forma<select id="shpKind"><option value="circle">cerchio</option><option value="rect">rettangolo</option></select></label>
+          <label class="f">Lato/diametro<input type="number" id="shpSize" value="40" min="5" step="1"></label>
+          <label class="f">Altezza (rett.)<input type="number" id="shpH" value="25" min="5" step="1"></label>
+          <label class="f">Spazio tra forme<input type="number" id="shpGap" value="5" min="1" step="1"></label>
+          <label class="f">Raggio angoli<input type="number" id="shpR" value="4" min="0" step="0.5"></label>
+          <label class="f">Bordo a penna<select id="shpPen"><option value="0">no</option><option value="1">sì (rientro 2 mm)</option></select></label>
+        </div>
+      </div>
+      <div class="note warn">Lama: usa materiale su supporto siliconato (vinile adesivo, carta adesiva) fissato con nastro. La lama deve sporgere appena più dello spessore del materiale: prova su un ritaglio.</div>
+    </div>
+
+    <!-- calibrazione -->
+    <div class="src" data-src="calib" hidden>
+      <div class="tabs" id="calTabs"><button data-cal="frame" class="on">Cornice area</button><button data-cal="press">Test pressione</button><button data-cal="ghost">Prova a vuoto</button></div>
+      <p class="small" id="calHelp"></p>
+    </div>
+
+    <div class="btns"><button class="btn pri" data-go="3">Avanti: colori e passate →</button></div>
+  </section>
+
+  <!-- 4 COLORI -->
+  <section class="step" id="s3">
+    <h2>Gruppi, colori e passate</h2>
+    <p class="small">Ogni gruppo è un cambio di penna: Orca mette una pausa prima di ciascuno. Le passate ripetono il gruppo (tratto più pieno o taglio più profondo).</p>
+    <div class="groups" id="groups"></div>
+    <label class="chk"><input type="checkbox" id="pauseEvery"> pausa anche prima di ogni passata (per regolare la penna, utile in taratura)</label>
+    <div class="btns"><button class="btn pri" data-go="4">Avanti: crea il file →</button></div>
+  </section>
+
+  <!-- 5 FILE -->
+  <section class="step" id="s4">
+    <h2>File pronto per Orca Slicer</h2>
+    <div id="summary"></div>
+    <div class="btns" id="dlBtns"></div>
+    <details>
+      <summary>Impostazioni avanzate</summary>
+      <label class="chk"><input type="checkbox" id="skipPurge" checked> salta la linea di spurgo iniziale (finirebbe sul foglio)</label>
+      <div class="row">
+        <label class="f">Ugello (°C, minimo anti‑errore)<input type="number" id="nozT" value="180" min="170" max="230"></label>
+        <label class="f">Piano (°C)<input type="number" id="bedT" value="25" min="20" max="60"></label>
+      </div>
+      <p class="small">Profilo “modalità plotter” di UMTS: flusso 0,01, ventole spente, retrazione 0,01 mm (sblocca lo Z‑hop), Z‑hop normale, 1 perimetro, strato 0,10 mm, larghezze 0,40 mm, area esclusa ( 0x0, 258x0, 258x55, 48x55, 48x258, 0x258 ). Il generatore pareti è Arachne, così ogni tratto diventa una sola linea centrale.</p>
+    </details>
+    <div class="btns"><button class="btn" data-go="5">Come lanciarlo →</button></div>
+  </section>
+
+  <!-- 6 STAMPA -->
+  <section class="step" id="s5">
+    <h2>In stampa, passo passo</h2>
+    <div class="note danger"><b>In caso di collisione spegni subito la stampante.</b> Non lasciare mai che la stampa finisca con il modulo montato: alla fine la testina va verso il fondo e il taglierino del filamento, e il modulo urterebbe.</div>
+    <div class="guide"><ol id="runGuide"></ol></div>
+    <details>
+      <summary>Prime volte: le fasi di test consigliate dall'autore</summary>
+      <ol class="small">
+        <li><b>A vuoto, solo base</b>: avvia senza modulo, alla prima pausa monta solo la base, riprendi (disegno fantasma), alla pausa finale rimuovila.</li>
+        <li><b>Set completo senza penna</b>: base + molla + guida, osserva che non ci siano collisioni.</li>
+        <li><b>Taratura in tempo reale</b>: foglio ai margini, file <i>Calibrazione → Test pressione</i>. Inserisci la penna poco sporgente; a ogni pausa abbassala di 1–2 mm e riprendi, finché il tratto è pulito e la penna si solleva negli spostamenti.</li>
+      </ol>
+    </details>
+    <details>
+      <summary>Problemi comuni</summary>
+      <table class="pz">
+        <tr><td>Linee tenui / non disegna</td><td>Manca contatto: abbassa lo Z‑offset o fai sporgere di più la penna.</td></tr>
+        <tr><td>Inchiostro che sbava</td><td>Troppa pressione: alza lo Z‑offset o ritira la penna.</td></tr>
+        <tr><td>Linee “fantasma” negli spostamenti</td><td>Z‑hop insufficiente: tipo Normale, 3–4 mm (passo 1).</td></tr>
+        <tr><td>Si mette in pausa e riparte da sola</td><td>Il G‑code di pausa deve essere <kbd>M400 U1</kbd> (già nel file).</td></tr>
+        <tr><td>Orca rifiuta di affettare</td><td>Il disegno tocca l'area esclusa: riduci la dimensione o la correzione X/Y.</td></tr>
+        <tr><td>La compensazione Z non funziona</td><td>Usa Orca Slicer (non Bambu Studio), stampante in modalità solo LAN.</td></tr>
+      </table>
+    </details>
+  </section>
+</aside>
+
+<div class="view" id="view">
+  <canvas id="pv"></canvas>
+  <div class="vtools"><button id="vTravel">spostamenti</button><button id="vPlate">vista piatto</button></div>
+  <div class="hud" id="hud">Carica un'immagine o scegli un disegno generativo.</div>
+  <div class="busy" id="busy">Elaboro…</div>
+  <div class="toast" id="toast"></div>
+</div>
+</main>
+
+<script>/*__LIBS__*/</script>
+<script>/*__CORE__*/</script>
+<script>window.BASE_P1S = /*__BASE__*/;</script>
+<script>
+(function(){
+'use strict';
+const VERSION = 'v0.2'; // v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+document.getElementById('ver').textContent = VERSION;
+// versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
+function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
+if (window.FB_EDITION) showSuite(window.FB_EDITION);
+else if (location.protocol.startsWith('http')) fetch('../edition.js', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => { const m = /"version"\s*:\s*"([^"]+)"/.exec(t) || /version\s*:\s*['"]([^'"]+)['"]/.exec(t); if (m) showSuite({ version: m[1] }); }).catch(() => {});
+document.getElementById('fbBack').addEventListener('click', (e) => { e.preventDefault(); location.assign(new URL(location.protocol === 'file:' ? '../index.html' : '../', location.href).href); });
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const P1S = TR.P1S;
+
+// ------------------------------------------------------------------ utensili
+const TOOLS = {
+  stabilo: { label: 'Stabilo point 88', sub: 'fineliner 0,4 mm', kind: 'pen', zOffset: 17.0, speed: 300, zHop: 3, accel: 5000, width: 0.4, passes: 1, color: '#1b1b1b',
+    guide: `<b>Montaggio</b><ol><li>Inserisci il pennarello nel tubo dell'UMTS: la <b>punta arancione deve sporgere circa 0,5 mm</b> (appena visibile).</li><li>La pressione la danno insieme <b>molla + profondità della penna + Z‑offset</b>.</li><li>Profilo pubblicato: <b>Z‑offset +17,0 mm</b>, velocità <b>300–400 mm/s</b>.</li></ol><p class="small">Il tubo si monta solo durante la prima pausa, quando la testina è già all'altezza compensata.</p>` },
+  posca: { label: 'POSCA', sub: 'marker a vernice', kind: 'pen', zOffset: 20.0, speed: 35, zHop: 4, accel: 2000, width: 1.0, passes: 1, color: '#d4352b',
+    guide: `<b>Montaggio</b><ol><li><b>Capovolgi la guida e il gruppo molla superiore</b>, poi stringi le viti assicurandoti che il <b>retro del POSCA appoggi sul tavolo</b>: è il riferimento fisso che dà pressione costante e linee pulite.</li><li>Profilo pubblicato: <b>Z‑offset +20,0 mm</b>, velocità <b>30–40 mm/s</b>.</li></ol><p class="small">Il tratto è largo: nel tratteggio usa un passo di almeno 1,2 mm.</p>` },
+  blade: { label: 'Lama da taglio', sub: 'porta‑lama tipo Roland', kind: 'cut', zOffset: 17.0, speed: 25, zHop: 3, accel: 1000, width: 0.25, passes: 2, color: '#8a1c7c',
+    guide: `<b>Montaggio</b><ol><li>Con il modulo di taglio originale UMTS: per ora l'autore indica di usare il profilo Stabilo e <b>tarare Z a mano</b>.</li><li>Con un porta‑lama tipo Roland (corpo zigrinato ~11,5 mm) serve il remix <b>“Sistema di taglio per P1 X1 (Remix UMTS)”</b> di rostkuchen: tubo 14,5/11,5 mm, guida e molla dedicate. Stampa prima il suo anello di prova.</li><li>Nel remix il porta‑lama sta <b>più in basso</b>: lo Z‑offset di partenza 17 mm è solo un punto di partenza, <b>misura il tuo</b> con Calibrazione → Test pressione.</li><li>Lama a 45° per vinile e carta adesiva, sporgenza appena oltre lo spessore del materiale. Lento (20–30 mm/s), 2 passate.</li></ol><p class="small">Gli angoli vivi escono leggermente arrotondati (raggio ≈ offset della lama): normale con le lame a trascinamento.</p>` },
+  custom: { label: 'Personalizzato', sub: 'altra penna', kind: 'pen', zOffset: 17.0, speed: 100, zHop: 3, accel: 3000, width: 0.5, passes: 1, color: '#2747c9',
+    guide: `<b>Altra penna</b><ol><li>Montala come la Stabilo e parti da Z‑offset 17 mm.</li><li>Trova il valore giusto con Calibrazione → Test pressione (pausa a ogni passata).</li><li>Penne a gel o a sfera: 50–150 mm/s; marker a vernice: 30–40 mm/s.</li></ol>` },
+};
+const KEYS = ['zOffset', 'speed', 'zHop', 'accel', 'width', 'passes'];
+
+// ------------------------------------------------------------------ stato persistente
+const store = { get() { try { return JSON.parse(localStorage.getItem('tratto.v1') || '{}'); } catch (e) { return {}; } }, set(v) { try { localStorage.setItem('tratto.v1', JSON.stringify(v)); } catch (e) {} } };
+const saved = store.get();
+const S = {
+  tool: saved.tool || 'stabilo',
+  tools: Object.fromEntries(Object.keys(TOOLS).map(k => [k, Object.assign({}, Object.fromEntries(KEYS.map(q => [q, TOOLS[k][q]])), (saved.tools || {})[k] || {})])),
+  offX: saved.offX || 0, offY: saved.offY || 0,
+  skipPurge: saved.skipPurge !== false, nozT: saved.nozT || 180, bedT: saved.bedT || 25,
+  src: 'image', alg: 'hatch', gen: 'flow', stk: 'image', cal: 'frame',
+  W: 180, H: 180, seed: 1,
+  img: null, imgAR: 1, stkImg: null, svgDoc: null,
+  params: {}, groupsMeta: [], pauseEvery: false, showTravel: false, plateView: false,
+  job: null,
+};
+function persist() { store.set({ tool: S.tool, tools: S.tools, offX: S.offX, offY: S.offY, skipPurge: S.skipPurge, nozT: S.nozT, bedT: S.bedT }); }
+const tool = () => Object.assign({}, TOOLS[S.tool], S.tools[S.tool]);
+const toolOf = (k) => Object.assign({}, TOOLS[k], S.tools[k]);
+
+// ------------------------------------------------------------------ navigazione
+function go(i) { $$('#steps button').forEach(b => b.classList.toggle('on', +b.dataset.s === i)); $$('section.step').forEach((s, k) => s.classList.toggle('on', k === i)); if (i === 4) renderSummary(); if (i === 5) renderRunGuide(); $('aside').scrollTop = 0; }
+$$('#steps button').forEach(b => b.onclick = () => go(+b.dataset.s));
+$$('[data-go]').forEach(b => b.onclick = () => go(+b.dataset.go));
+
+// ------------------------------------------------------------------ passo 1
+function renderTools() {
+  $('#toolCards').innerHTML = Object.entries(TOOLS).map(([k, t]) => `<button class="card ${k === S.tool ? 'on' : ''}" data-t="${k}"><b>${t.label}</b><span>${t.sub}</span></button>`).join('');
+  $$('#toolCards .card').forEach(c => c.onclick = () => { S.tool = c.dataset.t; persist(); renderTools(); syncGroupsTool(); schedule(); });
+  $('#toolGuide').innerHTML = TOOLS[S.tool].guide;
+  const t = S.tools[S.tool];
+  $('#tZ').value = t.zOffset; $('#tSpeed').value = t.speed; $('#tHop').value = t.zHop; $('#tAcc').value = t.accel; $('#tW').value = t.width; $('#tPass').value = t.passes;
+}
+[['#tZ', 'zOffset'], ['#tSpeed', 'speed'], ['#tHop', 'zHop'], ['#tAcc', 'accel'], ['#tW', 'width'], ['#tPass', 'passes']].forEach(([sel, k]) => {
+  $(sel).addEventListener('change', e => { const v = parseFloat(e.target.value); if (!isFinite(v)) return; S.tools[S.tool][k] = v; persist(); if (k === 'passes') syncGroupsTool(); draw(); });
+});
+$('#tReset').onclick = () => { S.tools[S.tool] = Object.fromEntries(KEYS.map(q => [q, TOOLS[S.tool][q]])); persist(); renderTools(); draw(); };
+
+// ------------------------------------------------------------------ passo 2: schema piatto
+function plateSVG() {
+  const s = 1.1, W = 256 * s, pad = 30;
+  const ex = `M0,0 L${258 * s},0 L${258 * s},${55 * s} L${48 * s},${55 * s} L${48 * s},${258 * s} L0,${258 * s}Z`;
+  const a = P1S.area;
+  // in SVG y verso il basso = verso il fronte; piatto Y cresce verso il retro
+  const Y = (y) => (256 - y) * s;
+  return `<svg viewBox="${-pad} ${-pad} ${W + pad * 2} ${W + pad * 2 + 10}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui" font-size="10">
+  <rect x="0" y="0" width="${W}" height="${W}" fill="#e9e6df" stroke="#b8b2a5"/>
+  <g transform="translate(0,${W}) scale(1,-1)"><path d="${ex}" fill="#d9534f" fill-opacity=".18" stroke="#d9534f" stroke-dasharray="4 3"/></g>
+  <rect x="${a.x0 * s}" y="${Y(a.y1)}" width="${(a.x1 - a.x0) * s}" height="${(a.y1 - a.y0) * s}" fill="#2747c9" fill-opacity=".08" stroke="#2747c9"/>
+  <text x="${(a.x0 + 4) * s}" y="${Y(a.y1) + 14}" fill="#2747c9">area utile ${P1S.areaW}×${P1S.areaH} mm</text>
+  <text x="${8 * s}" y="${Y(20)}" fill="#a3212b">area esclusa</text>
+  <text x="${W / 2}" y="${-12}" text-anchor="middle" fill="#6a7080">retro (parete posteriore)</text>
+  <text x="${W / 2}" y="${W + 20}" text-anchor="middle" fill="#6a7080">fronte (sportello)</text>
+  <text x="${W + 14}" y="${W / 2}" fill="#6a7080" transform="rotate(90 ${W + 14} ${W / 2})" text-anchor="middle">destra</text>
+  </svg><p class="small">Vista dall'alto del piatto P1S con l'area esclusa del profilo UMTS. Indicativa: verifica sul tuo foglio con la Cornice.</p>`;
+}
+$('#plateSvg').innerHTML = plateSVG();
+$('#offX').value = S.offX; $('#offY').value = S.offY;
+$('#offX').onchange = e => { S.offX = parseFloat(e.target.value) || 0; persist(); draw(); };
+$('#offY').onchange = e => { S.offY = parseFloat(e.target.value) || 0; persist(); draw(); };
+
+// ------------------------------------------------------------------ parametri (slider)
+function slider(container, key, label, min, max, step, def, fmt) {
+  const id = 'p_' + key; if (!(key in S.params)) S.params[key] = def;
+  const d = document.createElement('div'); d.className = 'rng';
+  d.innerHTML = `<span>${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${S.params[key]}"><output></output>`;
+  container.appendChild(d);
+  const inp = d.querySelector('input'), out = d.querySelector('output');
+  const upd = () => { out.textContent = fmt ? fmt(+inp.value) : (+inp.value).toString(); };
+  upd(); inp.oninput = () => { S.params[key] = +inp.value; upd(); schedule(); };
+}
+function check(container, key, label, def) {
+  if (!(key in S.params)) S.params[key] = def;
+  const l = document.createElement('label'); l.className = 'chk'; l.innerHTML = `<input type="checkbox" ${S.params[key] ? 'checked' : ''}> ${label}`;
+  container.appendChild(l); l.querySelector('input').onchange = e => { S.params[key] = e.target.checked; schedule(); };
+}
+const ALG_HELP = {
+  hatch: 'Tratteggio incrociato: più è scuro, più direzioni. Ogni direzione va su uno strato diverso, così le linee non si fondono nello slicer.',
+  contours: 'Isolinee del tono: da 1 livello (sagoma) a molti (effetto topografico). Ottimo per loghi e silhouette.',
+  centerline: 'Segue il centro dei tratti: per disegni a linea, fumetti, schizzi scansionati.',
+  waves: 'Righe ondulate: l’onda si allarga e si stringe con il tono.',
+  spiral: 'Un’unica spirale dal centro, modulata dal tono. Una sola alzata di penna.',
+  tsp: 'Un’unica linea continua che passa per punti distribuiti in base al tono.',
+};
+function renderAlgParams() {
+  const c = $('#algParams'); c.innerHTML = ''; $('#algHelp').textContent = ALG_HELP[S.alg];
+  const minSp = Math.max(0.6, tool().width * 1.2);
+  if (S.alg === 'hatch') { slider(c, 'h_levels', 'Livelli', 1, 6, 1, 4); slider(c, 'h_spacing', 'Passo (mm)', minSp, 4, 0.1, Math.max(1.0, minSp)); slider(c, 'h_angle', 'Angolo base', 0, 180, 5, 45, v => v + '°'); }
+  if (S.alg === 'contours') { slider(c, 'c_levels', 'Livelli', 1, 20, 1, 6); slider(c, 'c_thr', 'Soglia (1 livello)', 0.05, 0.95, 0.01, 0.5); slider(c, 'c_blur', 'Ammorbidisci', 0, 4, 1, 1); slider(c, 'c_min', 'Linea minima (mm)', 0, 10, 0.5, 1.5); }
+  if (S.alg === 'centerline') { slider(c, 'k_thr', 'Soglia nero', 0.1, 0.9, 0.01, 0.5); slider(c, 'k_min', 'Linea minima (mm)', 0, 10, 0.5, 1.5); slider(c, 'k_blur', 'Pulizia rumore', 0, 3, 1, 0); }
+  if (S.alg === 'waves') { slider(c, 'w_spacing', 'Passo righe (mm)', Math.max(1, minSp), 6, 0.1, 2); slider(c, 'w_freq', 'Frequenza', 0.3, 4, 0.1, 1.2); slider(c, 'w_gamma', 'Contrasto onde', 0.5, 3, 0.1, 1.2); }
+  if (S.alg === 'spiral') { slider(c, 's_spacing', 'Passo spirale (mm)', Math.max(1, minSp), 6, 0.1, 1.8); slider(c, 's_freq', 'Frequenza', 0.3, 4, 0.1, 1.5); slider(c, 's_gamma', 'Contrasto', 0.5, 3, 0.1, 1.2); }
+  if (S.alg === 'tsp') { slider(c, 't_points', 'Punti', 300, 12000, 100, 3000); slider(c, 't_gamma', 'Contrasto', 0.5, 4, 0.1, 1.6); }
+}
+function renderImgParams() {
+  const c = $('#imgParams'); c.innerHTML = '';
+  slider(c, 'i_bright', 'Luminosità', -0.5, 0.5, 0.01, 0, v => (v > 0 ? '+' : '') + v.toFixed(2));
+  slider(c, 'i_contrast', 'Contrasto', 0.3, 3, 0.05, 1.2);
+  slider(c, 'i_res', 'Dettaglio (px/mm)', 1.5, 8, 0.5, 4);
+  check(c, 'i_invert', 'inverti (chiaro ↔ scuro)', false);
+}
+const GEN_P = {
+  flow: c => { slider(c, 'g_spacing', 'Distanza linee (mm)', 0.8, 8, 0.1, 2.5); slider(c, 'g_scale', 'Scala rumore', 0.2, 4, 0.1, 1); slider(c, 'g_turb', 'Turbolenza', 0.5, 4, 0.1, 2); slider(c, 'g_len', 'Lunghezza max (mm)', 10, 300, 5, 90); },
+  topo: c => { slider(c, 'g_levels', 'Isolinee', 4, 40, 1, 18); slider(c, 'g_scale', 'Scala', 0.3, 4, 0.1, 1); },
+  ridges: c => { slider(c, 'g_lines', 'Linee', 10, 120, 1, 60); slider(c, 'g_amp', 'Altezza creste', 0.2, 3, 0.1, 1); },
+  truchet: c => { slider(c, 'g_cell', 'Cella (mm)', 4, 40, 1, 12); },
+  spiro: c => { slider(c, 'g_copies', 'Copie', 1, 8, 1, 3); },
+  harmono: c => {},
+  circles: c => { slider(c, 'g_spacing', 'Distanza cerchi (mm)', 0.8, 8, 0.1, 2.5); },
+  maze: c => { slider(c, 'g_cell', 'Cella (mm)', 3, 30, 1, 8); },
+};
+function renderGenParams() { const c = $('#genParams'); c.innerHTML = ''; GEN_P[S.gen](c); }
+const CAL_HELP = {
+  frame: 'Disegna la cornice dell’area utile, la croce al centro e tacche ogni 10 mm. Serve a vedere dove cade il tratto sul foglio e a regolare la correzione X/Y.',
+  press: 'Quadratini e diagonali ripetuti 8 volte con una pausa prima di ogni passata: a ogni pausa abbassi la penna di 1–2 mm (o ritocchi lo Z‑offset per il file successivo).',
+  ghost: 'Un quadrato al centro con una passata: per le prove a vuoto (solo base, poi set completo senza penna) suggerite dall’autore.',
+};
+
+// tabs
+function tabs(sel, attr, key, after) {
+  $$(sel + ' button').forEach(b => b.onclick = () => { S[key] = b.dataset[attr]; $$(sel + ' button').forEach(x => x.classList.toggle('on', x === b)); after && after(); schedule(); });
+}
+tabs('#srcTabs', 'src', 'src', () => { S.groupsMeta = []; $$('.src').forEach(d => d.hidden = d.dataset.src !== S.src); if (S.src === 'calib') { fitArea(); } });
+tabs('#algTabs', 'alg', 'alg', renderAlgParams);
+tabs('#genTabs', 'gen', 'gen', renderGenParams);
+tabs('#stkTabs', 'stk', 'stk', () => (S.groupsMeta = [], $$('[data-stk]')).forEach(d => { if (d.tagName === 'DIV') d.hidden = d.dataset.stk !== S.stk; }));
+tabs('#calTabs', 'cal', 'cal', () => { S.groupsMeta = []; $('#calHelp').textContent = CAL_HELP[S.cal]; });
+$('#calHelp').textContent = CAL_HELP.frame;
+$('#seed').onchange = e => { S.seed = parseInt(e.target.value) || 1; schedule(); };
+$('#dice').onclick = () => { S.seed = Math.floor(Math.random() * 99999); $('#seed').value = S.seed; schedule(); };
+$('#surprise').onclick = () => { const ks = Object.keys(GEN_P); const k = ks[Math.floor(Math.random() * ks.length)]; $$('#genTabs button').find(b => b.dataset.gen === k).click(); $('#dice').click(); };
+['#svgFill', '#stkOuter', '#stkDraw', '#shpKind', '#shpSize', '#shpH', '#shpGap', '#shpR', '#shpPen'].forEach(s => $(s).addEventListener('change', schedule));
+['#svgHatch', '#stkMargin', '#stkBg'].forEach(s => { const i = $(s), o = i.parentElement.querySelector('output'); const u = () => o.textContent = i.value; u(); i.addEventListener('input', () => { u(); schedule(); }); });
+
+// dimensioni
+function clampDims() {
+  S.W = Math.max(10, Math.min(P1S.areaW, S.W)); S.H = Math.max(10, Math.min(P1S.areaH, S.H));
+  $('#dimW').value = Math.round(S.W * 10) / 10; $('#dimH').value = Math.round(S.H * 10) / 10;
+}
+function aspect() { if (S.src === 'image' && S.img) return S.imgAR; if (S.src === 'sticker' && S.stk === 'image' && S.stkImg) return S.stkImg.ar; if (S.src === 'svg' && S.svgAR) return S.svgAR; return null; }
+function fitArea() {
+  const ar = aspect();
+  let W = P1S.areaW - 4, H = P1S.areaH - 4;
+  if (ar) { if (W / H > ar) W = H * ar; else H = W / ar; }
+  S.W = W; S.H = H; clampDims(); schedule();
+}
+$('#fitArea').onclick = fitArea;
+$('#dimW').onchange = e => { const v = +e.target.value; const ar = $('#lockAR').checked ? (aspect() || S.W / S.H) : null; S.W = v; if (ar) S.H = v / ar; clampDims(); schedule(); };
+$('#dimH').onchange = e => { const v = +e.target.value; const ar = $('#lockAR').checked ? (aspect() || S.W / S.H) : null; S.H = v; if (ar) S.W = v * ar; clampDims(); schedule(); };
+
+// ------------------------------------------------------------------ caricamento file
+function pick(dropSel, fileSel, handler) {
+  const d = $(dropSel), f = $(fileSel);
+  d.onclick = () => f.click();
+  f.onchange = () => f.files[0] && handler(f.files[0]);
+  d.ondragover = e => { e.preventDefault(); d.style.background = '#f4f6ff'; };
+  d.ondragleave = () => d.style.background = '';
+  d.ondrop = e => { e.preventDefault(); d.style.background = ''; const file = e.dataTransfer.files[0]; if (file) handler(file); };
+}
+function loadImage(file) {
+  return new Promise((res, rej) => { const u = URL.createObjectURL(file); const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = u; });
+}
+pick('#imgDrop', '#imgFile', async file => {
+  try { const im = await loadImage(file); S.img = im; S.imgAR = im.naturalWidth / im.naturalHeight; $('#imgDrop').textContent = '✓ ' + file.name; $('#imgDrop').classList.add('has'); fitArea(); }
+  catch (e) { toast('Immagine non leggibile'); }
+});
+pick('#stkDrop', '#stkFile', async file => {
+  try { const im = await loadImage(file); S.stkImg = { im, ar: im.naturalWidth / im.naturalHeight }; $('#stkDrop').textContent = '✓ ' + file.name; $('#stkDrop').classList.add('has'); fitArea(); }
+  catch (e) { toast('Immagine non leggibile'); }
+});
+pick('#svgDrop', '#svgFile', async file => {
+  const txt = await file.text();
+  const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
+  const svg = doc.querySelector('svg'); if (!svg) { toast('SVG non valido'); return; }
+  S.svgDoc = svg; $('#svgDrop').textContent = '✓ ' + file.name; $('#svgDrop').classList.add('has');
+  const host = svgHost(); host.innerHTML = ''; host.appendChild(document.importNode(svg, true));
+  const bb = host.firstChild.getBBox(); S.svgAR = bb.width / bb.height || 1; fitArea();
+});
+function svgHost() { let h = $('#svgHost'); if (!h) { h = document.createElement('div'); h.id = 'svgHost'; h.style.cssText = 'position:absolute;left:-10000px;top:0;width:1000px;height:1000px;opacity:0;pointer-events:none'; document.body.appendChild(h); } return h; }
+
+// immagine → campo di tono
+function rasterize(im, W, H, pxmm, adj) {
+  const w = Math.max(16, Math.min(1400, Math.round(W * pxmm))), h = Math.max(16, Math.min(1400, Math.round(H * pxmm)));
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.clearRect(0, 0, w, h); cx.drawImage(im, 0, 0, w, h);
+  const data = cx.getImageData(0, 0, w, h).data;
+  const d = new Float32Array(w * h), mask = new Float32Array(w * h);
+  let hasAlpha = false;
+  for (let i = 0; i < w * h; i++) {
+    const a = data[i * 4 + 3] / 255; if (a < 0.98) hasAlpha = true;
+    const lum = (0.2126 * data[i * 4] + 0.7152 * data[i * 4 + 1] + 0.0722 * data[i * 4 + 2]) / 255;
+    let v = (1 - lum) * a;
+    if (adj) { if (adj.invert) v = a * (1 - v / Math.max(a, 1e-6)); v = (v - 0.5) * adj.contrast + 0.5 + adj.bright; v = Math.max(0, Math.min(1, v)); }
+    d[i] = v; mask[i] = a;
+  }
+  return { w, h, d, mask: hasAlpha ? mask : null };
+}
+
+// SVG → gruppi per colore
+function svgGroups(W, H) {
+  const host = svgHost(); const root = host.querySelector('svg'); if (!root) return [];
+  const bb = root.getBBox(); const sc = Math.min(W / bb.width, H / bb.height);
+  const ox = (W - bb.width * sc) / 2 - bb.x * sc, oy = (H - bb.height * sc) / 2 - bb.y * sc;
+  const groups = new Map();
+  const add = (col, paths) => { if (!groups.has(col)) groups.set(col, []); groups.get(col).push(...paths); };
+  const els = root.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse');
+  const hatchSp = +$('#svgHatch').value, doFill = $('#svgFill').checked;
+  const rootCTM = root.getScreenCTM();
+  for (const el of els) {
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+    let len = 0; try { len = el.getTotalLength(); } catch (e) { continue; }
+    if (!(len > 0)) continue;
+    const m = rootCTM ? rootCTM.inverse().multiply(el.getScreenCTM()) : el.getCTM();
+    const step = Math.max(0.05, 0.25 / sc);
+    const pts = []; let cur = [];
+    let prev = null;
+    for (let s = 0; s <= len + 1e-9; s += step) {
+      const p = el.getPointAtLength(Math.min(s, len));
+      const q = new DOMPoint(p.x, p.y).matrixTransform(m);
+      const P = [q.x * sc + ox, q.y * sc + oy];
+      if (prev && Math.hypot(P[0] - prev[0], P[1] - prev[1]) > step * sc * 3 + 0.05) { if (cur.length > 1) pts.push(cur); cur = []; }
+      cur.push(P); prev = P;
+    }
+    if (cur.length > 1) pts.push(cur);
+    const strokeC = cs.stroke && cs.stroke !== 'none' ? cs.stroke : null, fillC = cs.fill && cs.fill !== 'none' ? cs.fill : null;
+    const col = strokeC || fillC || 'rgb(0, 0, 0)';
+    if (strokeC || !fillC || !doFill) add(col, pts.map(p => TR.simplify(p, 0.03)));
+    if (doFill && fillC) add(fillC, TR.hatchPolygons(pts, hatchSp, 45));
+  }
+  return [...groups.entries()].map(([col, paths]) => ({ color: rgbHex(col), paths: TR.orderPaths(TR.clipToRect(paths, W, H)) }));
+}
+function rgbHex(c) { const m = c.match(/\d+(\.\d+)?/g); if (!m || c.startsWith('#')) return c.startsWith('#') ? c : '#000000'; return '#' + m.slice(0, 3).map(v => (+v | 0).toString(16).padStart(2, '0')).join(''); }
+
+// ------------------------------------------------------------------ calcolo del lavoro
+const P = (k, d) => (k in S.params ? S.params[k] : d);
+function imageAlg(alg, img, W, H, seed) {
+  if (alg === 'hatch') { const r = TR.algHatch(img, W, H, { levels: P('h_levels', 4), spacing: P('h_spacing', 1), angle: P('h_angle', 45) }); return { slices: r.levels.map(l => TR.orderPaths(l)) }; }
+  if (alg === 'contours') return { paths: TR.orderPaths(TR.algContours(img, W, H, { levels: P('c_levels', 6), threshold: P('c_thr', 0.5), blur: P('c_blur', 1), minLen: P('c_min', 1.5) })) };
+  if (alg === 'centerline') return { paths: TR.orderPaths(TR.algCenterline(img, W, H, { threshold: P('k_thr', 0.5), minLen: P('k_min', 1.5), blur: P('k_blur', 0) })) };
+  if (alg === 'waves') return { paths: TR.algWaves(img, W, H, { spacing: P('w_spacing', 2), freq: P('w_freq', 1.2), gamma: P('w_gamma', 1.2) }) };
+  if (alg === 'spiral') return { paths: TR.algSpiral(img, W, H, { spacing: P('s_spacing', 1.8), freq: P('s_freq', 1.5), gamma: P('s_gamma', 1.2) }) };
+  if (alg === 'tsp') return { paths: TR.algTSP(img, W, H, { points: P('t_points', 3000), gamma: P('t_gamma', 1.6) }, seed) };
+  return { paths: [] };
+}
+function adjust() { return { bright: P('i_bright', 0), contrast: P('i_contrast', 1.2), invert: P('i_invert', false) }; }
+function computeJob() {
+  const W = S.W, H = S.H, t = tool();
+  const pen = t.kind === 'pen' ? S.tool : 'stabilo';
+  let groups = [], name = 'tratto';
+  if (S.src === 'image') {
+    if (!S.img) return null;
+    const img = rasterize(S.img, W, H, P('i_res', 4), adjust());
+    const r = imageAlg(S.alg, img, W, H, S.seed);
+    groups = [Object.assign({ tool: S.tool }, r)]; name = 'immagine-' + S.alg;
+  } else if (S.src === 'gen') {
+    const o = { spacing: P('g_spacing', 2.5), scale: P('g_scale', 1), turb: P('g_turb', 2), length: P('g_len', 90), levels: P('g_levels', 18), lines: P('g_lines', 60), amp: P('g_amp', 1), cell: P('g_cell', S.gen === 'maze' ? 8 : 12), copies: P('g_copies', 3) };
+    let paths = TR.GEN[S.gen](W, H, o, S.seed);
+    paths = TR.orderPaths(TR.clipToRect(paths, W, H));
+    groups = [{ tool: S.tool, paths }]; name = S.gen + '-' + S.seed;
+  } else if (S.src === 'svg') {
+    if (!S.svgDoc) return null;
+    groups = svgGroups(W, H).map(g => Object.assign({ tool: S.tool }, g)); name = 'svg';
+  } else if (S.src === 'sticker') {
+    name = 'adesivi';
+    if (S.stk === 'image') {
+      if (!S.stkImg) return null;
+      const img = rasterize(S.stkImg.im, W, H, 5, null);
+      const cut = TR.cutOutline(img, W, H, { margin: +$('#stkMargin').value, bgThr: +$('#stkBg').value, outerOnly: $('#stkOuter').checked });
+      const da = $('#stkDraw').value;
+      if (da !== 'none') {
+        const img2 = rasterize(S.stkImg.im, W, H, 4, { bright: 0, contrast: 1.2, invert: false });
+        const r = imageAlg(da, img2, W, H, S.seed);
+        groups.push(Object.assign({ tool: pen }, r));
+      }
+      groups.push({ tool: 'blade', paths: TR.orderPaths(TR.clipToRect(cut, W, H)) });
+    } else {
+      const o = { shape: $('#shpKind').value, size: +$('#shpSize').value, height: +$('#shpH').value, gap: +$('#shpGap').value, radius: +$('#shpR').value };
+      const cut = TR.shapeGrid(W, H, o);
+      if ($('#shpPen').value === '1') {
+        const inset = TR.shapeGrid(W, H, Object.assign({}, o)).map(p => insetPath(p, 2));
+        groups.push({ tool: pen, paths: TR.orderPaths(inset) });
+      }
+      groups.push({ tool: 'blade', paths: TR.orderPaths(cut) });
+    }
+  } else if (S.src === 'calib') {
+    name = 'calibrazione-' + S.cal;
+    groups = [{ tool: S.tool, paths: calibPaths(W, H, S.cal) }];
+  }
+  groups = groups.filter(g => (g.slices ? g.slices.some(s => s.length) : g.paths && g.paths.length));
+  return { name, W, H, groups };
+}
+function insetPath(p, d) {
+  // rientro semplice verso il baricentro (forme convesse)
+  const c = p.reduce((a, q) => [a[0] + q[0] / p.length, a[1] + q[1] / p.length], [0, 0]);
+  return p.map(([x, y]) => { const dx = x - c[0], dy = y - c[1], L = Math.hypot(dx, dy) || 1; return [x - dx / L * d, y - dy / L * d]; });
+}
+function calibPaths(W, H, kind) {
+  const out = [];
+  if (kind === 'frame') {
+    out.push([[0, 0], [W, 0], [W, H], [0, H], [0, 0]]);
+    out.push([[W / 2 - 10, H / 2], [W / 2 + 10, H / 2]], [[W / 2, H / 2 - 10], [W / 2, H / 2 + 10]]);
+    for (let x = 10; x < W; x += 10) { const L = x % 50 === 0 ? 6 : 3; out.push([[x, 0], [x, L]], [[x, H], [x, H - L]]); }
+    for (let y = 10; y < H; y += 10) { const L = y % 50 === 0 ? 6 : 3; out.push([[0, y], [L, y]], [[W, y], [W - L, y]]); }
+  } else if (kind === 'press') {
+    const s = 12, g = 6, n = Math.max(1, Math.min(4, Math.floor((Math.min(W, H) + g) / (s + g))));
+    const ox = (W - (n * s + (n - 1) * g)) / 2, oy = (H - (n * s + (n - 1) * g)) / 2;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const x = ox + i * (s + g), y = oy + j * (s + g); out.push([[x, y], [x + s, y], [x + s, y + s], [x, y + s], [x, y]], [[x + 2, y + 2], [x + s - 2, y + s - 2]]); }
+  } else {
+    const s = Math.min(W, H) * 0.5; out.push([[W / 2 - s / 2, H / 2 - s / 2], [W / 2 + s / 2, H / 2 - s / 2], [W / 2 + s / 2, H / 2 + s / 2], [W / 2 - s / 2, H / 2 + s / 2], [W / 2 - s / 2, H / 2 - s / 2]]);
+  }
+  return TR.orderPaths(out);
+}
+
+// gruppi con metadati utente (colore, passate, nome)
+const PALETTE = ['#1b1b1b', '#d4352b', '#2747c9', '#1d7a46', '#e08a00', '#8a1c7c'];
+function decorate(job) {
+  if (!job) return null;
+  let pi = 0;
+  job.groups.forEach((g, i) => {
+    const meta = S.groupsMeta[i] || {};
+    const tl = toolOf(g.tool);
+    if (!g.color || S.src !== 'svg') g.color = meta.color || (g.tool === 'blade' ? TOOLS.blade.color : (i === 0 ? tl.color : PALETTE[(pi) % PALETTE.length]));
+    else if (meta.color) g.color = meta.color;
+    if (g.tool !== 'blade') pi++;
+    g.passes = meta.passes || tl.passes;
+    g.name = meta.name || (g.tool === 'blade' ? 'Taglio' : (job.groups.filter(x => x.tool !== 'blade').length > 1 ? 'Penna ' + (i + 1) : tl.label));
+    if (S.src === 'calib' && S.cal === 'press') g.passes = 8;
+  });
+  return job;
+}
+function syncGroupsTool() { S.groupsMeta = S.groupsMeta.map(m => Object.assign({}, m, { passes: undefined })); renderAlgParams(); }
+function renderGroups() {
+  const job = S.job, c = $('#groups');
+  if (!job || !job.groups.length) { c.innerHTML = '<p class="small">Nessun tratto ancora.</p>'; return; }
+  c.innerHTML = job.groups.map((g, i) => {
+    const sl = g.slices ? g.slices.length : 1;
+    const L = (g.slices || [g.paths]).reduce((a, s) => a + s.reduce((b, p) => b + TR.pathLength(p), 0), 0);
+    const n = (g.slices || [g.paths]).reduce((a, s) => a + s.length, 0);
+    return `<div class="g"><input type="color" value="${g.color}" data-i="${i}" data-k="color"><input value="${g.name}" data-i="${i}" data-k="name"><input type="number" min="1" max="12" value="${g.passes}" data-i="${i}" data-k="passes" title="passate"><span class="small">${g.tool === 'blade' ? '✂ lama' : '✎ penna'}</span><div class="meta">${n} tratti · ${(L / 1000).toFixed(2)} m${sl > 1 ? ' · ' + sl + ' strati (una direzione ciascuno)' : ''}</div></div>`;
+  }).join('');
+  $$('#groups input').forEach(inp => inp.onchange = () => {
+    const i = +inp.dataset.i, k = inp.dataset.k; S.groupsMeta[i] = S.groupsMeta[i] || {};
+    S.groupsMeta[i][k] = k === 'passes' ? Math.max(1, parseInt(inp.value) || 1) : inp.value; recompute(true);
+  });
+}
+$('#pauseEvery').onchange = e => { S.pauseEvery = e.target.checked; };
+
+// ------------------------------------------------------------------ ricalcolo con debounce
+let timer = null, jobRaw = null;
+function schedule() { clearTimeout(timer); $('#busy').style.display = 'block'; timer = setTimeout(() => recompute(false), 250); }
+function recompute(metaOnly) {
+  try {
+    if (!metaOnly || !jobRaw) jobRaw = computeJob();
+    S.job = decorate(jobRaw ? JSON.parse(JSON.stringify(jobRaw)) : null);
+  } catch (e) { console.error(e); S.job = null; hud('Errore: ' + e.message); }
+  $('#busy').style.display = 'none';
+  renderGroups(); draw();
+}
+
+// ------------------------------------------------------------------ anteprima
+const cv = $('#pv'), ctx = cv.getContext('2d');
+$('#vTravel').onclick = e => { S.showTravel = !S.showTravel; e.target.classList.toggle('on', S.showTravel); draw(); };
+$('#vPlate').onclick = e => { S.plateView = !S.plateView; e.target.classList.toggle('on', S.plateView); draw(); };
+new ResizeObserver(() => draw()).observe($('#view'));
+function hud(html) { $('#hud').innerHTML = html; }
+function stats(job) {
+  let L = 0, n = 0, travel = 0, layers = 0, time = 240;
+  for (const g of job.groups) {
+    const tl = toolOf(g.tool); const sls = g.slices || [g.paths];
+    for (const s of sls) {
+      let l = 0, tr = 0, pos = null;
+      for (const p of s) { l += TR.pathLength(p); if (pos) tr += Math.hypot(p[0][0] - pos[0], p[0][1] - pos[1]); pos = p[p.length - 1]; }
+      L += l * g.passes; n += s.length * g.passes; travel += tr * g.passes; layers += g.passes;
+      time += g.passes * (l / tl.speed + tr / 300 + s.length * (2 * tl.zHop / 10 + 0.15));
+    }
+  }
+  return { L, n, travel, layers: layers + 2, time };
+}
+function fmtTime(s) { const m = Math.round(s / 60); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + (m % 60) + ' min'; }
+function areaOK(job) {
+  const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
+  return cx - job.W / 2 >= P1S.area.x0 - 1e-6 && cx + job.W / 2 <= P1S.area.x1 + 1e-6 && cy - job.H / 2 >= P1S.area.y0 - 1e-6 && cy + job.H / 2 <= P1S.area.y1 + 1e-6;
+}
+function draw() {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  cv.width = Math.max(1, r.width * dpr); cv.height = Math.max(1, r.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, r.width, r.height);
+  // mondo in coordinate piatto (mm): x 0..256, y 0..256 (y verso il retro)
+  const plate = S.plateView;
+  const world = plate ? { x0: -10, y0: -10, x1: 266, y1: 266 } : { x0: P1S.cx - 105 - 8, x1: P1S.cx + 105 + 8, y0: P1S.area.y1 - 297 - 8, y1: P1S.area.y1 + 8 };
+  const sc = Math.min(r.width / (world.x1 - world.x0), r.height / (world.y1 - world.y0)) * 0.96;
+  const ox = (r.width - (world.x1 - world.x0) * sc) / 2 - world.x0 * sc, oy = (r.height - (world.y1 - world.y0) * sc) / 2 + world.y1 * sc;
+  const X = x => ox + x * sc, Y = y => oy - y * sc;
+  ctx.save();
+  if (plate) {
+    ctx.fillStyle = '#e4e0d7'; ctx.fillRect(X(0), Y(256), 256 * sc, 256 * sc);
+    ctx.fillStyle = 'rgba(217,83,79,.18)'; ctx.beginPath(); [[0, 0], [256, 0], [256, 55], [48, 55], [48, 256], [0, 256]].forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.fill();
+  }
+  // foglio A4 (indicativo): larghezza centrata sull'area, bordo alto al limite posteriore dell'area
+  const pw = 210, ph = 297, px0 = P1S.cx - pw / 2, py1 = P1S.area.y1;
+  ctx.shadowColor = 'rgba(0,0,0,.12)'; ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.fillRect(X(px0), Y(py1), pw * sc, ph * sc); ctx.shadowBlur = 0;
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = '#9fb0ef'; ctx.lineWidth = 1; ctx.strokeRect(X(P1S.area.x0), Y(P1S.area.y1), P1S.areaW * sc, P1S.areaH * sc); ctx.setLineDash([]);
+  ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText('area utile UMTS', X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
+  ctx.textAlign = 'right'; ctx.fillText('A4 · posizione indicativa', X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
+  const job = S.job;
+  if (!job) { ctx.restore(); hud(S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
+  const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
+  const tx = x => X(cx - job.W / 2 + x), ty = y => Y(cy + job.H / 2 - y);
+  const ok = areaOK(job);
+  ctx.strokeStyle = ok ? 'rgba(39,71,201,.35)' : '#d9534f'; ctx.lineWidth = 1; ctx.strokeRect(tx(0), ty(0), job.W * sc, job.H * sc);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const g of job.groups) {
+    const tl = toolOf(g.tool);
+    ctx.strokeStyle = g.color; ctx.lineWidth = Math.max(0.6, tl.width * sc); ctx.globalAlpha = g.tool === 'blade' ? 0.9 : 0.92;
+    if (g.tool === 'blade') ctx.setLineDash([5, 3]);
+    for (const s of (g.slices || [g.paths])) {
+      ctx.beginPath();
+      for (const p of s) { ctx.moveTo(tx(p[0][0]), ty(p[0][1])); for (let i = 1; i < p.length; i++) ctx.lineTo(tx(p[i][0]), ty(p[i][1])); if (p.length === 1) ctx.lineTo(tx(p[0][0]) + 0.1, ty(p[0][1])); }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    if (S.showTravel) {
+      ctx.strokeStyle = 'rgba(255,0,120,.35)'; ctx.lineWidth = 0.6; ctx.beginPath();
+      for (const s of (g.slices || [g.paths])) { let pos = null; for (const p of s) { if (pos) { ctx.moveTo(tx(pos[0]), ty(pos[1])); ctx.lineTo(tx(p[0][0]), ty(p[0][1])); } pos = p[p.length - 1]; } }
+      ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+  const st = stats(job);
+  hud(`<b>${job.W.toFixed(0)} × ${job.H.toFixed(0)} mm</b> · ${job.groups.length} grupp${job.groups.length > 1 ? 'i' : 'o'} · ${st.n} tratti · ${(st.L / 1000).toFixed(1)} m di linea · ≈ <b>${fmtTime(st.time)}</b>${ok ? '' : ' · <span style="color:#a3212b">fuori dall\'area utile: riduci o correggi X/Y</span>'}`);
+}
+
+// ------------------------------------------------------------------ esportazione
+function thumbPNG(job) {
+  const s = 512, c = document.createElement('canvas'); c.width = c.height = s; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, s, s);
+  const k = (s - 40) / Math.max(job.W, job.H), ox = (s - job.W * k) / 2, oy = (s - job.H * k) / 2;
+  x.lineCap = 'round'; x.lineJoin = 'round';
+  for (const g of job.groups) { x.strokeStyle = g.color; x.lineWidth = Math.max(1, toolOf(g.tool).width * k); x.beginPath(); for (const sl of (g.slices || [g.paths])) for (const p of sl) { x.moveTo(ox + p[0][0] * k, oy + p[0][1] * k); for (const q of p) x.lineTo(ox + q[0] * k, oy + q[1] * k); } x.stroke(); }
+  const b64 = c.toDataURL('image/png').split(',')[1]; const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u;
+}
+function settingsFor(k) { const t = toolOf(k); return { zOffset: t.zOffset, zHop: t.zHop, speed: t.speed, accel: t.accel, nozzleTemp: S.nozT, bedTemp: S.bedT, skipPurge: S.skipPurge, colour: '#000000' }; }
+async function download(data, name, type) {
+  // dentro Claude (artifact) i download passano dalla capability "downloads", che non accetta .3mf: si salva come .3mf.zip
+  if (window.claude && typeof window.claude.use === 'function') {
+    let dl = null; try { dl = await window.claude.use('downloads'); } catch (e) {}
+    if (dl) {
+      const fn = /\.3mf$/i.test(name) ? name + '.zip' : name;
+      try { await dl.save({ filename: fn, data: new Blob([data]) }); if (fn !== name) toast('Salvato come <b>' + esc(fn) + '</b>: rinominalo togliendo “.zip” e aprilo in Orca Slicer.', 9000); }
+      catch (e) { if (!e || e.code !== 'declined') toast('Download non riuscito (' + esc((e && e.code) || e) + ').'); }
+      return;
+    }
+  }
+  const b = new Blob([data], { type }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+let toastT = null;
+function toast(html, ms = 5000) { const t = $('#toast'); t.innerHTML = html; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => t.style.display = 'none', ms); }
+function exportFiles() {
+  const job = S.job; if (!job) return [];
+  // un file per tipo di utensile (penne insieme, con pause di cambio; lama a parte)
+  const pens = job.groups.filter(g => g.tool !== 'blade'), cuts = job.groups.filter(g => g.tool === 'blade');
+  const files = [];
+  if (pens.length) files.push({ label: cuts.length ? '1 · Disegno (penna)' : 'File 3MF', suffix: cuts.length ? '_1-disegno' : '', groups: pens, toolKey: pens[0].tool });
+  if (cuts.length) files.push({ label: pens.length ? '2 · Taglio (lama)' : 'File 3MF (taglio)', suffix: pens.length ? '_2-taglio' : '_taglio', groups: cuts, toolKey: 'blade' });
+  return files;
+}
+function renderSummary() {
+  const job = S.job, el = $('#summary'), bt = $('#dlBtns');
+  if (!job || !job.groups.length) { el.innerHTML = '<div class="note warn">Prima crea un disegno al passo 3.</div>'; bt.innerHTML = ''; return; }
+  const ok = areaOK(job);
+  const files = exportFiles();
+  let html = ok ? '' : '<div class="note danger">Il disegno esce dall\'area utile: Orca non lo affetterebbe. Riduci le dimensioni o la correzione X/Y.</div>';
+  for (const f of files) {
+    const plan = TR.planLayers(f.groups, { pauseEveryPass: pauseEvery() });
+    const t = toolOf(f.toolKey);
+    html += `<div class="guide"><b>${f.label}</b> — ${t.label}: Z‑offset <b>+${t.zOffset.toFixed(1)} mm</b>, ${t.speed} mm/s, Z‑hop ${t.zHop} mm<table class="pz">` +
+      `<tr><td>strato 1</td><td>a vuoto, senza modulo (la testina sale alla quota compensata)</td></tr>` +
+      plan.pauses.map(p => `<tr><td>pausa a ${p.z.toFixed(1)} mm</td><td>${p.kind === 'mount' ? '⏸ <b>monta UMTS</b> con ' + esc(f.groups[p.group].name) : p.kind === 'swap' ? '⏸ cambia penna: <b>' + esc(f.groups[p.group].name) + '</b>' : p.kind === 'adjust' ? '⏸ regola la penna, poi riprendi' : '⏸ <b>rimuovi UMTS</b>, poi interrompi'}</td></tr>`).join('') +
+      `<tr><td>totale</td><td>${plan.layers} strati da 0,1 mm</td></tr></table></div>`;
+  }
+  el.innerHTML = html;
+  bt.innerHTML = files.map((f, i) => `<button class="btn pri" data-f="${i}" ${ok ? '' : 'disabled'}>⬇ ${f.label}</button>`).join('') + '<button class="btn" id="dlSvg">⬇ SVG</button>';
+  $$('#dlBtns [data-f]').forEach(b => b.onclick = () => {
+    const f = files[+b.dataset.f]; b.disabled = true; const old = b.textContent; b.textContent = 'Creo il file…';
+    setTimeout(() => {
+      try {
+        const sub = { name: job.name, W: job.W, H: job.H, groups: f.groups, offsetX: S.offX, offsetY: S.offY };
+        const r = TR.build3MF(sub, settingsFor(f.toolKey), window.BASE_P1S, { pauseEveryPass: pauseEvery(), thumbnail: thumbPNG(sub) });
+        download(r.data, `tratto_${job.name}${f.suffix}.3mf`, 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml');
+      } catch (e) { console.error(e); toast('Errore nella creazione del file: ' + esc(e.message)); }
+      b.disabled = false; b.textContent = old;
+    }, 30);
+  });
+  $('#dlSvg').onclick = () => download(TR.buildSVG(job), `tratto_${job.name}.svg`, 'image/svg+xml');
+}
+function pauseEvery() { return S.pauseEvery || (S.src === 'calib' && S.cal === 'press'); }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
+function renderRunGuide() {
+  const job = S.job; const hasCut = job && job.groups.some(g => g.tool === 'blade'), hasPen = job && job.groups.some(g => g.tool !== 'blade');
+  const steps = [
+    'Stampante in <b>modalità solo LAN</b> e <b>Orca Slicer</b> (con Bambu Studio la compensazione Z non viene applicata).',
+    'Apri il 3MF in Orca e accetta di caricare le <b>impostazioni del progetto</b>. Orca segnala G‑code modificato: è lo start senza linea di spurgo, atteso. Eventuali avvisi di “regioni sospese” si ignorano: ogni strato è un disegno a sé.',
+    'In anteprima controlla le <b>icone di pausa</b> sugli strati elencati al passo 5 e che il disegno non tocchi l\'area esclusa. Non premere “Centra/Disponi”: la posizione è già quella giusta per il foglio.',
+    'Lascia il filamento caricato (il firmware vuole “estrudere”: il flusso è 0,01). Nell\'invio disattiva il <b>timelapse</b>; il livellamento è facoltativo.',
+    'Foglio ai margini (29 mm da destra, 41 mm dal retro), angoli fissati. Avvia la stampa <b>senza modulo</b>.',
+    '<b>Prima pausa</b>: la testina è già salita alla quota compensata. Dal display spostala in una zona comoda, monta UMTS e l\'utensile, verifica che non tocchi il vetro e che la molla scorra libera. Riprendi.',
+  ];
+  if (job && job.groups.filter(g => g.tool !== 'blade').length > 1) steps.push('<b>Pause di cambio</b>: sfila la penna e inserisci la successiva con la stessa sporgenza. Riprendi.');
+  steps.push('<b>Pausa finale</b>: sposta la testina, <b>rimuovi UMTS</b>, poi interrompi la stampa. (Se riprendi, l\'ultimo strato gira a vuoto e la stampa termina normalmente.)');
+  if (hasCut && hasPen) steps.push('<b>Adesivi</b>: lascia il foglio fermo. Apri il file “2 · Taglio”, rifai la stessa sequenza con il modulo lama (Z‑offset della lama).');
+  $('#runGuide').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+}
+$('#skipPurge').checked = S.skipPurge; $('#nozT').value = S.nozT; $('#bedT').value = S.bedT;
+$('#skipPurge').onchange = e => { S.skipPurge = e.target.checked; persist(); };
+$('#nozT').onchange = e => { S.nozT = Math.max(170, +e.target.value || 180); persist(); };
+$('#bedT').onchange = e => { S.bedT = Math.max(20, +e.target.value || 25); persist(); };
+
+// ------------------------------------------------------------------ avvio
+renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); clampDims();
+// mostra subito un esempio generativo
+S.src = 'gen'; $$('#srcTabs button').forEach(b => b.classList.toggle('on', b.dataset.src === 'gen')); $$('.src').forEach(d => d.hidden = d.dataset.src !== 'gen');
+schedule();
+})();
+</script>
+</body>
+</html>

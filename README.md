@@ -1,8 +1,8 @@
 # Filament-Prismatica
 
-**FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero.
+**FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab P1S in plotter a penna e da taglio con il kit UMTS.
 
-Versione **2.0.10** · Prismatica **1.13**
+Versione **2.1.0** · Prismatica **1.13** · Tratto **0.2**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
@@ -22,6 +22,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 | Lettore NFC fisico (D1 Mini + PN532) | — | ✅ | ✅ |
 | File tag OpenTag3D da scrivere col telefono | ✅ | ✅ | ✅ |
 | Prismatica | ✅ | — | ✅ |
+| Tratto (plotter e taglio UMTS) | ✅ | — | ✅ |
 | Più dispositivi vedono gli stessi dati | No (backup/ripristino manuale) | ✅ | ✅ |
 
 ## Quale scegliere
@@ -37,6 +38,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 - [Edizione Full](docs/edizione-full.md): Smart + Prismatica
 - [Come funziona FilamentBox](docs/funzionamento.md): bobine, scaffali, AMS, consumi, fatture, statistiche
 - [Prismatica](docs/prismatica.md): dall'immagine ai piatti di stampa numerati
+- [Tratto](docs/tratto.md): plotter a penna e da taglio con il kit UMTS su P1S
 - [Chiave API Claude](docs/claude-api.md): scansione intelligente delle etichette in tutte le edizioni
 - [Home Assistant](docs/home-assistant.md): entità, webhook, automazione
 - [Lettore NFC](docs/lettore-nfc.md): hardware, collegamenti, firmware e protocollo
@@ -47,17 +49,18 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 
 ```
 server/            edizioni Smart e Full (Node.js + Express, un solo file server.js)
-  public/          interfaccia web, Prismatica, librerie (pdf.js, ZXing)
+  public/          interfaccia web, Prismatica, Tratto, librerie (pdf.js, ZXing)
   docker-compose.full.yml / docker-compose.smart.yml
 lite/              edizione Lite pronta all'uso (generata, non modificarla a mano)
 site/              pagina del progetto (italiano e inglese) pubblicata con GitHub Pages
 prismatica/src/    sorgenti di Prismatica (app.html + core.js)
+tratto/src/        sorgenti di Tratto (app.html + core.js + profilo Orca della P1S)
 tools/             build-lite.mjs: rigenera lite/ da server/public
 nfc-reader/        firmware Arduino del lettore NFC (D1 Mini + PN532)
 docs/              guide
 ```
 
-Per modificare FilamentBox si lavora su `server/public/`; poi `cd tools && npm install && npm run build:lite` rigenera l'edizione Lite. Prismatica si modifica in `prismatica/src/` e si ricompila con `python3 prismatica/src/build.py`.
+Per modificare FilamentBox si lavora su `server/public/`; poi `cd tools && npm install && npm run build:lite` rigenera l'edizione Lite. Prismatica si modifica in `prismatica/src/` e si ricompila con `python3 prismatica/src/build.py`; Tratto in `tratto/src/` con `python3 tratto/src/build.py`.
 
 ## Dati personali
 
@@ -65,7 +68,7 @@ Nel repository non ci sono dati personali: niente inventario, token, chiavi, ind
 
 ## Supporta il progetto
 
-FilamentBox e Prismatica sono gratuiti e open source. Se ti sono utili puoi offrirmi un caffè su [Ko-fi](https://ko-fi.com/filippocobelli): aiuta a coprire il tempo e i filamenti per le prove. Lo trovi anche in Settings → Supporta il progetto e in alto a destra in Prismatica.
+FilamentBox e Prismatica sono gratuiti e open source. Se ti sono utili puoi offrirmi un caffè su [Ko-fi](https://ko-fi.com/filippocobelli): aiuta a coprire il tempo e i filamenti per le prove. Lo trovi anche in Settings → Supporta il progetto e in alto a destra in Prismatica e Tratto.
 
 ## Licenza
 
@@ -76,4 +79,6 @@ MIT, vedi [LICENSE](LICENSE).
 - [pdf.js](https://github.com/mozilla/pdf.js) (Apache 2.0): lettura delle fatture PDF
 - [ZXing](https://github.com/zxing-js/browser) (Apache 2.0): scanner barcode
 - [three.js](https://threejs.org) (MIT): anteprima 3D di Prismatica
+- [Clipper](https://www.angusj.com/clipper2/) 6.4.2 (Boost Software License), [libtess.js](https://github.com/brendankenny/libtess.js) (SGI Free Software License B) e [fflate](https://github.com/101arrowz/fflate) (MIT): tratti, triangolazione e 3MF di Tratto
+- Profilo della Bambu Lab P1S ricavato dai profili di sistema di [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) (AGPL 3.0); impostazioni del kit [UMTS](https://makerworld.com/models/2029113) di Falu
 - Tabella colori Bambu Lab ricavata dal database pubblico BambuMan

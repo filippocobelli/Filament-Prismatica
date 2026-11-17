@@ -1,5 +1,6 @@
-// FilamentBox server — v2.0.10
+// FilamentBox server — v2.1.0
 // CHANGELOG
+// v2.1.0 — Tratto (plotter e taglio con il kit UMTS) servito su /tratto/ nell'edizione Full, come Prismatica
 // v2.0.10 — solo versione: Prismatica 1.13 (niente flessibili, colori nell'elenco dei filamenti)
 // v2.0.9 — solo versione: Prismatica 1.12 (linee sottili)
 // v2.0.8 — solo versione: Prismatica 1.11 (libreria completa dei filamenti)
@@ -34,9 +35,9 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3025;
-const VERSION = '2.0.10';
+const VERSION = '2.1.0';
 const EDITION = (process.env.FB_EDITION || 'full').toLowerCase() === 'smart' ? 'smart' : 'full';
-const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica'];
+const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica', 'tratto'];
 const DB_PATH = path.join(__dirname, 'db.json');
 
 app.use(express.json({ limit: '10mb' }));
@@ -47,6 +48,7 @@ app.get('/edition.js', (req, res) => {
 });
 // L'edizione Smart non include Prismatica
 app.use('/prismatica', (req, res, next) => EDITION === 'smart' ? res.status(404).send('Prismatica non è inclusa nell\'edizione Smart') : next());
+app.use('/tratto', (req, res, next) => EDITION === 'smart' ? res.status(404).send('Tratto non è incluso nell\'edizione Smart') : next());
 app.use(express.static(path.join(__dirname, 'public')));
 
 function updateSpoolStatus(spool) {
@@ -989,6 +991,6 @@ app.get('/api/nfc-write-job/status', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   initDB();
   const db = readDB();
-  console.log(`FilamentBox v${VERSION} (${EDITION}) in ascolto sulla porta ${PORT}${EDITION === 'full' ? ' · Prismatica su /prismatica/' : ''}`);
+  console.log(`FilamentBox v${VERSION} (${EDITION}) in ascolto sulla porta ${PORT}${EDITION === 'full' ? ' · Prismatica su /prismatica/ · Tratto su /tratto/' : ''}`);
   console.log(`Webhook: http://<indirizzo-del-server>:${PORT}/api/webhook/print-done?token=${db.webhookToken}`);
 });

@@ -1,8 +1,8 @@
 {
   "name": "filamentbox",
-  "version": "2.0.10",
+  "version": "2.1.0",
   "private": true,
-  "description": "FilamentBox (edizioni Smart e Full): inventario filamenti con server, Home Assistant, lettore NFC e Prismatica",
+  "description": "FilamentBox (edizioni Smart e Full): inventario filamenti con server, Home Assistant, lettore NFC, Prismatica e Tratto",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

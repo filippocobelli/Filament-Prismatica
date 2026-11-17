@@ -50,6 +50,10 @@ Non ci sono Home Assistant, consumi automatici e lettore NFC fisico: servono un 
 
 Si apre dal pulsante **Prismatica** in basso. Legge le bobine dallo stesso browser e si aggiorna da sola quando cambi qualcosa in FilamentBox, anche con le due pagine aperte in schede diverse. Funziona offline: three.js è incluso nel file. Guida completa: [prismatica.md](prismatica.md).
 
+## Tratto nella Lite
+
+Si apre dal pulsante **Tratto** in basso: plotter a penna e da taglio con il kit UMTS su P1S, anche offline. Guida: [tratto.md](tratto.md).
+
 ## Scansione etichette con Claude
 
 Settings → **Claude AI** → incolla la chiave → Salva → Test. La chiave resta solo in quel browser. Dettagli e consigli di sicurezza: [claude-api.md](claude-api.md).
