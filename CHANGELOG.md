@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.2 · Tratto 0.3
+
+- Sito: il titolo del progetto diventa **Filament-Prismatica · Tratto** (pagina del progetto e scheda su lab.cobelli.uk).
+
 ## FilamentBox 2.1.1 · Tratto 0.3
 
 - Tratto: nuova sorgente **Tavola tecnica**. *Da foto*: sagoma, dettagli interni e quote automatiche in scala dall'altezza reale, fino a tre viste. *Da STL/3MF*: viste frontale, dall'alto e laterale (metodo europeo o americano), isometrica, linee nascoste tratteggiate e quote d'ingombro.
