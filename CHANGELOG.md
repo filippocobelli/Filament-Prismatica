@@ -1,5 +1,9 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.11
+
+Il badge in alto mostra subito la versione e l'edizione vere: prima restava su «v2.0.4» finché non si caricavano le impostazioni Claude (lo si vedeva soprattutto nella Lite).
+
 ## FilamentBox 2.1.10 · Tratto 0.9
 
 - **Più stampanti**: oltre alla P1S, profili per X1 Carbon e P1P (stessa testina, valori di Falu per UMTS) e per A1 e A1 mini (da verificare: Z‑offset da misurare, area esclusa prudenziale). Ogni 3MF usa il profilo ufficiale di Orca di quella stampante; Tratto toglie solo lo spurgo. Taratura e correzione X/Y si salvano per stampante.

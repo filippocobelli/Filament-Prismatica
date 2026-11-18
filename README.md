@@ -2,7 +2,7 @@
 
 **FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab X1C, P1S o P1P (A1 e A1 mini da verificare) in plotter a penna e da taglio con il kit UMTS.
 
-Versione **2.1.10** · Prismatica **1.13** · Tratto **0.9**
+Versione **2.1.11** · Prismatica **1.13** · Tratto **0.9**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
