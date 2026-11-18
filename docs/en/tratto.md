@@ -2,9 +2,9 @@
 
 *[Versione italiana](../tratto.md)*
 
-Tratto turns a Bambu Lab **P1S** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
+Tratto turns a Bambu Lab **X1 Carbon, P1S, P1P, A1 or A1 mini** into a **pen plotter** or a **cutting plotter** with Falu's **UMTS** kit ([MakerWorld 2029113](https://makerworld.com/models/2029113)). From an image, an SVG or a generative drawing it builds a **3MF for Orca Slicer** with all the kit settings and the pauses to mount and remove the module.
 
-Version 0.8.2. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
+Version 0.9. It is included in the **Full** and **Lite** editions (the **Tratto** button in the bottom bar). It also works on its own: it is a single HTML file, no server needed.
 
 ## Language
 
@@ -12,12 +12,12 @@ The interface is in Italian and English. Tratto follows the browser language; th
 
 ## The flow, in six steps
 
-1. **Tool**: Stabilo point 88, POSCA, cutting blade or a custom pen. For each one: how to mount it, Z‑offset, speed, Z‑hop, acceleration and passes. Values are saved in the browser, tool by tool.
-2. **Sheet**: a diagram of the plate with the UMTS profile's excluded area and the usable area (≈ 206 × 199 mm). The sheet goes **29 mm from the right wall** and **41 mm from the rear wall**. An X/Y correction shifts every file if the line lands in the wrong spot.
+1. **Printer and tool**: pick the printer (X1C, P1S, P1P; A1 and A1 mini unverified, see below), then Stabilo point 88, POSCA, cutting blade or a custom pen. For each one: how to mount it, Z‑offset, speed, Z‑hop, acceleration and passes. Values are saved in the browser, tool by tool and printer by printer. With **Saved profiles** you name a pen’s calibration (Z‑offset, speed, Z‑hop, acceleration, width, passes and X/Y correction) and get it back when you mount it again.
+2. **Sheet**: a diagram of the plate with the UMTS profile's excluded area and the usable area (≈ 206 × 199 mm on X1/P1). On X1/P1 the sheet goes **29 mm from the right wall** and **41 mm from the rear wall**; on the A1 printers the bed moves, so the sheet is cut so it does not overhang and taped on all four sides. An X/Y correction shifts every file if the line lands in the wrong spot.
 3. **Drawing**:
    - *Image*: cross‑hatching, contours (isolines), line art (skeleton), waves, spiral, single continuous line (TSP), stippling, sketch (short segments, DrawingBot style).
    - *Generative*: flow field, topography, ridges, Truchet, spirograph, harmonograph, moiré, maze, Schotter (a tribute to Georg Nees), rosette, tunnel, ribbons, bubbles, op‑art, cellular automata, tree, sunflower, echo (one line repeated at a constant spacing, open or as concentric outlines). The spirograph also has sliders for the wheel teeth and the pen distance. «🎲 Variation» changes the seed, «✨ Random» changes the style too.
-   - *SVG*: each stroke colour becomes a group (one pen); solid shapes can be filled with hatching.
+   - *SVG*: each stroke colour becomes a group (one pen); solid shapes can be filled with hatching. Below the file Tratto lists what will not be drawn (texts, images, “use” clones, clip paths, masks, filters) and how to fix it.
    - *Stickers ✂*: from the subject (a transparent PNG works best) a pen **drawing** file and a **cut** file with the outline and the chosen margin; or grids of circles and rectangles for labels.
    - *Map*: a city map from OpenStreetMap (see below).
    - *Technical drawing*: a dimensioned drawing with border, title block and, if you like, graph paper (see below).
@@ -25,6 +25,33 @@ The interface is in Italian and English. Tratto follows the browser language; th
 4. **Colours**: each group is a pen change, with name, colour and number of passes.
 5. **File**: summary of layers and pauses, download of the 3MF (and of the SVG).
 6. **Printing**: the sequence to follow and common problems.
+
+## Printers
+
+| Printer | Status | Usable area | Sheet |
+|---|---|---|---|
+| X1 Carbon, P1S, P1P | Falu’s values for UMTS | ≈ 206 × 199 mm | A4, 29 mm from the right and 41 mm from the back |
+| A1 | unverified | ≈ 206 × 235 mm | A4 cut to 210 × 250 mm, centred |
+| A1 mini | unverified | ≈ 157 × 163 mm | 172 × 176 mm, centred |
+
+X1C, P1S and P1P share the same toolhead: the Z‑offset (+17 mm Stabilo, +20 mm POSCA) and the excluded area published by Falu apply. UMTS has a version for the A1 toolhead, but Falu publishes no Z‑offset or excluded area for the A1 and A1 mini: you measure the Z‑offset (nozzle on the bed, then raise Z until the tool touches) and Tratto’s area is a cautious estimate. Before drawing, run **Calibration → Area frame** without a pen. When sending from Orca to an A1, also turn off bed levelling: the hot nozzle would touch the sheet.
+
+Each 3MF uses Orca’s official profile for that printer (`printers-base.json`, rebuilt with `tratto/src/mkbase.py`). Tratto only removes the purge: the line at the front of the plate on X1/P1, the test lines on the A1 printers.
+
+### Why always Orca Slicer
+
+- Each model has its own start sequence (homing, checks, heating) that the firmware expects: Orca builds it from the official profile, always up to date.
+- Orca has a **Z‑offset** in the printer profile, the trick UMTS relies on; Bambu Studio lacks it.
+- The pauses to mount the module and change pen become real printer pauses.
+- Orca’s preview shows the real path with pen lifts. Tratto’s simulator shows an approximate order; Orca decides the exact one.
+- The output is a normal `.gcode.3mf` the printer accepts over LAN or from a microSD card.
+
+## Tools to avoid mistakes
+
+- **Join nearby strokes** (step 4, Effects): two strokes whose ends are less than 0.3 mm apart become one. The pen lifts less and leaves no dots where it lands again. 0 turns it off.
+- **Simulator** (“▶ simulate” on the preview): replays the drawing with play/pause, speed (1×–100×) and a scrub bar. It shows position, pen up/down, group and pass. The order is Tratto’s; Orca decides the final one and shows it in its preview.
+- **Checks** (step 5): usable area, purge really removed from the start sequence, enough Z‑hop, plausible Z‑offset, speed and acceleration within the printer limits, temperatures, pauses in the right place, strokes so short they become dots. An error blocks the download.
+- **20 mm square** (Calibration): a square with a cross in the middle. If the sides are not 20 mm the pen wobbles in its holder; if the cross is off, correct X/Y; if the line is uneven, adjust the Z‑offset. Then save the pen in the profiles.
 
 ## Maps
 
@@ -76,11 +103,11 @@ Groups: **Grid** (if enabled, drawn first), **Drawing** (object, border, title b
 
 ## What is in the 3MF
 
-It is an Orca Slicer project (printer *Bambu Lab P1S 0.4 nozzle*, process *0.20mm Standard @BBL X1C*, filament *Generic PLA*) with the UMTS profile changes:
+It is an Orca Slicer project with the official profile of the chosen printer (for the P1S: printer *Bambu Lab P1S 0.4 nozzle*, process *0.20mm Standard @BBL X1C*, filament *Generic PLA*) and the UMTS profile changes:
 
 | | |
 |---|---|
-| Printer | tool Z‑offset, excluded area `0x0, 258x0, 258x55, 48x55, 48x258, 0x258`, 0.01 mm retraction (unlocks Z‑hop), normal Z‑hop on every travel, no wipe, start without purge line (option) |
+| Printer | tool Z‑offset, excluded area (X1/P1: `0x0, 258x0, 258x55, 48x55, 48x258, 0x258`), 0.01 mm retraction (unlocks Z‑hop), normal Z‑hop on every travel, no wipe, start without purge line (option) |
 | Process | 0.10 mm layer, 0.40 mm widths, 1 **Arachne** wall, no infill, shells, brim, prime tower or timelapse moves |
 | Filament | 180 °C (avoids the cold‑extrusion error), flow 0.01, bed 25 °C, fans off, no cooling slowdown |
 
@@ -95,10 +122,10 @@ The layers:
 
 ## Printing
 
-- Printer in **LAN‑only mode** and **Orca Slicer**: Bambu Studio does not apply the Z compensation.
+- **Orca Slicer**, not Bambu Studio (it does not apply the Z‑offset). The file reaches the printer over LAN or on the microSD card: see [LAN mode](tratto-lan.md).
 - Open the 3MF and load the project settings. The modified G‑code warning is about the start without purge line; the floating regions warning can be ignored.
 - Don't use «Center» or «Arrange»: the position is the sheet's.
-- Leave the filament loaded and turn off timelapse when sending.
+- Leave the filament loaded. When sending, turn off timelapse and flow dynamics calibration; on the A1 printers also bed levelling.
 - **If anything collides, switch the printer off at once.** Never finish the print with the module mounted.
 
 The first few times follow the author's test stages (base only, set without pen, live calibration): they are in step 6.

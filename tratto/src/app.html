@@ -77,6 +77,19 @@ canvas#pv{position:absolute;inset:0;width:100%;height:100%}
 .vtools{position:absolute;right:12px;top:12px;display:flex;gap:6px}
 .vtools button{border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:8px;padding:5px 9px;font:12px var(--font);cursor:pointer}
 .vtools button.on{background:var(--ink);color:#fff}
+.simbar{position:absolute;left:14px;right:14px;bottom:58px;display:flex;align-items:center;gap:8px;background:rgba(255,253,249,.96);border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:12px;color:var(--muted)}
+.simbar[hidden]{display:none}
+.simbar input[type=range]{flex:1;min-width:80px}
+.simbar button,.simbar select{border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 8px;font:12px var(--font);cursor:pointer;color:var(--ink)}
+#simInfo{font-variant-numeric:tabular-nums;white-space:nowrap}
+#simInfo b{color:var(--ink)}
+.chk-list{list-style:none;padding:0;margin:6px 0}
+.chk-list li{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:4px 0;border-top:1px solid var(--line);font-size:13px}
+.chk-list li:first-child{border-top:0}
+.chk-list .k-ok{color:var(--ok)}.chk-list .k-warn{color:var(--warn)}.chk-list .k-err{color:var(--danger)}
+.profrow{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;margin:6px 0}
+.profrow select,.profrow input{font:13px var(--font);padding:6px 8px;border:1px solid var(--line);border-radius:8px;min-width:0}
+.card .tag{display:inline-block;margin-left:4px;font-size:10px;font-weight:600;color:var(--warn);background:var(--warn-bg);border-radius:4px;padding:0 4px}
 .toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:9px 14px;font-size:13px;display:none;max-width:90%;z-index:5}
 .busy{position:absolute;right:14px;bottom:12px;background:var(--ink);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;display:none}
 table.pz{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
@@ -97,7 +110,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
   <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
   <h1><b>Tratto</b><span class="h1sub"> · plotter &amp; taglio UMTS</span></h1>
   <span class="ver" id="ver">v0.8.2</span>
-  <span class="sub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
+  <span class="sub" id="prnSub">Bambu Lab P1S · Orca Slicer · kit UMTS di Falu</span>
   <span class="sp"></span>
   <button class="kofi" id="langSw" type="button" style="cursor:pointer">EN</button>
   <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener" title="Tratto è gratuito: se ti è utile, offrimi un caffè">☕ Ko-fi</a>
@@ -115,6 +128,9 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 
   <!-- 1 UTENSILE -->
   <section class="step on" id="s0">
+    <h2 id="prnH"></h2>
+    <div class="cards" id="prnCards"></div>
+    <div id="prnNote"></div>
     <h2>Che utensile monti sull'UMTS?</h2>
     <div class="cards" id="toolCards"></div>
     <div class="guide" id="toolGuide"></div>
@@ -127,6 +143,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
       <label class="f">Larghezza tratto (anteprima, mm)<input type="number" id="tW" step="0.1" min="0.1" max="3"></label>
       <label class="f">Passate predefinite<input type="number" id="tPass" step="1" min="1" max="8"></label>
     </div>
+    <div id="profBox"></div>
     <p class="small">Fonti: <a href="https://makerworld.com/it/models/2029113" target="_blank" rel="noopener">UMTS di Falu su MakerWorld</a> · <a href="https://makerworld.com/it/models/3564112" target="_blank" rel="noopener">remix taglio di rostkuchen</a>.</p>
     <p class="small">I valori si salvano in questo browser per ciascun utensile. Regola fine dello Z‑offset: <b>preme troppo</b> → aumenta (17,0 → 17,5); <b>non tocca o segno tenue</b> → diminuisci (17,0 → 16,5).</p>
     <div class="btns"><button class="btn" id="tReset">Ripristina valori del profilo UMTS</button><button class="btn pri" data-go="1">Avanti: il foglio →</button></div>
@@ -136,14 +153,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
   <section class="step" id="s1">
     <h2>Posiziona il foglio</h2>
     <div class="plate guide" id="plateSvg"></div>
-    <div class="guide">
-      <ol>
-        <li>Il foglio va sempre nello stesso punto, perché la punta non coincide con l'ugello: <b>29 mm dalla parete destra</b> e <b>41 mm dalla parete posteriore</b> (margini pubblicati per UMTS su X1/P1).</li>
-        <li>Per la ripetibilità stampa una <b>dima di allineamento</b> con questi margini: appoggiala, allinea il foglio, toglila.</li>
-        <li>Fissa gli angoli con nastro di carta (indispensabile con POSCA e con la lama).</li>
-        <li>L'area utile è ≈ <b>206 × 199 mm</b> nella parte alta di un A4, larga quanto il foglio: il centro dell'area cade al centro della larghezza A4.</li>
-      </ol>
-    </div>
+    <div class="guide" id="paperGuide"></div>
     <div class="note warn">Prima volta? Fai il file <b>Calibrazione → Cornice area</b> (passo 3) e controlla dove cade il tratto sul foglio. Se è spostato, correggi qui sotto: lo spostamento vale per tutti i file.</div>
     <div class="row">
       <label class="f">Correzione X (mm, + = verso destra)<input type="number" id="offX" step="0.5" value="0"></label>
@@ -226,6 +236,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
     <div class="src" data-src="svg" hidden>
       <div class="drop" id="svgDrop">Trascina qui un file SVG o <u>sceglilo</u></div>
       <input type="file" id="svgFile" accept=".svg,image/svg+xml" hidden>
+      <div id="svgDiag"></div>
       <p class="small">Ogni colore del tratto diventa un gruppo (una penna). Le linee sono seguite al centro, come nel file.</p>
       <label class="chk"><input type="checkbox" id="svgFill"> riempi le forme piene con tratteggio</label>
       <div class="rng"><span>Passo tratteggio</span><input type="range" id="svgHatch" min="0.6" max="4" step="0.1" value="1.2"><output></output></div>
@@ -305,7 +316,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
     </div>
 
     <div class="src" data-src="calib" hidden>
-      <div class="tabs" id="calTabs"><button data-cal="frame" class="on">Cornice area</button><button data-cal="press">Test pressione</button><button data-cal="ghost">Prova a vuoto</button></div>
+      <div class="tabs" id="calTabs"><button data-cal="frame" class="on">Cornice area</button><button data-cal="press">Test pressione</button><button data-cal="ghost">Prova a vuoto</button><button data-cal="square" id="calSq"></button></div>
       <p class="small" id="calHelp"></p>
     </div>
 
@@ -327,6 +338,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
   <section class="step" id="s4">
     <h2>File pronto per Orca Slicer</h2>
     <div id="summary"></div>
+    <div id="checks"></div>
     <div class="btns" id="dlBtns"></div>
     <details>
       <summary>Impostazioni avanzate</summary>
@@ -345,6 +357,7 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
     <h2>In stampa, passo passo</h2>
     <div class="note danger"><b>In caso di collisione spegni subito la stampante.</b> Non lasciare mai che la stampa finisca con il modulo montato: alla fine la testina va verso il fondo e il taglierino del filamento, e il modulo urterebbe.</div>
     <div class="guide"><ol id="runGuide"></ol></div>
+    <div id="whyBox"></div>
     <details>
       <summary>Prime volte: le fasi di test consigliate dall'autore</summary>
       <ol class="small">
@@ -369,7 +382,14 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 
 <div class="view" id="view">
   <canvas id="pv"></canvas>
-  <div class="vtools"><button id="vTravel">spostamenti</button><button id="vPlate">vista piatto</button></div>
+  <div class="vtools"><button id="vSim"></button><button id="vTravel">spostamenti</button><button id="vPlate">vista piatto</button></div>
+  <div class="simbar" id="simBar" hidden>
+    <button id="simPlay" type="button" aria-label="play">▶</button>
+    <input type="range" id="simT" min="0" max="1000" step="1" value="0" aria-label="time">
+    <select id="simSpd" aria-label="speed"><option value="1">1×</option><option value="5">5×</option><option value="20" selected>20×</option><option value="100">100×</option></select>
+    <span id="simInfo"></span>
+    <button id="simClose" type="button" aria-label="close">✕</button>
+  </div>
   <div class="hud" id="hud">Carica un'immagine o scegli un disegno generativo.</div>
   <div class="busy" id="busy">Elaboro…</div>
   <div class="toast" id="toast"></div>
@@ -383,14 +403,14 @@ kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;paddi
 <script>window.TRATTO_FONT = /*__FONT__*/;</script>
 <script>/*__TAVOLA__*/</script>
 <script>/*__MAPPA__*/</script>
-<script>window.BASE_P1S = /*__BASE__*/;</script>
+<script>window.TRATTO_BASES = /*__BASE__*/;</script>
 <script>
 (function(){
 'use strict';
-const VERSION = 'v0.8.2'; // v0.8.2: ricerca che preferisce la città alla provincia, passo delle curve automatico in montagna · v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
+const VERSION = 'v0.9'; // v0.9: profili per X1C, P1P, A1 e A1 mini oltre alla P1S (sempre con Orca), tratti vicini uniti in uno solo, controlli prima di creare il file, simulatore animato del disegno, elenco degli elementi SVG non disegnati, profili salvati per ogni penna e quadrato di prova da 20 mm, guida alla modalità LAN · v0.8.2: ricerca che preferisce la città alla provincia, passo delle curve automatico in montagna · v0.8.1: server Overpass in parallelo, curve senza rumore · v0.8: piantine di città da OpenStreetMap (strade, acqua, ferrovie, curve di livello, titolo e coordinate) · v0.7: generativo Eco, stile immagine Schizzo, spirografo regolabile, effetti «a mano» e copia sfalsata · v0.6: 9 nuovi generativi (Schotter, Rosone, Tunnel, Nastri, Bolle, Op‑art, Automi cellulari, Albero, Girasole) e stile immagine Puntinato · v0.5: disegni a più colori con più penne (immagine divisa nei suoi colori, generativi divisi tra le penne) · v0.4: interfaccia anche in inglese (selettore EN/IT, ?lang=en), nomi dei gruppi, pause, cartiglio e file nella lingua scelta · v0.3: «Tavola tecnica» da foto (sagoma, dettagli, quote automatiche in scala) e da STL/3MF (viste ortogonali, isometrica, linee nascoste, quote d'ingombro), cornice, cartiglio e carta millimetrata con testo a tratto · v0.2: inclusa in FilamentBox (voce «Tratto» nella barra in basso, pulsante «← FilamentBox», versione della suite) · v0.1: prima versione (immagine, generativo, SVG, adesivi, calibrazione, 3MF per Orca)
 document.getElementById('ver').textContent = VERSION;
 // versione di FilamentBox che include Tratto (edizioni Full e Lite): «v0.2 · FilamentBox 2.1.0»
-function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + ', incluso in FilamentBox ' + e.version; document.getElementById('fbBack').hidden = false; } }
+function showSuite(e) { if (e && e.version) { document.getElementById('ver').textContent = VERSION + ' · FilamentBox ' + e.version; document.getElementById('ver').title = 'Tratto ' + VERSION + tL(', incluso in FilamentBox ', ', included in FilamentBox ') + e.version; document.getElementById('fbBack').hidden = false; } }
 if (window.FB_EDITION) showSuite(window.FB_EDITION);
 else if (location.protocol.startsWith('http')) fetch('../edition.js', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => { const m = /"version"\s*:\s*"([^"]+)"/.exec(t) || /version\s*:\s*['"]([^'"]+)['"]/.exec(t); if (m) showSuite({ version: m[1] }); }).catch(() => {});
 document.getElementById('fbBack').addEventListener('click', (e) => { e.preventDefault(); location.assign(new URL(location.protocol === 'file:' ? '../index.html' : '../', location.href).href); });
@@ -413,10 +433,16 @@ const KEYS = ['zOffset', 'speed', 'zHop', 'accel', 'width', 'passes'];
 // ------------------------------------------------------------------ stato persistente
 const store = { get() { try { return JSON.parse(localStorage.getItem('tratto.v1') || '{}'); } catch (e) { return {}; } }, set(v) { try { localStorage.setItem('tratto.v1', JSON.stringify(v)); } catch (e) {} } };
 const saved = store.get();
+// taratura e correzione X/Y si salvano per stampante (i valori della 0.8 diventano quelli della P1S)
+const toolDefaults = (src) => Object.fromEntries(Object.keys(TOOLS).map(k => [k, Object.assign({}, Object.fromEntries(KEYS.map(q => [q, TOOLS[k][q]])), (src || {})[k] || {})]));
+const toolsBy = saved.toolsBy || { P1S: saved.tools || {} };
+const offBy = saved.offBy || { P1S: { x: saved.offX || 0, y: saved.offY || 0 } };
+const PRN = TR.setPrinter(saved.printer || 'P1S');
 const S = {
+  printer: PRN.id, toolsBy, offBy,
   tool: saved.tool || 'stabilo',
-  tools: Object.fromEntries(Object.keys(TOOLS).map(k => [k, Object.assign({}, Object.fromEntries(KEYS.map(q => [q, TOOLS[k][q]])), (saved.tools || {})[k] || {})])),
-  offX: saved.offX || 0, offY: saved.offY || 0,
+  tools: toolDefaults(toolsBy[PRN.id]),
+  offX: (offBy[PRN.id] || {}).x || 0, offY: (offBy[PRN.id] || {}).y || 0,
   skipPurge: saved.skipPurge !== false, nozT: saved.nozT || 180, bedT: saved.bedT || 25,
   src: 'image', alg: 'hatch', gen: 'flow', stk: 'image', cal: 'frame', tav: 'foto', tfImgs: [null, null, null], tmMesh: null, tmName: '', tvCache: {},
   W: 180, H: 180, seed: 1,
@@ -424,7 +450,7 @@ const S = {
   params: {}, groupsMeta: [], pauseEvery: false, showTravel: false, plateView: false,
   job: null,
 };
-function persist() { store.set({ tool: S.tool, tools: S.tools, offX: S.offX, offY: S.offY, skipPurge: S.skipPurge, nozT: S.nozT, bedT: S.bedT }); }
+function persist() { S.toolsBy[S.printer] = S.tools; S.offBy[S.printer] = { x: S.offX, y: S.offY }; store.set({ printer: S.printer, tool: S.tool, toolsBy: S.toolsBy, offBy: S.offBy, skipPurge: S.skipPurge, nozT: S.nozT, bedT: S.bedT }); }
 const tool = () => Object.assign({}, TOOLS[S.tool], S.tools[S.tool]);
 const toolOf = (k) => Object.assign({}, TOOLS[k], S.tools[k]);
 
@@ -447,22 +473,44 @@ function renderTools() {
 $('#tReset').onclick = () => { S.tools[S.tool] = Object.fromEntries(KEYS.map(q => [q, TOOLS[S.tool][q]])); persist(); renderTools(); draw(); };
 
 // ------------------------------------------------------------------ passo 2: schema piatto
+const exPoly = () => PRN.exclude.map(t => t.split('x').map(Number));
+// foglio consigliato in coordinate piatto: X1/P1 → A4 con il bordo alto al limite posteriore dell'area; A1 → centrato sul piatto
+function paperRect() {
+  const pp = PRN.paper;
+  if (pp.top === 'area') { const x0 = PRN.cx - pp.w / 2; return { x0, x1: x0 + pp.w, y1: PRN.area.y1, y0: PRN.area.y1 - pp.h }; }
+  const x0 = (PRN.bed - pp.w) / 2, y0 = (PRN.bed - pp.h) / 2; return { x0, x1: x0 + pp.w, y0, y1: y0 + pp.h };
+}
 function plateSVG() {
-  const s = 1.1, W = 256 * s, pad = 30;
-  const ex = `M0,0 L${258 * s},0 L${258 * s},${55 * s} L${48 * s},${55 * s} L${48 * s},${258 * s} L0,${258 * s}Z`;
-  const a = P1S.area;
+  const B = PRN.bed, s = 280 / B, W = B * s, pad = 30;
+  const ex = exPoly().map(([x, y], i) => (i ? 'L' : 'M') + Math.min(x, B) * s + ',' + Math.min(y, B) * s).join(' ') + 'Z';
+  const a = PRN.area;
   // in SVG y verso il basso = verso il fronte; piatto Y cresce verso il retro
-  const Y = (y) => (256 - y) * s;
+  const Y = (y) => (B - y) * s;
   return `<svg viewBox="${-pad} ${-pad} ${W + pad * 2} ${W + pad * 2 + 10}" xmlns="http://www.w3.org/2000/svg" font-family="system-ui" font-size="10">
   <rect x="0" y="0" width="${W}" height="${W}" fill="#e9e6df" stroke="#b8b2a5"/>
   <g transform="translate(0,${W}) scale(1,-1)"><path d="${ex}" fill="#d9534f" fill-opacity=".18" stroke="#d9534f" stroke-dasharray="4 3"/></g>
   <rect x="${a.x0 * s}" y="${Y(a.y1)}" width="${(a.x1 - a.x0) * s}" height="${(a.y1 - a.y0) * s}" fill="#2747c9" fill-opacity=".08" stroke="#2747c9"/>
-  <text x="${(a.x0 + 4) * s}" y="${Y(a.y1) + 14}" fill="#2747c9">${tL('area utile', 'usable area')} ${P1S.areaW}×${P1S.areaH} mm</text>
-  <text x="${8 * s}" y="${Y(20)}" fill="#a3212b">${tL('area esclusa', 'excluded area')}</text>
-  <text x="${W / 2}" y="${-12}" text-anchor="middle" fill="#6a7080">${tL('retro (parete posteriore)', 'back (rear wall)')}</text>
-  <text x="${W / 2}" y="${W + 20}" text-anchor="middle" fill="#6a7080">${tL('fronte (sportello)', 'front (door)')}</text>
+  <text x="${(a.x0 + 4) * s}" y="${Y(a.y1) + 14}" fill="#2747c9">${tL('area utile', 'usable area')} ${PRN.areaW}×${PRN.areaH} mm</text>
+  <text x="${4}" y="${W - 4}" fill="#a3212b">${tL('area esclusa', 'excluded area')}</text>
+  <text x="${W / 2}" y="${-12}" text-anchor="middle" fill="#6a7080">${PRN.family === 'xp' ? tL('retro (parete posteriore)', 'back (rear wall)') : tL('retro del piatto', 'back of the bed')}</text>
+  <text x="${W / 2}" y="${W + 20}" text-anchor="middle" fill="#6a7080">${PRN.family === 'xp' ? tL('fronte (sportello)', 'front (door)') : tL('fronte del piatto', 'front of the bed')}</text>
   <text x="${W + 14}" y="${W / 2}" fill="#6a7080" transform="rotate(90 ${W + 14} ${W / 2})" text-anchor="middle">${tL('destra', 'right')}</text>
-  </svg><p class="small">Vista dall'alto del piatto P1S con l'area esclusa del profilo UMTS. Indicativa: verifica sul tuo foglio con la Cornice.</p>`;
+  </svg><p class="small">${tL('Vista dall’alto del piatto ' + PRN.name + ' con l’area esclusa del profilo. Indicativa: verifica sul tuo foglio con la Cornice.', 'Top view of the ' + PRN.name + ' bed with the profile’s excluded area. Approximate: check it on your sheet with the Frame.')}</p>`;
+}
+function renderPaperGuide() {
+  const pr = paperRect(), xp = PRN.family === 'xp';
+  const items = xp ? [
+    tL('Il foglio va sempre nello stesso punto, perché la punta non coincide con l’ugello: <b>29 mm dalla parete destra</b> e <b>41 mm dalla parete posteriore</b> (margini pubblicati per UMTS su X1/P1).', 'The sheet always goes in the same place, because the tip is not where the nozzle is: <b>29 mm from the right wall</b> and <b>41 mm from the rear wall</b> (margins published for UMTS on X1/P1).'),
+    tL('Per la ripetibilità stampa una <b>dima di allineamento</b> con questi margini: appoggiala, allinea il foglio, toglila.', 'For repeatability print an <b>alignment jig</b> with these margins: place it, line up the sheet, remove it.'),
+    tL('Fissa gli angoli con nastro di carta (indispensabile con POSCA e con la lama).', 'Tape the corners with masking tape (essential with POSCA and with the blade).'),
+    tL(`L’area utile è ≈ <b>${PRN.areaW} × ${PRN.areaH} mm</b> nella parte alta di un A4, larga quanto il foglio: il centro dell’area cade al centro della larghezza A4.`, `The usable area is ≈ <b>${PRN.areaW} × ${PRN.areaH} mm</b> in the top part of an A4, as wide as the sheet: its centre falls at the centre of the A4 width.`),
+  ] : [
+    tL(`Sulla ${PRN.name} il piatto si muove avanti e indietro: il foglio <b>non deve sporgere</b>. Taglialo a <b>${PRN.paper.w} × ${PRN.paper.h} mm</b> e centralo sul piatto.`, `On the ${PRN.name} the bed moves back and forth: the sheet <b>must not overhang</b>. Cut it to <b>${PRN.paper.w} × ${PRN.paper.h} mm</b> and centre it on the bed.`),
+    tL('Lascia libero il bordo davanti: all’avvio la testina ci appoggia l’ugello caldo per pulirlo.', 'Keep the front edge clear: at start-up the toolhead touches the hot nozzle there to clean it.'),
+    tL('Fissa tutti e quattro i lati con nastro di carta: il piatto accelera e il foglio non deve scivolare.', 'Tape all four sides with masking tape: the bed accelerates and the sheet must not slide.'),
+    tL(`L’area utile è ≈ <b>${PRN.areaW} × ${PRN.areaH} mm</b>, prudenziale: Falu non pubblica i margini per A1. Prima di disegnare fai la <b>Cornice area</b> senza penna e controlla che il modulo non urti nulla.`, `The usable area is ≈ <b>${PRN.areaW} × ${PRN.areaH} mm</b>, a cautious estimate: Falu publishes no margins for the A1. Before drawing, run the <b>Area frame</b> without a pen and check that the module hits nothing.`),
+  ];
+  $('#paperGuide').innerHTML = '<ol>' + items.map(t => `<li>${t}</li>`).join('') + '</ol>';
 }
 $('#plateSvg').innerHTML = plateSVG();
 $('#offX').value = S.offX; $('#offY').value = S.offY;
@@ -535,6 +583,8 @@ const GEN_P = {
 };
 function renderFx() {
   const c = $('#fxParams'); c.innerHTML = '';
+  slider(c, 'join_tol', tL('Unisci tratti vicini (mm)', 'Join nearby strokes (mm)'), 0, 1, 0.05, 0.3);
+  note(c, tL('Due tratti i cui estremi distano meno di questo valore diventano uno solo: la penna si alza meno e non lascia puntini dove si riappoggia. 0 = spento.', 'Two strokes whose ends are closer than this become one: the pen lifts less and leaves no dots where it lands again. 0 = off.'));
   slider(c, 'fx_wobble', 'Effetto a mano (mm)', 0, 3, 0.1, 0);
   check(c, 'fx_copy', 'copia sfalsata con un’altra penna', false);
   c.lastChild.querySelector('input').addEventListener('change', renderFx);
@@ -691,7 +741,9 @@ const CAL_HELP = {
   frame: 'Disegna la cornice dell’area utile, la croce al centro e tacche ogni 10 mm. Serve a vedere dove cade il tratto sul foglio e a regolare la correzione X/Y.',
   press: 'Quadratini e diagonali ripetuti 8 volte con una pausa prima di ogni passata: a ogni pausa abbassi la penna di 1–2 mm (o ritocchi lo Z‑offset per il file successivo).',
   ghost: 'Un quadrato al centro con una passata: per le prove a vuoto (solo base, poi set completo senza penna) suggerite dall’autore.',
+  square: tL('Un quadrato di 20 × 20 mm con una croce al centro. Misuralo col righello: se i lati non sono 20 mm la penna balla nel supporto; se la croce non cade dove te l’aspetti, correggi X/Y al passo 2; se il tratto è irregolare, ritocca lo Z‑offset. Poi salva la penna nei Profili salvati.', 'A 20 × 20 mm square with a cross in the middle. Measure it with a ruler: if the sides are not 20 mm the pen wobbles in its holder; if the cross is not where you expect, correct X/Y in step 2; if the line is uneven, adjust the Z‑offset. Then save the pen in Saved profiles.'),
 };
+$('#calSq').textContent = tL('Quadrato 20 mm', '20 mm square');
 
 // tabs
 function tabs(sel, attr, key, after) {
@@ -750,7 +802,7 @@ pick('#svgDrop', '#svgFile', async file => {
   const txt = await file.text();
   const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
   const svg = doc.querySelector('svg'); if (!svg) { toast('SVG non valido'); return; }
-  S.svgDoc = svg; $('#svgDrop').textContent = '✓ ' + file.name; $('#svgDrop').classList.add('has');
+  S.svgDoc = svg; $('#svgDrop').textContent = '✓ ' + file.name; $('#svgDrop').classList.add('has'); svgDiagnose(svg);
   const host = svgHost(); host.innerHTML = ''; host.appendChild(document.importNode(svg, true));
   const bb = host.firstChild.getBBox(); S.svgAR = bb.width / bb.height || 1; fitArea();
 });
@@ -809,6 +861,7 @@ function svgGroups(W, H) {
   const hatchSp = +$('#svgHatch').value, doFill = $('#svgFill').checked;
   const rootCTM = root.getScreenCTM();
   for (const el of els) {
+    if (el.closest('defs,clipPath,mask,pattern,marker,symbol')) continue; // forme di servizio, non da disegnare
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') continue;
     let len = 0; try { len = el.getTotalLength(); } catch (e) { continue; }
@@ -906,6 +959,13 @@ function computeJob() {
   }
   groups = groups.filter(g => (g.slices ? g.slices.some(s => s.length) : g.paths && g.paths.length));
   groups = applyFx(groups);
+  // tratti vicini uniti in uno solo: meno alzate di penna
+  const tol = P('join_tol', 0.3); let before = 0, after = 0;
+  groups = groups.map(g => {
+    const j = (ps) => { before += ps.length; const r = tol > 0 ? TR.orderPaths(TR.joinNear(ps, tol)) : ps; after += r.length; return r; };
+    return g.slices ? Object.assign({}, g, { slices: g.slices.map(j) }) : Object.assign({}, g, { paths: j(g.paths) });
+  });
+  S.joinStat = { before, after };
   return { name, W, H, groups };
 }
 // effetti: tremolio «a mano» e copia sfalsata con un'altra penna (non toccano i tagli)
@@ -997,6 +1057,9 @@ function calibPaths(W, H, kind) {
     const s = 12, g = 6, n = Math.max(1, Math.min(4, Math.floor((Math.min(W, H) + g) / (s + g))));
     const ox = (W - (n * s + (n - 1) * g)) / 2, oy = (H - (n * s + (n - 1) * g)) / 2;
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const x = ox + i * (s + g), y = oy + j * (s + g); out.push([[x, y], [x + s, y], [x + s, y + s], [x, y + s], [x, y]], [[x + 2, y + 2], [x + s - 2, y + s - 2]]); }
+  } else if (kind === 'square') {
+    const a = 10, cx = W / 2, cy = H / 2;
+    out.push([[cx - a, cy - a], [cx + a, cy - a], [cx + a, cy + a], [cx - a, cy + a], [cx - a, cy - a]], [[cx - 4, cy], [cx + 4, cy]], [[cx, cy - 4], [cx, cy + 4]]);
   } else {
     const s = Math.min(W, H) * 0.5; out.push([[W / 2 - s / 2, H / 2 - s / 2], [W / 2 + s / 2, H / 2 - s / 2], [W / 2 + s / 2, H / 2 + s / 2], [W / 2 - s / 2, H / 2 + s / 2], [W / 2 - s / 2, H / 2 - s / 2]]);
   }
@@ -1048,6 +1111,7 @@ function recompute(metaOnly) {
   try {
     if (!metaOnly || !jobRaw) jobRaw = computeJob();
     S.job = decorate(jobRaw ? JSON.parse(JSON.stringify(jobRaw)) : null);
+    if (SIM.on) simStop();
   } catch (e) { console.error(e); S.job = null; hud(tL('Errore: ', 'Error: ') + e.message); }
   $('#busy').style.display = 'none';
   renderGroups(); draw();
@@ -1083,21 +1147,22 @@ function draw() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, r.width, r.height);
   // mondo in coordinate piatto (mm): x 0..256, y 0..256 (y verso il retro)
   const plate = S.plateView;
-  const world = plate ? { x0: -10, y0: -10, x1: 266, y1: 266 } : { x0: P1S.cx - 105 - 8, x1: P1S.cx + 105 + 8, y0: P1S.area.y1 - 297 - 8, y1: P1S.area.y1 + 8 };
+  const pr = paperRect(), B = PRN.bed;
+  const world = plate ? { x0: -10, y0: -10, x1: B + 10, y1: B + 10 } : { x0: Math.min(pr.x0, PRN.area.x0) - 8, x1: Math.max(pr.x1, PRN.area.x1) + 8, y0: Math.min(pr.y0, PRN.area.y0) - 8, y1: Math.max(pr.y1, PRN.area.y1) + 8 };
   const sc = Math.min(r.width / (world.x1 - world.x0), r.height / (world.y1 - world.y0)) * 0.96;
   const ox = (r.width - (world.x1 - world.x0) * sc) / 2 - world.x0 * sc, oy = (r.height - (world.y1 - world.y0) * sc) / 2 + world.y1 * sc;
   const X = x => ox + x * sc, Y = y => oy - y * sc;
   ctx.save();
   if (plate) {
-    ctx.fillStyle = '#e4e0d7'; ctx.fillRect(X(0), Y(256), 256 * sc, 256 * sc);
-    ctx.fillStyle = 'rgba(217,83,79,.18)'; ctx.beginPath(); [[0, 0], [256, 0], [256, 55], [48, 55], [48, 256], [0, 256]].forEach(([x, y], i) => i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y))); ctx.fill();
+    ctx.fillStyle = '#e4e0d7'; ctx.fillRect(X(0), Y(B), B * sc, B * sc);
+    ctx.fillStyle = 'rgba(217,83,79,.18)'; ctx.beginPath(); exPoly().forEach(([x, y], i) => { x = Math.min(x, B); y = Math.min(y, B); i ? ctx.lineTo(X(x), Y(y)) : ctx.moveTo(X(x), Y(y)); }); ctx.fill();
   }
-  // foglio A4 (indicativo): larghezza centrata sull'area, bordo alto al limite posteriore dell'area
-  const pw = 210, ph = 297, px0 = P1S.cx - pw / 2, py1 = P1S.area.y1;
+  // foglio consigliato (indicativo)
+  const pw = pr.x1 - pr.x0, ph = pr.y1 - pr.y0, px0 = pr.x0, py1 = pr.y1;
   ctx.shadowColor = 'rgba(0,0,0,.12)'; ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.fillRect(X(px0), Y(py1), pw * sc, ph * sc); ctx.shadowBlur = 0;
   ctx.setLineDash([4, 4]); ctx.strokeStyle = '#9fb0ef'; ctx.lineWidth = 1; ctx.strokeRect(X(P1S.area.x0), Y(P1S.area.y1), P1S.areaW * sc, P1S.areaH * sc); ctx.setLineDash([]);
   ctx.fillStyle = '#9aa3b8'; ctx.font = '11px system-ui'; ctx.fillText(tL('area utile UMTS', 'UMTS usable area'), X(P1S.area.x0) + 4, Y(P1S.area.y0) - 5);
-  ctx.textAlign = 'right'; ctx.fillText(tL('A4 · posizione indicativa', 'A4 · approximate position'), X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
+  ctx.textAlign = 'right'; ctx.fillText(PRN.paper.label + tL(' · posizione indicativa', ' · approximate position'), X(px0 + pw) - 6, Y(py1 - ph) - 8); ctx.textAlign = 'left';
   const job = S.job;
   if (!job) { ctx.restore(); hud(S.src === 'map' ? 'Cerca una città per scaricare la mappa.' : S.src === 'tavola' ? (S.tav === 'foto' ? 'Carica la foto della vista di fronte.' : 'Carica un file STL o 3MF.') : S.src === 'image' ? 'Carica un\'immagine per vedere l\'anteprima.' : S.src === 'svg' ? 'Carica un file SVG.' : S.src === 'sticker' ? 'Carica l\'immagine del soggetto.' : '—'); return; }
   const cx = P1S.cx + S.offX, cy = P1S.cy + S.offY;
@@ -1105,6 +1170,7 @@ function draw() {
   const ok = areaOK(job);
   ctx.strokeStyle = ok ? 'rgba(39,71,201,.35)' : '#d9534f'; ctx.lineWidth = 1; ctx.strokeRect(tx(0), ty(0), job.W * sc, job.H * sc);
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (SIM.on && SIM.job === job) { drawSim(job, tx, ty, sc); ctx.restore(); return; }
   for (const g of job.groups) {
     const tl = toolOf(g.tool);
     ctx.strokeStyle = g.color; ctx.lineWidth = Math.max(0.6, tl.width * sc); ctx.globalAlpha = g.tool === 'blade' ? 0.9 : 0.92;
@@ -1162,7 +1228,7 @@ function exportFiles() {
 }
 function renderSummary() {
   const job = S.job, el = $('#summary'), bt = $('#dlBtns');
-  if (!job || !job.groups.length) { el.innerHTML = '<div class="note warn">Prima crea un disegno al passo 3.</div>'; bt.innerHTML = ''; return; }
+  if (!job || !job.groups.length) { el.innerHTML = '<div class="note warn">Prima crea un disegno al passo 3.</div>'; bt.innerHTML = ''; $('#checks').innerHTML = ''; return; }
   const ok = areaOK(job);
   const files = exportFiles();
   let html = ok ? '' : '<div class="note danger">Il disegno esce dall\'area utile: Orca non lo affetterebbe. Riduci le dimensioni o la correzione X/Y.</div>';
@@ -1175,13 +1241,14 @@ function renderSummary() {
       `<tr><td>totale</td><td>${plan.layers} strati da 0,1 mm</td></tr></table></div>`;
   }
   el.innerHTML = html;
-  bt.innerHTML = files.map((f, i) => `<button class="btn pri" data-f="${i}" ${ok ? '' : 'disabled'}>⬇ ${f.label}</button>`).join('') + '<button class="btn" id="dlSvg">⬇ SVG</button>';
+  const pass = renderChecks(job, files) && ok;
+  bt.innerHTML = files.map((f, i) => `<button class="btn pri" data-f="${i}" ${pass ? '' : 'disabled'}>⬇ ${f.label}</button>`).join('') + '<button class="btn" id="dlSvg">⬇ SVG</button>';
   $$('#dlBtns [data-f]').forEach(b => b.onclick = () => {
     const f = files[+b.dataset.f]; b.disabled = true; const old = b.textContent; b.textContent = 'Creo il file…';
     setTimeout(() => {
       try {
         const sub = { name: job.name, W: job.W, H: job.H, groups: f.groups, offsetX: S.offX, offsetY: S.offY };
-        const r = TR.build3MF(sub, settingsFor(f.toolKey), window.BASE_P1S, { pauseEveryPass: pauseEvery(), thumbnail: thumbPNG(sub) });
+        const r = TR.build3MF(sub, settingsFor(f.toolKey), window.TRATTO_BASES[S.printer], { pauseEveryPass: pauseEvery(), thumbnail: thumbPNG(sub) });
         download(r.data, `tratto_${job.name}${f.suffix}.3mf`, 'application/vnd.ms-package.3dmanufacturing-3dmodel+xml');
       } catch (e) { console.error(e); toast(tL('Errore nella creazione del file: ', 'Error while creating the file: ') + esc(e.message)); }
       b.disabled = false; b.textContent = old;
@@ -1194,24 +1261,221 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<':
 function renderRunGuide() {
   const job = S.job; const hasCut = job && job.groups.some(g => g.tool === 'blade'), hasPen = job && job.groups.some(g => g.tool !== 'blade');
   const steps = [
-    'Stampante in <b>modalità solo LAN</b> e <b>Orca Slicer</b> (con Bambu Studio la compensazione Z non viene applicata).',
+    tL('Usa <b>Orca Slicer</b>: Bambu Studio non ha lo Z‑offset su cui si basa UMTS. Il file arriva alla stampante via <b>LAN</b> o con la <b>scheda microSD</b>: vedi «Serve la modalità LAN?» qui sotto.', 'Use <b>Orca Slicer</b>: Bambu Studio has no Z‑offset, which UMTS relies on. The file reaches the printer over <b>LAN</b> or on the <b>microSD card</b>: see “Do I need LAN mode?” below.'),
     'Apri il 3MF in Orca e accetta di caricare le <b>impostazioni del progetto</b>. Orca segnala G‑code modificato: è lo start senza linea di spurgo, atteso. Eventuali avvisi di “regioni sospese” si ignorano: ogni strato è un disegno a sé.',
     'In anteprima controlla le <b>icone di pausa</b> sugli strati elencati al passo 5 e che il disegno non tocchi l\'area esclusa. Non premere “Centra/Disponi”: la posizione è già quella giusta per il foglio.',
-    'Lascia il filamento caricato (il firmware vuole “estrudere”: il flusso è 0,01). Nell\'invio disattiva il <b>timelapse</b>; il livellamento è facoltativo.',
-    'Foglio ai margini (29 mm da destra, 41 mm dal retro), angoli fissati. Avvia la stampa <b>senza modulo</b>.',
+    PRN.family === 'xp'
+      ? tL('Lascia il filamento caricato (il firmware vuole “estrudere”: il flusso è 0,01). Nell’invio disattiva il <b>timelapse</b> e la <b>calibrazione dinamica del flusso</b>; il livellamento è facoltativo.', 'Leave the filament loaded (the firmware wants to “extrude”: flow is 0.01). When sending, turn off <b>timelapse</b> and <b>flow dynamics calibration</b>; bed levelling is optional.')
+      : tL('Lascia il filamento caricato (il firmware vuole “estrudere”: il flusso è 0,01). Nell’invio disattiva <b>timelapse</b>, <b>calibrazione dinamica del flusso</b> e <b>livellamento del piatto</b>: sulla A1 l’ugello caldo toccherebbe il foglio.', 'Leave the filament loaded (the firmware wants to “extrude”: flow is 0.01). When sending, turn off <b>timelapse</b>, <b>flow dynamics calibration</b> and <b>bed levelling</b>: on the A1 the hot nozzle would touch the sheet.'),
+    PRN.family === 'xp'
+      ? tL('Foglio ai margini (29 mm da destra, 41 mm dal retro), angoli fissati. Avvia la stampa <b>senza modulo</b>.', 'Sheet at the margins (29 mm from the right, 41 mm from the back), corners taped. Start the print <b>without the module</b>.')
+      : tL(`Foglio ${PRN.paper.w} × ${PRN.paper.h} mm centrato sul piatto, fissato sui quattro lati, bordo davanti libero. Avvia la stampa <b>senza modulo</b>.`, `Sheet ${PRN.paper.w} × ${PRN.paper.h} mm centred on the bed, taped on all four sides, front edge clear. Start the print <b>without the module</b>.`),
     '<b>Prima pausa</b>: la testina è già salita alla quota compensata. Dal display spostala in una zona comoda, monta UMTS e l\'utensile, verifica che non tocchi il vetro e che la molla scorra libera. Riprendi.',
   ];
   if (job && job.groups.filter(g => g.tool !== 'blade').length > 1) steps.push('<b>Pause di cambio</b>: sfila la penna e inserisci la successiva con la stessa sporgenza. Riprendi.');
   steps.push('<b>Pausa finale</b>: sposta la testina, <b>rimuovi UMTS</b>, poi interrompi la stampa. (Se riprendi, l\'ultimo strato gira a vuoto e la stampa termina normalmente.)');
   if (hasCut && hasPen) steps.push('<b>Adesivi</b>: lascia il foglio fermo. Apri il file “2 · Taglio”, rifai la stessa sequenza con il modulo lama (Z‑offset della lama).');
   $('#runGuide').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+  renderWhyLan();
 }
 $('#skipPurge').checked = S.skipPurge; $('#nozT').value = S.nozT; $('#bedT').value = S.bedT;
 $('#skipPurge').onchange = e => { S.skipPurge = e.target.checked; persist(); };
 $('#nozT').onchange = e => { S.nozT = Math.max(170, +e.target.value || 180); persist(); };
 $('#bedT').onchange = e => { S.bedT = Math.max(20, +e.target.value || 25); persist(); };
 
+// ------------------------------------------------------------------ stampanti
+const PRN_LIST = [['P1S', 'P1S', ''], ['P1P', 'P1P', ''], ['X1C', 'X1 Carbon', ''], ['A1', 'A1', 'beta'], ['A1M', 'A1 mini', 'beta']];
+function renderPrinters() {
+  $('#prnH').textContent = tL('Che stampante usi?', 'Which printer do you use?');
+  $('#prnCards').innerHTML = PRN_LIST.map(([id, nm, tag]) => `<button class="card ${id === S.printer ? 'on' : ''}" data-p="${id}"><b>${nm}${tag ? '<span class="tag">' + tL('da verificare', 'unverified') + '</span>' : ''}</b><span>${id === 'A1M' ? tL('piatto 180 mm', '180 mm bed') : tL('piatto 256 mm', '256 mm bed')}</span></button>`).join('');
+  $$('#prnCards .card').forEach(c => c.onclick = () => setPrinterUI(c.dataset.p));
+  const xp = PRN.family === 'xp';
+  $('#prnNote').innerHTML = xp
+    ? `<div class="note info">${tL('X1C, P1S e P1P hanno la stessa testina: valgono lo Z‑offset (+17 mm Stabilo, +20 mm POSCA) e l’area esclusa pubblicati da Falu per UMTS. Cambia solo la sequenza di avvio, che Orca prende dal profilo ufficiale di ciascun modello.', 'X1C, P1S and P1P share the same toolhead: the Z‑offset (+17 mm Stabilo, +20 mm POSCA) and the excluded area published by Falu for UMTS apply. Only the start sequence changes, and Orca takes it from each model’s official profile.')}</div>`
+    : `<div class="note warn">${tL(`<b>${PRN.name}: da verificare.</b> UMTS ha una versione per la testina della A1, ma Falu non pubblica Z‑offset e area esclusa per questa stampante. Lo Z‑offset si misura: abbassa l’ugello fino al piatto, poi alza Z dal display finché l’utensile tocca; quella distanza è il tuo Z‑offset. L’area esclusa qui è prudenziale: prima di disegnare fai <b>Calibrazione → Cornice area</b> senza penna.`, `<b>${PRN.name}: unverified.</b> UMTS has a version for the A1 toolhead, but Falu publishes no Z‑offset or excluded area for this printer. Measure the Z‑offset: lower the nozzle to the bed, then raise Z from the screen until the tool touches; that distance is your Z‑offset. The excluded area here is a cautious estimate: before drawing, run <b>Calibration → Area frame</b> without a pen.`)}</div>`;
+  $('#prnSub').textContent = PRN.name + ' · Orca Slicer · ' + tL('kit UMTS di Falu', 'Falu’s UMTS kit');
+}
+function setPrinterUI(id) {
+  if (id === S.printer) return;
+  persist();
+  TR.setPrinter(id); S.printer = PRN.id;
+  S.tools = toolDefaults(S.toolsBy[S.printer]);
+  const o = S.offBy[S.printer] || {}; S.offX = o.x || 0; S.offY = o.y || 0;
+  $('#offX').value = S.offX; $('#offY').value = S.offY;
+  persist(); renderPrinters(); renderTools(); renderProfiles(); renderPaperGuide(); $('#plateSvg').innerHTML = plateSVG();
+  clampDims(); schedule();
+}
+
+// ------------------------------------------------------------------ profili salvati per penna
+const profStore = { get() { try { return JSON.parse(localStorage.getItem('tratto.pens') || '[]'); } catch (e) { return []; } }, set(v) { try { localStorage.setItem('tratto.pens', JSON.stringify(v)); } catch (e) {} } };
+function renderProfiles() {
+  const all = profStore.get(), mine = all.map((p, i) => [p, i]).filter(([p]) => p.printer === S.printer);
+  $('#profBox').innerHTML = `<h3>${tL('Profili salvati', 'Saved profiles')}</h3>
+    <p class="small">${tL('Salva la taratura di una penna (utensile, Z‑offset, velocità, Z‑hop, accelerazione, larghezza, passate e correzione X/Y) per ritrovarla quando la rimonti. I profili valgono per la stampante scelta.', 'Save a pen’s calibration (tool, Z‑offset, speed, Z‑hop, acceleration, width, passes and X/Y correction) to get it back when you mount it again. Profiles belong to the selected printer.')}</p>
+    ${mine.length ? `<div class="profrow"><select id="profSel">${mine.map(([p, i]) => `<option value="${i}">${esc(p.name)} · ${esc(TRATTO_TR(TOOLS[p.tool] ? TOOLS[p.tool].label : p.tool))} · Z ${(+p.v.zOffset).toFixed(1)}</option>`).join('')}</select><button class="btn" id="profLoad" type="button">${tL('Usa', 'Use')}</button><button class="btn" id="profDel" type="button">${tL('Elimina', 'Delete')}</button></div>` : ''}
+    <div class="profrow"><input id="profName" placeholder="${tL('es. Stabilo nera 0,4', 'e.g. black Stabilo 0.4')}" maxlength="40"><button class="btn" id="profSave" type="button">${tL('Salva', 'Save')}</button><span></span></div>`;
+  $('#profSave').onclick = () => {
+    const name = $('#profName').value.trim() || TRATTO_TR(TOOLS[S.tool].label);
+    const list = profStore.get().filter(p => !(p.printer === S.printer && p.name === name));
+    list.push({ name, printer: S.printer, tool: S.tool, v: Object.assign({}, S.tools[S.tool]), offX: S.offX, offY: S.offY });
+    profStore.set(list); renderProfiles(); toast(tL('Profilo salvato: ', 'Profile saved: ') + esc(name));
+  };
+  if (mine.length) {
+    $('#profLoad').onclick = () => {
+      const p = profStore.get()[+$('#profSel').value]; if (!p) return;
+      S.tool = TOOLS[p.tool] ? p.tool : S.tool; S.tools[S.tool] = Object.assign({}, S.tools[S.tool], p.v); S.offX = p.offX || 0; S.offY = p.offY || 0;
+      $('#offX').value = S.offX; $('#offY').value = S.offY; persist(); renderTools(); syncGroupsTool(); schedule(); toast(tL('Profilo in uso: ', 'Profile in use: ') + esc(p.name));
+    };
+    $('#profDel').onclick = () => { const list = profStore.get(); list.splice(+$('#profSel').value, 1); profStore.set(list); renderProfiles(); };
+  }
+}
+
+// ------------------------------------------------------------------ controlli prima del file
+function machineMax(key) { const v = (window.TRATTO_BASES[S.printer].machine || {})[key]; const n = parseFloat(Array.isArray(v) ? v[0] : v); return isFinite(n) ? n : null; }
+function runChecks(job, files) {
+  const out = []; const add = (lv, t) => out.push([lv, t]);
+  if (areaOK(job)) add('ok', tL('Il disegno sta dentro l’area utile e fuori dall’area esclusa.', 'The drawing is inside the usable area and outside the excluded area.'));
+  else add('err', tL('Il disegno esce dall’area utile: Orca non lo affetterebbe. Riduci le dimensioni o la correzione X/Y.', 'The drawing leaves the usable area: Orca would not slice it. Reduce the size or the X/Y correction.'));
+  if (!S.skipPurge) add('err', tL('La linea di spurgo è attiva: finirebbe sul foglio. Riattivala in «Impostazioni avanzate».', 'The purge line is on: it would end up on the sheet. Turn the option back on in “Advanced settings”.'));
+  else {
+    const cfg = TR.buildProjectConfig(window.TRATTO_BASES[S.printer], settingsFor(files[0].toolKey));
+    if (/Tratto: spurgo saltato/.test(cfg.machine_start_gcode || '')) add('ok', tL('Spurgo iniziale tolto dalla sequenza di avvio: niente filamento sul foglio.', 'Start purge removed from the start sequence: no filament on the sheet.'));
+    else add('warn', tL('Non trovo lo spurgo nella sequenza di avvio di questo profilo: in Orca controlla che non ci sia una linea di spurgo sul piatto.', 'I can’t find the purge in this profile’s start sequence: in Orca check that no purge line is drawn on the bed.'));
+  }
+  const vMax = machineMax('machine_max_speed_x'), aMax = machineMax('machine_max_acceleration_x');
+  for (const f of files) {
+    const t = toolOf(f.toolKey), nm = TRATTO_TR(t.label);
+    if (t.zHop < 1) add('err', nm + tL(`: Z‑hop ${t.zHop} mm, la penna non si alza abbastanza negli spostamenti.`, `: Z‑hop ${t.zHop} mm, the pen does not lift enough on travel moves.`));
+    else if (t.zHop < 2) add('warn', nm + tL(`: Z‑hop ${t.zHop} mm, possibili linee fantasma negli spostamenti (consigliati 3–4 mm).`, `: Z‑hop ${t.zHop} mm, ghost lines on travel moves are possible (3–4 mm recommended).`));
+    else add('ok', nm + tL(`: penna alzata di ${t.zHop} mm negli spostamenti, abbassata solo per disegnare.`, `: pen lifted ${t.zHop} mm on travel moves, lowered only to draw.`));
+    if (PRN.family === 'xp' && (t.zOffset < 10 || t.zOffset > 25)) add('warn', nm + tL(`: Z‑offset ${t.zOffset} mm, lontano dai valori di UMTS (17–20 mm). Ricontrolla prima di avviare.`, `: Z‑offset ${t.zOffset} mm, far from the UMTS values (17–20 mm). Double-check before starting.`));
+    if (PRN.family !== 'xp' && t.zOffset === TOOLS[f.toolKey].zOffset) add('warn', nm + tL(`: Z‑offset ancora al valore di partenza (${t.zOffset} mm). Sulla ${PRN.name} misuralo come spiegato al passo 1.`, `: Z‑offset still at the starting value (${t.zOffset} mm). On the ${PRN.name} measure it as explained in step 1.`));
+    if (vMax && t.speed > vMax) add('err', nm + tL(`: velocità ${t.speed} mm/s oltre il limite della stampante (${vMax}).`, `: speed ${t.speed} mm/s above the printer limit (${vMax}).`));
+    if (aMax && t.accel > aMax) add('err', nm + tL(`: accelerazione ${t.accel} oltre il limite della stampante (${aMax}).`, `: acceleration ${t.accel} above the printer limit (${aMax}).`));
+  }
+  if (S.nozT > 200) add('warn', tL(`Ugello a ${S.nozT} °C: il modulo stampato è vicino all’ugello, resta sui 180 °C.`, `Nozzle at ${S.nozT} °C: the printed module sits close to the nozzle, keep it around 180 °C.`));
+  if (S.bedT > 35) add('warn', tL(`Piano a ${S.bedT} °C: per la carta basta il piano freddo (25 °C).`, `Bed at ${S.bedT} °C: paper needs no heat (25 °C).`));
+  const plan = TR.planLayers(files[0].groups, { pauseEveryPass: pauseEvery() });
+  const mnt = plan.pauses.find(p => p.kind === 'mount'), rem = plan.pauses.find(p => p.kind === 'remove');
+  if (mnt && rem) add('ok', tL(`Pause al posto giusto: monti il modulo a ${mnt.z.toFixed(1).replace('.', ',')} mm (dopo l’avvio) e lo togli a ${rem.z.toFixed(1).replace('.', ',')} mm (prima della fine).`, `Pauses in the right place: you mount the module at ${mnt.z.toFixed(1)} mm (after start-up) and remove it at ${rem.z.toFixed(1)} mm (before the end).`));
+  let dots = 0; for (const g of job.groups) for (const sl of (g.slices || [g.paths])) for (const p of sl) if (TR.pathLength(p) < 0.3) dots++;
+  if (dots) add('warn', tL(`${dots} tratti più corti di 0,3 mm: con la penna diventano puntini.`, `${dots} strokes shorter than 0.3 mm: with a pen they become dots.`));
+  const js = S.joinStat; if (js && js.before > js.after) add('ok', tL(`Tratti vicini uniti: ${js.before - js.after} alzate di penna in meno (${js.after} in tutto).`, `Nearby strokes joined: ${js.before - js.after} fewer pen lifts (${js.after} in total).`));
+  if (PRN.provisional) add('warn', tL(`${PRN.name}: area esclusa prudenziale e non verificata da Falu. Fai prima la Cornice area senza penna.`, `${PRN.name}: cautious excluded area, not verified by Falu. Run the Area frame without a pen first.`));
+  return out;
+}
+function renderChecks(job, files) {
+  const el = $('#checks'); if (!job || !files.length) { el.innerHTML = ''; return true; }
+  const r = runChecks(job, files), icon = { ok: '✓', warn: '!', err: '✕' };
+  el.innerHTML = `<h3>${tL('Controlli', 'Checks')}</h3><ul class="chk-list">${r.map(([lv, t]) => `<li><b class="k-${lv}">${icon[lv]}</b><span>${t}</span></li>`).join('')}</ul>`;
+  return !r.some(([lv]) => lv === 'err');
+}
+
+// ------------------------------------------------------------------ perché Orca + modalità LAN
+function renderWhyLan() {
+  $('#whyBox').innerHTML = `<details><summary>${tL('Perché passare da Orca Slicer?', 'Why go through Orca Slicer?')}</summary><ol class="small">${[
+    tL('Ogni stampante Bambu ha la sua sequenza di avvio (azzeramento, controlli, riscaldamento) che il firmware si aspetta. Orca la prende dal profilo ufficiale di quel modello, sempre aggiornata: Tratto toglie solo lo spurgo.', 'Every Bambu printer has its own start sequence (homing, checks, heating) that the firmware expects. Orca takes it from that model’s official profile, always up to date: Tratto only removes the purge.'),
+    tL('Orca ha lo <b>Z‑offset</b> nel profilo stampante: è il trucco su cui si basa UMTS (Bambu Studio non ce l’ha).', 'Orca has a <b>Z‑offset</b> in the printer profile: it is the trick UMTS relies on (Bambu Studio lacks it).'),
+    tL('Le pause per montare il modulo e cambiare penna diventano pause vere della stampante.', 'The pauses to mount the module and change pen become real printer pauses.'),
+    tL('L’anteprima di Orca mostra il percorso reale con le alzate della penna. Il simulatore di Tratto mostra l’ordine indicativo; quello esatto lo decide Orca.', 'Orca’s preview shows the real path with pen lifts. Tratto’s simulator shows an approximate order; Orca decides the exact one.'),
+    tL('Il risultato è un normale <code>.gcode.3mf</code> che la stampante accetta via LAN o da scheda microSD.', 'The result is a normal <code>.gcode.3mf</code> the printer accepts over LAN or from a microSD card.'),
+  ].map(t => `<li>${t}</li>`).join('')}</ol></details>
+  <details><summary>${tL('Serve la modalità LAN? Quanto ci vuole?', 'Do I need LAN mode? How long does it take?')}</summary><div class="small">
+    <p>${tL('<b>Non per forza.</b> Ci sono due strade per portare il file di Orca alla stampante:', '<b>Not necessarily.</b> There are two ways to get Orca’s file to the printer:')}</p>
+    <p><b>${tL('1 · Scheda microSD (nessuna modifica, 2 minuti)', '1 · microSD card (no changes, 2 minutes)')}</b><br>${tL('In Orca affetta, poi <i>Esporta il file G‑code della piastra</i> (.gcode.3mf) sulla scheda. Inseriscila nella stampante e avvia la stampa dal display. L’autore di UMTS ha verificato la compensazione Z con Orca in modalità solo LAN: il file su scheda è lo stesso, ma la prima volta fai una Cornice area per controllare.', 'In Orca slice, then <i>Export plate sliced file</i> (.gcode.3mf) to the card. Insert it in the printer and start from the screen. The UMTS author verified the Z compensation with Orca in LAN-only mode: the file on the card is the same, but the first time run an Area frame to check.')}</p>
+    <p><b>${tL('2 · Invio diretto da Orca in LAN (5–10 minuti la prima volta)', '2 · Send directly from Orca over LAN (5–10 minutes the first time)')}</b></p>
+    <ol>${[
+      tL('Sul display della stampante apri le impostazioni di rete (WLAN) e attiva <b>Solo LAN</b> (LAN Only).', 'On the printer screen open the network (WLAN) settings and turn on <b>LAN Only</b>.'),
+      tL('Nello stesso menu attiva la <b>Modalità sviluppatore</b> (Developer Mode). Dai firmware del 2025 (P1 01.08.02.00, A1 01.05.00.00 e successivi) senza questa la stampante rifiuta i programmi non ufficiali come Orca.', 'In the same menu turn on <b>Developer Mode</b>. Since the 2025 firmware (P1 01.08.02.00, A1 01.05.00.00 and later) the printer refuses unofficial software such as Orca without it.'),
+      tL('Annota <b>indirizzo IP</b> e <b>codice di accesso</b> che compaiono nella stessa pagina.', 'Write down the <b>IP address</b> and <b>access code</b> shown on the same page.'),
+      tL('In Orca apri la scheda <b>Dispositivo</b>, aggiungi la stampante con IP e codice di accesso (se Orca non la trova, usa come nome il numero di serie). Da lì invii il file affettato.', 'In Orca open the <b>Device</b> tab and add the printer with IP and access code (if Orca can’t find it, use the serial number as its name). From there you send the sliced file.'),
+    ].map(t => `<li>${t}</li>`).join('')}</ol>
+    <p>${tL('<b>Cosa perdi finché è attiva:</b> app Bambu Handy, stampa da remoto e servizi cloud. <b>Home Assistant</b> con l’integrazione Bambu Lab continua a funzionare, ma in modalità locale (IP, numero di serie e codice di accesso): se oggi passa dal cloud, va riconfigurata. Si torna indietro spegnendo gli stessi interruttori.', '<b>What you lose while it is on:</b> the Bambu Handy app, remote printing and cloud services. <b>Home Assistant</b> with the Bambu Lab integration keeps working, but in local mode (IP, serial number and access code): if it uses the cloud today, it must be reconfigured. Switch the same toggles off to go back.')}</p>
+  </div></details>`;
+}
+
+// ------------------------------------------------------------------ SVG: elementi non disegnati
+function svgDiagnose(svg) {
+  const kinds = [['text', 'tspan', tL('testi (convertili in tracciati: in Inkscape Tracciato → Da oggetto a tracciato)', 'texts (convert them to paths: in Inkscape Path → Object to Path)')], ['image', '', tL('immagini incorporate (caricale come Immagine)', 'embedded images (load them as Image)')], ['use', '', tL('copie con «use» (scollega i cloni: in Inkscape Modifica → Clona → Scollega)', '“use” copies (unlink clones: in Inkscape Edit → Clone → Unlink)')], ['clipPath', '', tL('ritagli (la forma viene disegnata intera)', 'clip paths (the shape is drawn whole)')], ['mask', '', tL('maschere (ignorate)', 'masks (ignored)')], ['filter', '', tL('filtri (ignorati)', 'filters (ignored)')], ['pattern', '', tL('riempimenti a motivo (ignorati)', 'pattern fills (ignored)')], ['foreignObject', '', tL('contenuti HTML (ignorati)', 'HTML content (ignored)')]];
+  const rows = [];
+  for (const [a, b, label] of kinds) { const n = svg.getElementsByTagName(a).length + (b ? 0 : 0); if (n) rows.push(`<li><b>${n}</b> ${label}</li>`); }
+  $('#svgDiag').innerHTML = rows.length ? `<div class="note warn">${tL('Alcuni elementi non verranno disegnati:', 'Some elements will not be drawn:')}<ul>${rows.join('')}</ul></div>` : `<p class="small">✓ ${tL('Tutti gli elementi del file sono disegnabili.', 'All elements in the file can be drawn.')}</p>`;
+}
+
+// ------------------------------------------------------------------ simulatore
+// ordine indicativo: per gruppo, passata, strato e tratto; spostamenti a 300 mm/s con alzata e discesa della penna
+const SIM = { on: false, playing: false, t: 0, tl: null, total: 0, last: 0, raf: 0 };
+function buildTimeline(job) {
+  const ev = []; let t = 0, pos = [job.W / 2, job.H + 20];
+  job.groups.forEach((g, gi) => {
+    const tl = toolOf(g.tool), v = Math.max(1, tl.speed), lift = 2 * tl.zHop / 10 + 0.15;
+    if (gi > 0) { ev.push({ k: 'pause', g: gi, t0: t, t1: t + 1.5, pos }); t += 1.5; }
+    for (let ps = 0; ps < Math.max(1, g.passes | 0); ps++) for (const sl of (g.slices || [g.paths])) for (const p of sl) {
+      const d = Math.hypot(p[0][0] - pos[0], p[0][1] - pos[1]), tt = d / 300 + lift;
+      ev.push({ k: 'move', g: gi, t0: t, t1: t + tt, a: pos, b: p[0] }); t += tt;
+      const L = TR.pathLength(p), td = Math.max(0.02, L / v);
+      ev.push({ k: 'draw', g: gi, t0: t, t1: t + td, p, L, pass: ps }); t += td; pos = p[p.length - 1];
+    }
+  });
+  return { ev, total: t };
+}
+function simStart() {
+  if (!S.job) { toast(tL('Prima crea un disegno.', 'Create a drawing first.')); return; }
+  const r = buildTimeline(S.job); SIM.tl = r.ev; SIM.total = r.total; SIM.t = 0; SIM.on = true; SIM.job = S.job;
+  $('#simBar').hidden = false; $('#vSim').classList.add('on'); simPlay(true);
+}
+function simStop() { SIM.on = false; SIM.playing = false; cancelAnimationFrame(SIM.raf); $('#simBar').hidden = true; $('#vSim').classList.remove('on'); draw(); }
+function simPlay(on) {
+  SIM.playing = on; $('#simPlay').textContent = on ? '❚❚' : '▶'; cancelAnimationFrame(SIM.raf);
+  if (on) { if (SIM.t >= SIM.total) SIM.t = 0; SIM.last = performance.now(); SIM.raf = requestAnimationFrame(simTick); }
+}
+function simTick(now) {
+  if (!SIM.playing) return;
+  SIM.t = Math.min(SIM.total, SIM.t + (now - SIM.last) / 1000 * (+$('#simSpd').value)); SIM.last = now;
+  $('#simT').value = Math.round(SIM.t / SIM.total * 1000); draw();
+  if (SIM.t >= SIM.total) { simPlay(false); return; }
+  SIM.raf = requestAnimationFrame(simTick);
+}
+function fmtClock(s) { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); }
+// disegna lo stato del simulatore sul canvas (tx/ty: mm del disegno → pixel)
+function drawSim(job, tx, ty, sc) {
+  const t = SIM.t; let cur = null;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const e of SIM.tl) {
+    if (e.t0 > t) break;
+    if (e.k !== 'draw') { cur = e; continue; }
+    const g = job.groups[e.g], tl = toolOf(g.tool);
+    ctx.strokeStyle = g.color; ctx.lineWidth = Math.max(0.6, tl.width * sc); ctx.globalAlpha = 0.92;
+    const p = e.p; ctx.beginPath(); ctx.moveTo(tx(p[0][0]), ty(p[0][1]));
+    if (t >= e.t1) { for (let i = 1; i < p.length; i++) ctx.lineTo(tx(p[i][0]), ty(p[i][1])); }
+    else {
+      let want = e.L * (t - e.t0) / (e.t1 - e.t0), acc = 0, end = p[0];
+      for (let i = 1; i < p.length; i++) { const d = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); if (acc + d >= want) { const k = d ? (want - acc) / d : 0; end = [p[i - 1][0] + (p[i][0] - p[i - 1][0]) * k, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * k]; ctx.lineTo(tx(end[0]), ty(end[1])); break; } acc += d; ctx.lineTo(tx(p[i][0]), ty(p[i][1])); end = p[i]; }
+      cur = Object.assign({}, e, { at: end });
+    }
+    ctx.stroke();
+    if (t >= e.t1) cur = Object.assign({}, e, { at: p[p.length - 1], done: true });
+  }
+  ctx.globalAlpha = 1;
+  let at = [job.W / 2, job.H + 20], down = false, label = '';
+  if (cur) {
+    if (cur.k === 'move') { const k = Math.min(1, (t - cur.t0) / (cur.t1 - cur.t0)); at = [cur.a[0] + (cur.b[0] - cur.a[0]) * k, cur.a[1] + (cur.b[1] - cur.a[1]) * k]; ctx.strokeStyle = 'rgba(255,0,120,.6)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx(cur.a[0]), ty(cur.a[1])); ctx.lineTo(tx(at[0]), ty(at[1])); ctx.stroke(); ctx.setLineDash([]); }
+    else if (cur.k === 'pause') { at = cur.pos; label = tL('⏸ cambio penna', '⏸ pen change'); }
+    else { at = cur.at; down = !cur.done; }
+  }
+  ctx.beginPath(); ctx.arc(tx(at[0]), ty(at[1]), 6, 0, Math.PI * 2);
+  if (down) { ctx.fillStyle = cur ? job.groups[cur.g].color : '#000'; ctx.fill(); } else { ctx.lineWidth = 2; ctx.strokeStyle = '#d4352b'; ctx.stroke(); }
+  const g = cur ? job.groups[cur.g] : job.groups[0];
+  $('#simInfo').innerHTML = `<b>${fmtClock(t)}</b> / ${fmtClock(SIM.total)} · X ${at[0].toFixed(1)} Y ${(job.H - at[1]).toFixed(1)} · ${down ? '<b>' + tL('penna giù', 'pen down') + '</b>' : tL('penna su', 'pen up')} · ${esc(g ? g.name : '')}${cur && cur.pass ? ' · ' + tL('passata ', 'pass ') + (cur.pass + 1) : ''}${label ? ' · ' + label : ''}`;
+}
+$('#vSim').textContent = tL('▶ simula', '▶ simulate');
+$('#vSim').onclick = () => SIM.on ? simStop() : simStart();
+$('#simPlay').onclick = () => simPlay(!SIM.playing);
+$('#simClose').onclick = simStop;
+$('#simT').oninput = e => { SIM.t = +e.target.value / 1000 * SIM.total; simPlay(false); draw(); };
+
 // ------------------------------------------------------------------ avvio
+renderPrinters(); renderProfiles(); renderPaperGuide(); $('#plateSvg').innerHTML = plateSVG();
 renderTools(); renderAlgParams(); renderImgParams(); renderGenParams(); renderImgColors(); renderGenColors(); renderFx(); renderMapParams(); renderTavParams(); clampDims();
 // mostra subito un esempio generativo
 S.src = 'gen'; $$('#srcTabs button').forEach(b => b.classList.toggle('on', b.dataset.src === 'gen')); $$('.src').forEach(d => d.hidden = d.dataset.src !== 'gen');

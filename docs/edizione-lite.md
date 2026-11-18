@@ -52,7 +52,7 @@ Si apre dal pulsante **Prismatica** in basso. Legge le bobine dallo stesso brows
 
 ## Tratto nella Lite
 
-Si apre dal pulsante **Tratto** in basso: plotter a penna e da taglio con il kit UMTS su P1S, anche offline. Guida: [tratto.md](tratto.md).
+Si apre dal pulsante **Tratto** in basso: plotter a penna e da taglio con il kit UMTS su X1C, P1S, P1P, A1 e A1 mini, anche offline. Guida: [tratto.md](tratto.md).
 
 ## Scansione etichette con Claude
 

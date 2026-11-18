@@ -1,8 +1,8 @@
 # Filament-Prismatica
 
-**FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab P1S in plotter a penna e da taglio con il kit UMTS.
+**FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab X1C, P1S o P1P (A1 e A1 mini da verificare) in plotter a penna e da taglio con il kit UMTS.
 
-Versione **2.1.9** · Prismatica **1.13** · Tratto **0.8.2**
+Versione **2.1.10** · Prismatica **1.13** · Tratto **0.9**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
@@ -38,7 +38,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 - [Edizione Full](docs/edizione-full.md): Smart + Prismatica
 - [Come funziona FilamentBox](docs/funzionamento.md): bobine, scaffali, AMS, consumi, fatture, statistiche
 - [Prismatica](docs/prismatica.md): dall'immagine ai piatti di stampa numerati
-- [Tratto](docs/tratto.md): plotter a penna e da taglio con il kit UMTS su P1S ([English](docs/en/tratto.md))
+- [Tratto](docs/tratto.md): plotter a penna e da taglio con il kit UMTS su X1C, P1S, P1P, A1 e A1 mini ([English](docs/en/tratto.md)) · [Serve la modalità LAN?](docs/tratto-lan.md) ([English](docs/en/tratto-lan.md))
 - [Chiave API Claude](docs/claude-api.md): scansione intelligente delle etichette in tutte le edizioni
 - [Home Assistant](docs/home-assistant.md): entità, webhook, automazione
 - [Lettore NFC](docs/lettore-nfc.md): hardware, collegamenti, firmware e protocollo
@@ -54,7 +54,7 @@ server/            edizioni Smart e Full (Node.js + Express, un solo file server
 lite/              edizione Lite pronta all'uso (generata, non modificarla a mano)
 site/              pagina del progetto (italiano e inglese) pubblicata con GitHub Pages
 prismatica/src/    sorgenti di Prismatica (app.html + core.js)
-tratto/src/        sorgenti di Tratto (app.html + core.js + tavola.js + i18n inglese + profilo Orca della P1S)
+tratto/src/        sorgenti di Tratto (app.html + core.js + tavola.js + i18n inglese + profili Orca delle stampanti)
 tools/             build-lite.mjs: rigenera lite/ da server/public
 nfc-reader/        firmware Arduino del lettore NFC (D1 Mini + PN532)
 docs/              guide
@@ -82,5 +82,5 @@ MIT, vedi [LICENSE](LICENSE).
 - Dati delle mappe di Tratto: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), via Nominatim e Overpass; quote dai [Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Mapzen, AWS Open Data)
 - Font Hershey (pubblico dominio) dal pacchetto [hersheytext](https://github.com/techninja/hersheytextjs) (MIT): testo a tratto delle tavole di Tratto
 - [Clipper](https://www.angusj.com/clipper2/) 6.4.2 (Boost Software License), [libtess.js](https://github.com/brendankenny/libtess.js) (SGI Free Software License B) e [fflate](https://github.com/101arrowz/fflate) (MIT): tratti, triangolazione e 3MF di Tratto
-- Profilo della Bambu Lab P1S ricavato dai profili di sistema di [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) (AGPL 3.0); impostazioni del kit [UMTS](https://makerworld.com/models/2029113) di Falu
+- Profili di Bambu Lab X1C, P1S, P1P, A1 e A1 mini ricavati dai profili di sistema di [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) (AGPL 3.0); impostazioni del kit [UMTS](https://makerworld.com/models/2029113) di Falu
 - Tabella colori Bambu Lab ricavata dal database pubblico BambuMan

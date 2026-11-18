@@ -1,4 +1,4 @@
-/* Tratto core v0.2 — geometria, algoritmi, export 3MF per il kit UMTS (penna/lama) su Bambu Lab P1S.
+/* Tratto core v0.9 — geometria, algoritmi, export 3MF per il kit UMTS (penna/lama) su Bambu Lab X1C, P1S, P1P, A1 e A1 mini.
    Richiede ClipperLib, libtess, fflate nello scope globale (o via require in Node). */
 (function (root) {
 'use strict';
@@ -8,18 +8,34 @@ const ClipperLib = root.ClipperLib || (isNode ? require('./vendor/clipper.min.js
 const libtess = root.libtess || (isNode ? require('./vendor/libtess.min.js') : null);
 const fflate = root.fflate || (isNode ? require('./vendor/fflate.min.js') : null);
 
-// ---------------------------------------------------------------- costanti P1S + UMTS
-const P1S = {
-  bed: 256,
-  // Area esclusa pubblicata da Falu per UMTS (X1/P1): striscia sinistra 48 mm e frontale 55 mm
-  exclude: ['0x0', '258x0', '258x55', '48x55', '48x258', '0x258'],
-  // Rettangolo disegnabile (1 mm di margine dall'area esclusa e dal bordo piatto)
-  area: { x0: 49, y0: 56, x1: 255, y1: 255 },
+// ---------------------------------------------------------------- stampanti + UMTS
+/* Ogni stampante: piatto, area esclusa per il modulo (coordinate ugello), rettangolo disegnabile (1 mm di margine),
+   foglio consigliato e il tratto del G-code iniziale da saltare (linea di spurgo / linee di prova sul piatto).
+   X1/P1: area pubblicata da Falu per UMTS (striscia sinistra 48 mm, frontale 55 mm).
+   A1 / A1 mini: Falu non pubblica un'area; quella qui è prudenziale (strisce sinistra e frontale, dove la testina
+   tocca e pulisce l'ugello) e va verificata con Calibrazione → Cornice area prima di disegnare. */
+const XP_EXCLUDE = ['0x0', '258x0', '258x55', '48x55', '48x258', '0x258'];
+const XP_PURGE = { from: 'G1 X18.0 Y1.0 Z0.8', to: 'M400' };
+const A_PURGE = { from: ';===== extrude cali test', to: ';========turn off light' };
+const PRINTERS = {
+  P1S: { name: 'Bambu Lab P1S', bed: 256, exclude: XP_EXCLUDE, area: { x0: 49, y0: 56, x1: 255, y1: 255 }, purge: XP_PURGE, family: 'xp', paper: { w: 210, h: 297, label: 'A4', top: 'area' } },
+  P1P: { name: 'Bambu Lab P1P', bed: 256, exclude: XP_EXCLUDE, area: { x0: 49, y0: 56, x1: 255, y1: 255 }, purge: XP_PURGE, family: 'xp', paper: { w: 210, h: 297, label: 'A4', top: 'area' } },
+  X1C: { name: 'Bambu Lab X1 Carbon', bed: 256, exclude: XP_EXCLUDE, area: { x0: 49, y0: 56, x1: 255, y1: 255 }, purge: XP_PURGE, family: 'xp', paper: { w: 210, h: 297, label: 'A4', top: 'area' } },
+  A1: { name: 'Bambu Lab A1', bed: 256, exclude: ['0x0', '256x0', '256x15', '20x15', '20x256', '0x256'], area: { x0: 25, y0: 16, x1: 231, y1: 251 }, purge: A_PURGE, family: 'a', provisional: true, paper: { w: 210, h: 250, label: 'A4 → 210×250', top: 'bed' } },
+  A1M: { name: 'Bambu Lab A1 mini', bed: 180, exclude: ['0x0', '180x0', '180x12', '16x12', '16x180', '0x180'], area: { x0: 17, y0: 13, x1: 174, y1: 176 }, purge: A_PURGE, family: 'a', provisional: true, paper: { w: 172, h: 176, label: '172×176', top: 'bed' } },
 };
-P1S.areaW = P1S.area.x1 - P1S.area.x0;   // 206
-P1S.areaH = P1S.area.y1 - P1S.area.y0;   // 199
-P1S.cx = (P1S.area.x0 + P1S.area.x1) / 2; // 152
-P1S.cy = (P1S.area.y0 + P1S.area.y1) / 2; // 155.5
+// PRN è la stampante scelta (lo stesso oggetto per tutto il programma: setPrinter lo aggiorna)
+const PRN = {};
+function setPrinter(id) {
+  const p = PRINTERS[id] || PRINTERS.P1S;
+  for (const k of Object.keys(PRN)) delete PRN[k];
+  Object.assign(PRN, JSON.parse(JSON.stringify(p)), { id: PRINTERS[id] ? id : 'P1S' });
+  PRN.areaW = PRN.area.x1 - PRN.area.x0; PRN.areaH = PRN.area.y1 - PRN.area.y0;
+  PRN.cx = (PRN.area.x0 + PRN.area.x1) / 2; PRN.cy = (PRN.area.y0 + PRN.area.y1) / 2;
+  return PRN;
+}
+setPrinter('P1S');
+const P1S = PRN; // nome storico
 
 const LAYER = 0.1;     // altezza strato UMTS
 const BEAD = 0.4;      // larghezza tratto per lo slicer (linea singola Arachne)
@@ -125,6 +141,42 @@ function chainPaths(paths, eps = 0.05) {
       }
       cur.reverse();
     }
+    out.push(cur);
+  }
+  return out;
+}
+// Unisce i tratti i cui estremi distano meno di tol mm (anche chiudendo un tratto su sé stesso):
+// la penna si alza meno volte e non lascia puntini dove si riappoggia. Restituisce i tratti uniti.
+function joinNear(paths, tol) {
+  if (!(tol > 0) || paths.length < 2) return paths;
+  const items = paths.filter(p => p.length > 1).map(p => p.slice());
+  const t2 = tol * tol, cell = tol, grid = new Map();
+  const gk = (x, y) => Math.floor(x / cell) + ',' + Math.floor(y / cell);
+  const ends = []; // [x, y, path, isTail]
+  items.forEach((p, i) => { if (isClosed(p)) return; [[p[0], 0], [p[p.length - 1], 1]].forEach(([q, t]) => { const k = gk(q[0], q[1]); if (!grid.has(k)) grid.set(k, []); grid.get(k).push([q[0], q[1], i, t]); }); });
+  const used = new Uint8Array(items.length);
+  const near = (q, self) => {
+    const cx = Math.floor(q[0] / cell), cy = Math.floor(q[1] / cell); let best = null, bd = t2;
+    for (let gx = cx - 1; gx <= cx + 1; gx++) for (let gy = cy - 1; gy <= cy + 1; gy++) {
+      const l = grid.get(gx + ',' + gy); if (!l) continue;
+      for (const e of l) { if (used[e[2]] || e[2] === self) continue; const d = (e[0] - q[0]) ** 2 + (e[1] - q[1]) ** 2; if (d <= bd) { bd = d; best = e; } }
+    }
+    return best;
+  };
+  const out = [];
+  for (let i = 0; i < items.length; i++) {
+    if (used[i]) continue; used[i] = 1;
+    let cur = items[i];
+    if (isClosed(cur)) { out.push(cur); continue; }
+    for (let dir = 0; dir < 2; dir++) {
+      for (;;) {
+        const e = near(cur[cur.length - 1], i); if (!e) break;
+        used[e[2]] = 1; const nx = e[3] ? items[e[2]].slice().reverse() : items[e[2]];
+        cur = cur.concat(dist(cur[cur.length - 1], nx[0]) < 1e-6 ? nx.slice(1) : nx);
+      }
+      cur.reverse();
+    }
+    if (cur.length > 3 && dist(cur[0], cur[cur.length - 1]) <= tol && pathLength(cur) > tol * 4) cur.push(cur[0].slice());
     out.push(cur);
   }
   return out;
@@ -941,7 +993,7 @@ function buildProjectConfig(base, s) {
   };
   // --- stampante (UMTS)
   set('M', 'z_offset', s.zOffset.toFixed(2));
-  M.bed_exclude_area = P1S.exclude.slice(); diff.M.add('bed_exclude_area');
+  M.bed_exclude_area = PRN.exclude.slice(); diff.M.add('bed_exclude_area');
   set('M', 'retraction_length', '0.01');
   set('M', 'z_hop', s.zHop);
   set('M', 'z_hop_types', 'Normal Lift');
@@ -952,10 +1004,11 @@ function buildProjectConfig(base, s) {
   set('M', 'wipe_distance', '0');
   set('M', 'retract_restart_extra', '0');
   if (s.skipPurge && typeof M.machine_start_gcode === 'string') {
-    const g = M.machine_start_gcode;
-    const a = g.indexOf('G1 X18.0 Y1.0 Z0.8'), b = g.indexOf('M400', a);
+    // salta la linea di spurgo (X1/P1) o le linee di prova davanti al piatto (A1): finirebbero sul foglio
+    const g = M.machine_start_gcode, pg = PRN.purge;
+    const a = g.indexOf(pg.from), b = g.indexOf(pg.to, a + 1);
     if (a > 0 && b > a) {
-      M.machine_start_gcode = g.slice(0, a) + 'G1 Z10 F1200 ; UMTS/Tratto: linea di spurgo saltata (foglio sul piano)\nM109 S{nozzle_temperature_initial_layer[initial_extruder]}\n' + g.slice(b);
+      M.machine_start_gcode = g.slice(0, a) + 'G1 Z10 F1200 ; UMTS/Tratto: spurgo saltato (foglio sul piano)\nM109 S{nozzle_temperature_initial_layer[initial_extruder]}\n' + g.slice(b);
       diff.M.add('machine_start_gcode');
     }
   }
@@ -1212,7 +1265,7 @@ function splitPens(paths, n, mode, W, H, seed) {
   return G;
 }
 
-const api = { P1S, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainPaths, orderPaths, bbox, clipToRect, pathLength, isClosed,
+const api = { P1S, PRN, PRINTERS, setPrinter, buildProjectConfig, joinNear, LAYER, BEAD, mulberry32, makeNoise, simplify, chaikin, chainPaths, orderPaths, bbox, clipToRect, pathLength, isClosed,
   algHatch, algWaves, algSpiral, algContours, algCenterline, algTSP, algStipple, algSketch, wobblePaths, GEN, shapeGrid, roundRect, cutOutline, hatchPolygons,
   strokesToExPolys, slabMesh, planLayers, slicesOf, buildProjectConfig, build3MF, buildSVG,
   rgbToLab, paletteKMeans, separateColors, cutByLayer, splitPens, marching, blurField: blur };

@@ -1,5 +1,16 @@
 # Storico delle versioni
 
+## FilamentBox 2.1.10 · Tratto 0.9
+
+- **Più stampanti**: oltre alla P1S, profili per X1 Carbon e P1P (stessa testina, valori di Falu per UMTS) e per A1 e A1 mini (da verificare: Z‑offset da misurare, area esclusa prudenziale). Ogni 3MF usa il profilo ufficiale di Orca di quella stampante; Tratto toglie solo lo spurgo. Taratura e correzione X/Y si salvano per stampante.
+- Si resta su **Orca Slicer**, e Tratto spiega perché: sequenza di avvio ufficiale per ogni modello, Z‑offset, pause vere, anteprima del percorso reale.
+- **Unisci tratti vicini**: estremi a meno di 0,3 mm diventano un tratto solo (meno alzate di penna, niente puntini).
+- **Simulatore** animato del disegno: play/pausa, velocità, barra, posizione e penna su/giù.
+- **Controlli** prima del file: area, spurgo tolto, Z‑hop, Z‑offset, limiti della stampante, temperature, pause, tratti troppo corti. Un errore blocca il download.
+- **SVG**: elenco degli elementi che non verranno disegnati (testi, immagini, cloni, ritagli, maschere, filtri); le forme dentro `defs`, ritagli e maschere non vengono più disegnate.
+- **Profili salvati** per ogni penna e calibrazione **Quadrato 20 mm**.
+- Guida **Serve la modalità LAN?** nell'app e in `docs/tratto-lan.md`: scheda microSD (nessuna modifica) oppure Solo LAN + Modalità sviluppatore, tempi e cosa si perde.
+
 ## FilamentBox 2.1.9 · Tratto 0.8.2
 
 - Mappe: la ricerca preferisce la città al comune o alla provincia omonimi (es. «Brescia»); in montagna il passo delle curve di livello sale da solo per non superare circa 30 curve, e il gruppo mostra il passo usato.

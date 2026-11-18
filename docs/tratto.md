@@ -2,9 +2,9 @@
 
 *[English version](en/tratto.md)*
 
-Tratto usa una Bambu Lab **P1S** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
+Tratto usa una Bambu Lab **X1 Carbon, P1S, P1P, A1 o A1 mini** come **plotter a penna** o come **plotter da taglio** con il kit **UMTS** di Falu ([MakerWorld 2029113](https://makerworld.com/models/2029113)). Da un'immagine, da un SVG o da un disegno generativo crea un **3MF per Orca Slicer** con tutte le impostazioni del kit e le pause per montare e togliere il modulo.
 
-Versione 0.8.2. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
+Versione 0.9. È inclusa nelle edizioni **Full** e **Lite** (pulsante **Tratto** nella barra in basso). Si può usare anche da sola: è un file HTML unico, senza server.
 
 ## Lingua
 
@@ -12,12 +12,12 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 
 ## Il flusso, in sei passi
 
-1. **Utensile**: Stabilo point 88, POSCA, lama da taglio o penna personalizzata. Per ognuno: come montarlo, Z‑offset, velocità, Z‑hop, accelerazione e passate. I valori si salvano nel browser, utensile per utensile.
-2. **Foglio**: schema del piatto con l'area esclusa del profilo UMTS e l'area utile (≈ 206 × 199 mm). Il foglio va a **29 mm dalla parete destra** e **41 mm da quella posteriore**. Una correzione X/Y sposta tutti i file se il tratto cade fuori posto.
+1. **Stampante e utensile**: scegli la stampante (X1C, P1S, P1P; A1 e A1 mini da verificare, vedi sotto), poi Stabilo point 88, POSCA, lama da taglio o penna personalizzata. Per ognuno: come montarlo, Z‑offset, velocità, Z‑hop, accelerazione e passate. I valori si salvano nel browser, utensile per utensile e stampante per stampante. Con **Profili salvati** dai un nome alla taratura di una penna (Z‑offset, velocità, Z‑hop, accelerazione, larghezza, passate e correzione X/Y) e la ritrovi quando la rimonti.
+2. **Foglio**: schema del piatto con l'area esclusa del profilo UMTS e l'area utile (≈ 206 × 199 mm su X1/P1). Su X1/P1 il foglio va a **29 mm dalla parete destra** e **41 mm da quella posteriore**; sulle A1 il piatto si muove, quindi il foglio va tagliato perché non sporga e fissato sui quattro lati. Una correzione X/Y sposta tutti i file se il tratto cade fuori posto.
 3. **Disegno**:
    - *Immagine*: tratteggio incrociato, contorni (isolinee), linee a tratto (scheletro), onde, spirale, linea continua (TSP), puntinato (stippling), schizzo (segmenti corti alla DrawingBot).
    - *Generativo*: campo di flusso, topografia, creste, Truchet, spirografo, armonografo, moiré, labirinto, Schotter (omaggio a Georg Nees), rosone, tunnel, nastri, bolle, op‑art, automi cellulari, albero, girasole, eco (una linea ripetuta a passo costante, aperta o a contorni concentrici). Lo spirografo ha anche i cursori per i denti della ruota e la distanza della penna. «🎲 Variante» cambia il seme, «✨ A caso» cambia anche lo stile.
-   - *SVG*: ogni colore del tratto diventa un gruppo (una penna); le forme piene si possono riempire a tratteggio.
+   - *SVG*: ogni colore del tratto diventa un gruppo (una penna); le forme piene si possono riempire a tratteggio. Sotto il file compare l'elenco di quello che non verrà disegnato (testi, immagini, cloni «use», ritagli, maschere, filtri), con il modo di sistemarlo.
    - *Adesivi ✂*: dal soggetto (meglio PNG trasparente) un file **disegno** a penna e un file **taglio** con la sagoma e il margine scelto; oppure griglie di cerchi e rettangoli per etichette.
    - *Mappa*: piantina di una città da OpenStreetMap (vedi sotto).
    - *Tavola tecnica*: tavola quotata con cornice, cartiglio e, se vuoi, carta millimetrata (vedi sotto).
@@ -25,6 +25,33 @@ L'interfaccia è in italiano e in inglese. Tratto segue la lingua del browser; i
 4. **Colori**: ogni gruppo è un cambio di penna, con nome, colore e numero di passate.
 5. **File**: riepilogo di strati e pause, download del 3MF (e dell'SVG).
 6. **In stampa**: la sequenza da seguire e i problemi comuni.
+
+## Stampanti
+
+| Stampante | Stato | Area utile | Foglio |
+|---|---|---|---|
+| X1 Carbon, P1S, P1P | valori di Falu per UMTS | ≈ 206 × 199 mm | A4, a 29 mm da destra e 41 mm dal retro |
+| A1 | da verificare | ≈ 206 × 235 mm | A4 tagliato a 210 × 250 mm, centrato |
+| A1 mini | da verificare | ≈ 157 × 163 mm | 172 × 176 mm, centrato |
+
+X1C, P1S e P1P hanno la stessa testina: valgono lo Z‑offset (+17 mm Stabilo, +20 mm POSCA) e l'area esclusa pubblicati da Falu. Per A1 e A1 mini UMTS ha una versione per la testina, ma Falu non pubblica Z‑offset e area esclusa: lo Z‑offset si misura (ugello sul piatto, poi alzi Z finché l'utensile tocca) e l'area di Tratto è prudenziale. Prima di disegnare fai **Calibrazione → Cornice area** senza penna. Nell'invio da Orca, sulle A1 disattiva anche il livellamento del piatto: l'ugello caldo toccherebbe il foglio.
+
+Ogni 3MF usa il profilo ufficiale di Orca di quella stampante (`printers-base.json`, rigenerato con `tratto/src/mkbase.py`). Tratto toglie solo lo spurgo: la linea davanti al piatto su X1/P1, le linee di prova sulle A1.
+
+### Perché sempre Orca Slicer
+
+- Ogni modello ha la sua sequenza di avvio (azzeramento, controlli, riscaldamento) che il firmware si aspetta: Orca la genera dal profilo ufficiale, sempre aggiornato.
+- Orca ha lo **Z‑offset** nel profilo stampante, il trucco su cui si basa UMTS; Bambu Studio non ce l'ha.
+- Le pause per montare il modulo e cambiare penna diventano pause vere della stampante.
+- L'anteprima di Orca mostra il percorso reale con le alzate della penna. Il simulatore di Tratto mostra l'ordine indicativo, quello esatto lo decide Orca.
+- Il file finale è un normale `.gcode.3mf` che la stampante accetta via LAN o da scheda microSD.
+
+## Strumenti per non sbagliare
+
+- **Unisci tratti vicini** (passo 4, Effetti): due tratti con gli estremi a meno di 0,3 mm diventano uno solo. La penna si alza meno e non lascia puntini dove si riappoggia. A 0 è spento.
+- **Simulatore** (pulsante «▶ simula» sull'anteprima): riproduce il disegno con play/pausa, velocità (1×–100×) e barra per scorrere. Mostra posizione, penna su/giù, gruppo e passata. L'ordine è quello di Tratto; quello finale lo decide Orca, che lo mostra nella sua anteprima.
+- **Controlli** (passo 5): area utile, spurgo tolto davvero dalla sequenza di avvio, Z‑hop sufficiente, Z‑offset plausibile, velocità e accelerazione entro i limiti della stampante, temperature, pause al posto giusto, tratti così corti da diventare puntini. Un errore blocca il download.
+- **Quadrato 20 mm** (Calibrazione): quadrato con croce al centro. Se i lati non misurano 20 mm la penna balla nel supporto; se la croce è fuori posto correggi X/Y; se il tratto è irregolare ritocca lo Z‑offset. Poi salva la penna nei profili.
 
 ## Mappe
 
@@ -76,11 +103,11 @@ Gruppi: **Griglia** (se attivata, si disegna per prima), **Disegno** (oggetto, c
 
 ## Cosa c'è nel 3MF
 
-È un progetto di Orca Slicer (stampante *Bambu Lab P1S 0.4 nozzle*, processo *0.20mm Standard @BBL X1C*, filamento *Generic PLA*) con le modifiche del profilo UMTS:
+È un progetto di Orca Slicer con il profilo ufficiale della stampante scelta (per la P1S: stampante *Bambu Lab P1S 0.4 nozzle*, processo *0.20mm Standard @BBL X1C*, filamento *Generic PLA*) e le modifiche del profilo UMTS:
 
 | | |
 |---|---|
-| Stampante | Z‑offset dell'utensile, area esclusa `0x0, 258x0, 258x55, 48x55, 48x258, 0x258`, retrazione 0,01 mm (sblocca lo Z‑hop), Z‑hop normale su ogni spostamento, niente wipe, start senza linea di spurgo (opzione) |
+| Stampante | Z‑offset dell'utensile, area esclusa (X1/P1: `0x0, 258x0, 258x55, 48x55, 48x258, 0x258`), retrazione 0,01 mm (sblocca lo Z‑hop), Z‑hop normale su ogni spostamento, niente wipe, start senza linea di spurgo (opzione) |
 | Processo | strato 0,10 mm, larghezze 0,40 mm, 1 perimetro **Arachne**, niente riempimenti, gusci, brim, torre e timelapse con movimento |
 | Filamento | 180 °C (evita l'errore di estrusione a freddo), flusso 0,01, piano 25 °C, ventole spente, nessun rallentamento per raffreddamento |
 
@@ -95,10 +122,10 @@ Gli strati:
 
 ## In stampa
 
-- Stampante in **modalità solo LAN** e **Orca Slicer**: con Bambu Studio la compensazione Z non viene applicata.
+- **Orca Slicer**, non Bambu Studio (non applica lo Z‑offset). Il file arriva alla stampante via LAN o con la scheda microSD: vedi [Modalità LAN](tratto-lan.md).
 - Apri il 3MF e carica le impostazioni del progetto. L'avviso di G‑code modificato riguarda lo start senza linea di spurgo; quello di regioni sospese si ignora.
 - Non usare «Centra» o «Disponi»: la posizione è quella del foglio.
-- Lascia il filamento caricato e disattiva il timelapse nell'invio.
+- Lascia il filamento caricato. Nell'invio disattiva timelapse e calibrazione dinamica del flusso; sulle A1 anche il livellamento del piatto.
 - **In caso di collisione spegni subito la stampante.** Mai finire la stampa con il modulo montato.
 
 Le prime volte segui le fasi di prova dell'autore (solo base, set senza penna, taratura in tempo reale): sono nel passo 6.
