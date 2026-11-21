@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Filament-Prismatica · Tratto · lab.cobelli.uk</title>
-<meta name="description" content="FilamentBox, a filament inventory for 3D printing, and Prismatica, a generator of 3D triangle wall art from any picture, and Tratto, a pen plotter and cutter for Bambu Lab X1C, P1S, P1P, A1 and A1 mini with the UMTS kit. Works in the browser with no server, or on your home server with Home Assistant.">
+<title>Filament-Prismatica · Tratto · Strati · lab.cobelli.uk</title>
+<meta name="description" content="FilamentBox, a filament inventory for 3D printing, and Prismatica, a generator of 3D triangle wall art from any picture, and Tratto, a pen plotter and cutter for Bambu Lab X1C, P1S, P1P, A1 and A1 mini with the UMTS kit, and Strati, colour relief lettering with an illustration inside every letter. Works in the browser with no server, or on your home server with Home Assistant.">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="alternate" hreflang="it" href="https://lab.cobelli.uk/Filament-Prismatica/it/">
 <link rel="alternate" hreflang="en" href="https://lab.cobelli.uk/Filament-Prismatica/">
@@ -90,13 +90,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
 <main class="wrap">
   <section class="hero">
     <p class="prompt mono"><b>~/lab/filament-prismatica</b> $ ./open</p>
-    <h1>Filament-Prismatica · Tratto</h1>
-    <span class="status mono" data-repo="filippocobelli/Filament-Prismatica" data-extra="Prismatica 1.13 · Tratto 0.9">v2.1.11 · Prismatica 1.13 · Tratto 0.9 · live</span>
-    <p class="lead">A filament inventory for 3D printing, plus a tool that turns any picture into 3D triangle wall art, printed one colour per plate with the filaments you actually own, and one that turns the printer into a pen plotter and cutter.</p>
+    <h1>Filament-Prismatica · Tratto · Strati</h1>
+    <span class="status mono" data-repo="filippocobelli/Filament-Prismatica" data-extra="Prismatica 1.13 · Tratto 0.9 · Strati 0.1">v2.2.0 · Prismatica 1.13 · Tratto 0.9 · Strati 0.1 · live</span>
+    <p class="lead">A filament inventory for 3D printing, plus a tool that turns any picture into 3D triangle wall art, printed one colour per plate with the filaments you actually own, one that turns the printer into a pen plotter and cutter, and one for colour relief lettering.</p>
     <div class="cta">
       <a class="btn primary" href="app/">Open FilamentBox</a>
       <a class="btn" href="app/prismatica/index.html">Open Prismatica</a>
       <a class="btn" href="app/tratto/index.html?lang=en">Open Tratto</a>
+      <a class="btn" href="app/strati/index.html?lang=en">Open Strati</a>
       <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica/archive/refs/heads/main.zip">Download (zip)</a>
       <a class="btn" href="https://ko-fi.com/filippocobelli">☕ Support on Ko-fi</a>
       <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica">Source</a>
@@ -105,7 +106,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
   </section>
 
   <section>
-    <p class="label mono">three tools, one inventory</p>
+    <p class="label mono">four tools, one inventory</p>
     <div class="two">
       <div class="card">
         <h3>FilamentBox</h3>
@@ -146,6 +147,19 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
         </ul>
         <ul class="tags mono"><li>plotter</li><li>cutter</li><li>3MF</li><li>Orca Slicer</li></ul>
       </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>Strati</h3>
+        <p>Turns a word into colour relief lettering: an illustration inside every letter, each colour at its own height, so the printer changes filament only a few times.</p>
+        <ul>
+          <li>One illustration per letter, or one picture cut out by the whole text</li>
+          <li>Joined letters (one sign as big as the bed) or separate letters (one per bed, much bigger)</li>
+          <li>2–6 colours from the pictures or from your FilamentBox spools, in the height order you choose</li>
+          <li>Top rim around every letter, clean-up of specks too small for the nozzle</li>
+          <li>3MF for Bambu Studio and Orca with filaments and per-layer colour changes already set: AMS or manual pauses</li>
+          <li>Five display typefaces, interface in English and Italian</li>
+        </ul>
+        <ul class="tags mono"><li>relief</li><li>multicolour</li><li>3MF</li><li>AMS</li></ul>
+      </div>
     </div>
   </section>
 
@@ -164,6 +178,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
           <tr><td>NFC reader (D1 Mini + PN532)</td><td class="n">no</td><td class="y">yes</td><td class="y">yes</td></tr>
           <tr><td>Prismatica</td><td class="y">yes</td><td class="n">no</td><td class="y">yes, live with your stock</td></tr>
           <tr><td>Tratto: pen plotter and cutter with the UMTS kit (X1C, P1S, P1P, A1)</td><td class="y">yes</td><td class="n">no</td><td class="y">yes</td></tr>
+          <tr><td>Strati: colour relief lettering</td><td class="y">yes</td><td class="n">no</td><td class="y">yes, with your spools</td></tr>
         </tbody>
       </table>
     </div>

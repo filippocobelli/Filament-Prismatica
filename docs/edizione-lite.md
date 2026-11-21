@@ -54,6 +54,10 @@ Si apre dal pulsante **Prismatica** in basso. Legge le bobine dallo stesso brows
 
 Si apre dal pulsante **Tratto** in basso: plotter a penna e da taglio con il kit UMTS su X1C, P1S, P1P, A1 e A1 mini, anche offline. Guida: [tratto.md](tratto.md).
 
+## Strati nella Lite
+
+Si apre dal pulsante **Strati** in basso: lettere a colori in rilievo con un'illustrazione dentro ogni lettera, anche offline. Se hai bobine nella Lite puoi sceglierle per ogni colore. Guida: [strati.md](strati.md).
+
 ## Scansione etichette con Claude
 
 Settings → **Claude AI** → incolla la chiave → Salva → Test. La chiave resta solo in quel browser. Dettagli e consigli di sicurezza: [claude-api.md](claude-api.md).

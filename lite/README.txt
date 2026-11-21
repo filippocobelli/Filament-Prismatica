@@ -1,4 +1,4 @@
-FilamentBox Lite v2.1.11
+FilamentBox Lite v2.2.0
 
 Apri index.html con Chrome, Edge o Firefox: funziona senza server e senza internet.
 I dati restano in questo browser: fai un backup da Settings -> Backup dei dati.

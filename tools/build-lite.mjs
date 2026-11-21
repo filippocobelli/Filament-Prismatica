@@ -20,7 +20,7 @@ fs.cpSync(SRC, OUT, { recursive: true });
 
 // 1) edizione + API locale
 fs.writeFileSync(path.join(OUT, 'edition.js'),
-  `// FilamentBox Lite v${VERSION} — generato da tools/build-lite.mjs\nwindow.FB_EDITION = { name: 'lite', version: '${VERSION}', features: ['prismatica', 'tratto', 'local'] };\n`);
+  `// FilamentBox Lite v${VERSION} — generato da tools/build-lite.mjs\nwindow.FB_EDITION = { name: 'lite', version: '${VERSION}', features: ['prismatica', 'tratto', 'strati', 'local'] };\n`);
 fs.copyFileSync(path.join(HERE, 'lite', 'local-api.js'), path.join(OUT, 'local-api.js'));
 
 const indexPath = path.join(OUT, 'index.html');
@@ -47,6 +47,10 @@ fs.writeFileSync(prisPath, pris);
 // 2b) Tratto: edition.js per il pulsante «← FilamentBox» e la versione della suite anche da file://
 const trattoPath = path.join(OUT, 'tratto', 'index.html');
 if (fs.existsSync(trattoPath)) fs.writeFileSync(trattoPath, fs.readFileSync(trattoPath, 'utf8').replace('<head>', '<head>\n<script src="../edition.js"></script>'));
+
+// 2c) Strati: edition.js e API locale (per l'elenco dei filamenti) anche da file://
+const stratiPath = path.join(OUT, 'strati', 'index.html');
+if (fs.existsSync(stratiPath)) fs.writeFileSync(stratiPath, fs.readFileSync(stratiPath, 'utf8').replace('<head>', '<head>\n<script src="../edition.js"></script>\n<script src="../local-api.js"></script>'));
 
 // 3) service worker: cache dei file per uso offline
 const files = [];

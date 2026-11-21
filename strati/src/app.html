@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strati · lettere a colori in rilievo</title>
+<style>
+/*__FONTS__*/
+:root{
+  --bg:#f3f1ec; --panel:#fffdf9; --ink:#1d2433; --muted:#6a7080; --line:#e2ded5; --accent:#7a3fa0; --accent-soft:#f1e8f7;
+  --warn:#9a5b00; --warn-bg:#fff4e0; --ok:#1d7a46; --ok-bg:#e6f5ec; --danger:#a3212b; --danger-bg:#fdeaea;
+  --r:10px; --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 var(--font)}
+header{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:18px;margin:0;letter-spacing:.2px;white-space:nowrap}
+header h1 b{color:var(--accent)}
+header .ver{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:1px 8px;white-space:nowrap}
+header .sub{color:var(--muted);font-size:13px}
+header .sp{flex:1}
+.back{font:600 13px var(--font);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:6px;padding:4px 9px;background:#fff}
+.back:hover{border-color:var(--ink)}
+.kofi,.lang{font:600 12px var(--font);color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:#fff;white-space:nowrap;cursor:pointer}
+.kofi:hover,.lang:hover{border-color:var(--accent);color:var(--accent)}
+[hidden]{display:none !important}
+main{display:grid;grid-template-columns:420px 1fr;height:calc(100% - 53px)}
+aside{overflow:auto;border-right:1px solid var(--line);background:var(--panel)}
+.steps{display:flex;gap:4px;padding:10px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.steps button{flex:1;min-width:52px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 4px;font:12px var(--font);color:var(--muted);cursor:pointer}
+.steps button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.steps button .n{display:block;font-weight:700;font-size:13px}
+section.step{display:none;padding:14px 16px 28px}
+section.step.on{display:block}
+h2{font-size:16px;margin:4px 0 10px}
+h3{font-size:13px;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+p{margin:6px 0}
+.small{font-size:12px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{border:1.5px solid var(--line);border-radius:var(--r);padding:10px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.card b{display:block;font-size:13px}
+.card span{font-size:12px;color:var(--muted)}
+.card.on{border-color:var(--accent);background:var(--accent-soft)}
+.note{border-radius:8px;padding:8px 10px;margin:8px 0;font-size:13px}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.note.ok{background:var(--ok-bg);color:var(--ok)}
+.note.danger{background:var(--danger-bg);color:var(--danger)}
+.note.info{background:var(--accent-soft);color:#4b2266}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin:6px 0}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+label.f input,label.f select,label.f textarea{font:14px var(--font);padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);width:100%}
+label.f textarea{font:600 18px var(--font);resize:vertical;min-height:64px;text-transform:none}
+label.chk{display:flex;align-items:center;gap:8px;font-size:13px;margin:6px 0}
+.rng{display:grid;grid-template-columns:120px 1fr 52px;align-items:center;gap:8px;margin:5px 0;font-size:12px;color:var(--muted)}
+.rng input{width:100%}
+.rng output{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font:600 13px var(--font);cursor:pointer;color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.drop{border:1.5px dashed #c9c3b6;border-radius:var(--r);padding:14px;text-align:center;background:#fff;cursor:pointer;color:var(--muted)}
+.drop.over{border-color:var(--accent);color:var(--accent)}
+.fonts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.fonts button{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:6px 4px;font-size:20px;cursor:pointer;color:var(--ink);white-space:nowrap;overflow:hidden}
+.fonts button small{display:block;font:11px var(--font);color:var(--muted)}
+.fonts button.on{border-color:var(--accent);background:var(--accent-soft)}
+.thumbs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.thumbs .t{position:relative;width:62px;height:62px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff}
+.thumbs .t img{width:100%;height:100%;object-fit:cover}
+.thumbs .t b{position:absolute;left:3px;top:2px;font-size:11px;background:rgba(255,255,255,.9);border-radius:4px;padding:0 4px}
+.thumbs .t button{position:absolute;right:2px;top:2px;border:0;background:rgba(0,0,0,.55);color:#fff;border-radius:4px;font-size:11px;cursor:pointer;padding:0 4px}
+.letters .L{display:grid;grid-template-columns:40px 1fr;gap:4px 8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;margin:6px 0}
+.letters .L .ch{grid-row:1/4;font-size:30px;text-align:center;line-height:1}
+.letters .L select{font:13px var(--font);padding:4px 6px;border:1px solid var(--line);border-radius:6px;width:100%}
+.letters .L .mini{display:grid;grid-template-columns:28px 1fr;gap:4px;align-items:center;font-size:11px;color:var(--muted)}
+.pal .c{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;margin:6px 0}
+.pal input[type=color]{width:34px;height:34px;border:0;padding:0;background:none;cursor:pointer}
+.pal select{font:12px var(--font);padding:4px 6px;border:1px solid var(--line);border-radius:6px;width:100%}
+.pal .lv{font-size:11px;color:var(--muted)}
+.pal .mv{display:flex;flex-direction:column;gap:2px}
+.pal .mv button{border:1px solid var(--line);background:#fff;border-radius:5px;font-size:11px;cursor:pointer;padding:0 6px}
+.view{position:relative;overflow:hidden;background:#d9d5cc}
+canvas#pv{position:absolute;inset:0;width:100%;height:100%}
+.hud{position:absolute;left:14px;bottom:12px;background:rgba(255,253,249,.94);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--muted);max-width:min(560px,calc(100% - 28px))}
+.hud b{color:var(--ink)}
+.vtools{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+.vtools button{border:1px solid var(--line);background:rgba(255,255,255,.95);border-radius:8px;padding:5px 9px;font:12px var(--font);cursor:pointer}
+.vtools button.on{background:var(--ink);color:#fff}
+.busy{position:absolute;right:14px;bottom:12px;background:var(--ink);color:#fff;border-radius:20px;padding:5px 12px;font-size:12px;display:none}
+.toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:10px;padding:9px 14px;font-size:13px;display:none;max-width:90%;z-index:5}
+.chk-list{list-style:none;padding:0;margin:6px 0}
+.chk-list li{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:4px 0;border-top:1px solid var(--line);font-size:13px}
+.chk-list li:first-child{border-top:0}
+.k-ok{color:var(--ok)}.k-warn{color:var(--warn)}.k-err{color:var(--danger)}
+table.tb{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+table.tb td{border-top:1px solid var(--line);padding:5px 4px;vertical-align:middle}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.2);vertical-align:-2px;margin-right:4px}
+@media (max-width:860px){main{grid-template-columns:1fr;grid-template-rows:auto 55vh;height:auto}aside{border-right:0}.view{height:55vh}header .sub{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <a id="fbBack" class="back" href="../index.html" hidden>← FilamentBox</a>
+  <h1><b>Strati</b> · <span data-t="title"></span></h1>
+  <span class="ver" id="ver"></span>
+  <span class="sub" data-t="sub"></span>
+  <span class="sp"></span>
+  <button class="lang" id="langSw" type="button"></button>
+  <a class="kofi" href="https://ko-fi.com/filippocobelli" target="_blank" rel="noopener">☕ Ko-fi</a>
+</header>
+<main>
+<aside>
+  <div class="steps" id="steps">
+    <button data-s="0" class="on"><span class="n">1</span><span data-t="s1"></span></button>
+    <button data-s="1"><span class="n">2</span><span data-t="s2"></span></button>
+    <button data-s="2"><span class="n">3</span><span data-t="s3"></span></button>
+    <button data-s="3"><span class="n">4</span><span data-t="s4"></span></button>
+    <button data-s="4"><span class="n">5</span><span data-t="s5"></span></button>
+  </div>
+
+  <!-- 1 TESTO -->
+  <section class="step on" id="s0">
+    <h2 data-t="h1"></h2>
+    <label class="f"><span data-t="text"></span><textarea id="txt" rows="2" spellcheck="false">STRATI</textarea></label>
+    <h3 data-t="font"></h3>
+    <div class="fonts" id="fonts"></div>
+    <h3 data-t="shape"></h3>
+    <div class="cards" id="modes"></div>
+    <div id="modeNote"></div>
+    <div id="sizeBox"></div>
+  </section>
+
+  <!-- 2 IMMAGINI -->
+  <section class="step" id="s1">
+    <h2 data-t="h2"></h2>
+    <div class="cards" id="imgModes"></div>
+    <div class="drop" id="drop" style="margin-top:10px"></div>
+    <input type="file" id="imgFile" accept="image/*" multiple hidden>
+    <div class="thumbs" id="thumbs"></div>
+    <div id="letterBox"></div>
+  </section>
+
+  <!-- 3 COLORI -->
+  <section class="step" id="s2">
+    <h2 data-t="h3"></h2>
+    <p class="small" data-t="h3p"></p>
+    <div id="kBox"></div>
+    <div id="invNote"></div>
+    <div class="pal" id="pal"></div>
+    <div id="bodyBox"></div>
+    <div class="btns"><button class="btn" id="repal" type="button" data-t="repal"></button></div>
+    <div id="cleanBox"></div>
+  </section>
+
+  <!-- 4 SPESSORI -->
+  <section class="step" id="s3">
+    <h2 data-t="h4"></h2>
+    <div id="thickBox"></div>
+    <div id="thickInfo"></div>
+  </section>
+
+  <!-- 5 FILE -->
+  <section class="step" id="s4">
+    <h2 data-t="h5"></h2>
+    <h3 data-t="printer"></h3>
+    <div class="cards" id="printers"></div>
+    <h3 data-t="change"></h3>
+    <div class="cards" id="changeModes"></div>
+    <div id="summary"></div>
+    <div id="checks"></div>
+    <div class="btns" id="dl"></div>
+    <div id="howto"></div>
+  </section>
+</aside>
+<div class="view" id="view">
+  <canvas id="pv"></canvas>
+  <div class="vtools"><button id="vColor" class="on" type="button"></button><button id="vRelief" type="button"></button></div>
+  <div class="hud" id="hud"></div>
+  <div class="busy" id="busy"></div>
+  <div class="toast" id="toast"></div>
+</div>
+</main>
+<script>/*__LIBS__*/</script>
+<script>/*__CORE__*/</script>
+<script>window.STRATI_BASES = /*__BASE__*/;</script>
+<script>
+(function () {
+'use strict';
+const VERSION = 'v0.1'; // v0.1: prima versione — scritta con un'illustrazione dentro ogni lettera (o una sola per tutta la scritta), colori per altezza, lettere unite o separate, 3MF con cambi di filamento per strato (AMS o pause)
+const ST = window.STRATI;
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// ------------------------------------------------------------------ lingua (stessa scelta di Tratto)
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang'); let l = null;
+  if (q === 'it' || q === 'en') { l = q; try { localStorage.setItem('tratto.lang', q); } catch (e) {} }
+  if (!l) { try { l = localStorage.getItem('tratto.lang'); } catch (e) {} }
+  if (l !== 'it' && l !== 'en') l = /^it\b/i.test(navigator.language || '') ? 'it' : 'en';
+  return l;
+})();
+document.documentElement.lang = LANG;
+const tL = (it, en) => (LANG === 'en' ? en : it);
+const nf = (v, d = 1) => (+v).toFixed(d).replace('.', LANG === 'en' ? '.' : ',');
+const T = {
+  title: ['lettere a colori in rilievo', 'colour relief lettering'],
+  sub: ['un’illustrazione dentro ogni lettera, un colore per altezza', 'an illustration inside each letter, one colour per height'],
+  s1: ['Testo', 'Text'], s2: ['Immagini', 'Images'], s3: ['Colori', 'Colours'], s4: ['Spessori', 'Heights'], s5: ['File', 'File'],
+  h1: ['Cosa scrivi?', 'What do you write?'], text: ['Testo (vai a capo per più righe)', 'Text (new line for more rows)'],
+  font: ['Carattere', 'Typeface'], shape: ['Forma', 'Shape'],
+  h2: ['Le illustrazioni', 'The illustrations'],
+  h3: ['Colori e altezze', 'Colours and heights'],
+  h3p: ['Ogni colore sta a un’altezza diversa: in cima alla lista il più alto. La stampante cambia filamento solo a quelle quote, quindi pochi cambi anche con 4–5 colori.', 'Each colour sits at its own height: the top of the list is the highest. The printer changes filament only at those heights, so few changes even with 4–5 colours.'],
+  repal: ['↻ Ricalcola i colori dalle immagini', '↻ Recompute colours from the images'],
+  h4: ['Spessori', 'Heights'], h5: ['Stampa', 'Print'], printer: ['Stampante', 'Printer'], change: ['Cambio colore', 'Colour change'],
+};
+function applyT() { for (const el of $$('[data-t]')) { const v = T[el.dataset.t]; if (v) el.textContent = tL(v[0], v[1]); } }
+applyT();
+$('#langSw').textContent = LANG === 'en' ? 'IT' : 'EN';
+$('#langSw').onclick = () => { const nl = LANG === 'en' ? 'it' : 'en'; try { localStorage.setItem('tratto.lang', nl); } catch (e) {} const u = new URL(location.href); u.searchParams.set('lang', nl); location.replace(u.href); };
+$('#ver').textContent = VERSION;
+function showSuite(e) { if (e && e.version) { $('#ver').textContent = VERSION + ' · FilamentBox ' + e.version; $('#fbBack').hidden = false; } }
+if (window.FB_EDITION) showSuite(window.FB_EDITION);
+else if (location.protocol.startsWith('http')) fetch('../edition.js', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => { const m = /"version"\s*:\s*"([^"]+)"/.exec(t) || /version\s*:\s*['"]([^'"]+)['"]/.exec(t); if (m) showSuite({ version: m[1] }); }).catch(() => {});
+$('#fbBack').addEventListener('click', (e) => { e.preventDefault(); location.assign(new URL(location.protocol === 'file:' ? '../index.html' : '../', location.href).href); });
+
+// ------------------------------------------------------------------ stato
+const FONTS = [['LuckiestGuy', 'Luckiest Guy'], ['Bangers', 'Bangers'], ['Anton', 'Anton'], ['BowlbyOne', 'Bowlby One'], ['TitanOne', 'Titan One'], ['Arial Black', 'Arial Black']];
+const PRINTERS = [['P1S', 'P1S', 256], ['P1P', 'P1P', 256], ['X1C', 'X1 Carbon', 256], ['A1', 'A1', 256], ['A1M', 'A1 mini', 180]];
+const MARGIN = 8;
+const store = { get() { try { return JSON.parse(localStorage.getItem('strati.s') || '{}'); } catch (e) { return {}; } }, set(v) { try { localStorage.setItem('strati.s', JSON.stringify(v)); } catch (e) {} } };
+const sv = store.get();
+const S = Object.assign({
+  text: 'STRATI', font: 'LuckiestGuy', mode: 'joined', imgMode: 'each',
+  width: 200, letterH: 200, spacing: -6, lineGap: -12, bold: 1.2,
+  k: 4, base: 3, step: 0.6, rim: 1.2, minDetail: 0.6,
+  printer: 'P1S', manual: false, tower: false, view: 'color',
+}, sv, { images: [], letters: [], pal: null, order: null, body: null });
+const KEEP = ['text', 'font', 'mode', 'imgMode', 'width', 'letterH', 'spacing', 'lineGap', 'bold', 'k', 'base', 'step', 'rim', 'minDetail', 'printer', 'manual', 'tower', 'view'];
+const persist = () => store.set(Object.fromEntries(KEEP.map(k => [k, S[k]])));
+const bedOf = () => (PRINTERS.find(p => p[0] === S.printer) || PRINTERS[0])[2];
+const usable = () => bedOf() - 2 * MARGIN;
+
+function toast(m) { const t = $('#toast'); t.innerHTML = m; t.style.display = 'block'; clearTimeout(toast._t); toast._t = setTimeout(() => t.style.display = 'none', 3200); }
+function busy(m) { const b = $('#busy'); b.textContent = m || ''; b.style.display = m ? 'block' : 'none'; }
+function rng(el, key, label, min, max, step, unit, cb) {
+  const id = 'r_' + key;
+  el.insertAdjacentHTML('beforeend', `<div class="rng"><span>${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${S[key]}"><output id="${id}o"></output></div>`);
+  const i = $('#' + id), o = $('#' + id + 'o'); const show = () => o.textContent = nf(S[key], step < 1 ? (step < 0.1 ? 2 : 1) : 0) + (unit || '');
+  show();
+  i.oninput = () => { S[key] = +i.value; show(); persist(); (cb || schedule)(); };
+}
+
+// ------------------------------------------------------------------ passi
+$$('#steps button').forEach(b => b.onclick = () => { $$('#steps button').forEach(x => x.classList.toggle('on', x === b)); $$('section.step').forEach((s, i) => s.classList.toggle('on', i === +b.dataset.s)); if (+b.dataset.s === 4) renderSummary(); });
+
+// 1 · testo e forma
+$('#txt').value = S.text;
+$('#txt').oninput = () => { S.text = $('#txt').value; persist(); renderLetters(); schedule(); };
+$('#fonts').innerHTML = FONTS.map(([id, nm]) => `<button type="button" data-f="${id}" style="font-family:'${id}'">Abc<small>${nm}</small></button>`).join('');
+$$('#fonts button').forEach(b => b.onclick = () => { S.font = b.dataset.f; persist(); renderFonts(); schedule(); });
+function renderFonts() { $$('#fonts button').forEach(b => b.classList.toggle('on', b.dataset.f === S.font)); }
+function renderModes() {
+  $('#modes').innerHTML = [['joined', tL('Lettere unite', 'Joined letters'), tL('una scritta sola, grande quanto il piatto', 'one piece, as big as the bed')], ['separate', tL('Lettere separate', 'Separate letters'), tL('una lettera per piatto: molto più grandi', 'one letter per plate: much bigger')]]
+    .map(([id, a, b]) => `<button class="card ${S.mode === id ? 'on' : ''}" data-m="${id}" type="button"><b>${a}</b><span>${b}</span></button>`).join('');
+  $$('#modes .card').forEach(c => c.onclick = () => { S.mode = c.dataset.m; persist(); renderModes(); renderSize(); schedule(); });
+  $('#modeNote').innerHTML = S.mode === 'joined'
+    ? `<p class="small">${tL('Le lettere si sovrappongono e diventano un pezzo unico, come una scritta da parete. Il limite è il piatto: tutta la scritta deve starci.', 'Letters overlap and become one piece, like a wall sign. The bed is the limit: the whole sign must fit.')}</p>`
+    : `<p class="small">${tL('Ogni lettera è un pezzo a sé e ha un piatto tutto per lei: puoi farle alte quasi quanto il piatto e appenderle una accanto all’altra.', 'Each letter is its own piece with a whole bed to itself: they can be almost as tall as the bed and hung side by side.')}</p>`;
+}
+function renderSize() {
+  const el = $('#sizeBox'); el.innerHTML = '<h3>' + tL('Dimensioni', 'Size') + '</h3>';
+  if (S.mode === 'joined') {
+    rng(el, 'width', tL('Larghezza (mm)', 'Width (mm)'), 60, 400, 1, ' mm');
+    rng(el, 'spacing', tL('Spaziatura (%)', 'Spacing (%)'), -30, 20, 1, '%');
+    rng(el, 'lineGap', tL('Interlinea (%)', 'Line gap (%)'), -40, 30, 1, '%');
+  } else rng(el, 'letterH', tL('Altezza lettera (mm)', 'Letter height (mm)'), 40, 260, 1, ' mm');
+  rng(el, 'bold', tL('Ingrossa (mm)', 'Thicken (mm)'), 0, 4, 0.2, ' mm');
+  el.insertAdjacentHTML('beforeend', `<p class="small">${tL('«Ingrossa» allarga le lettere: aiuta le lettere unite a toccarsi e i caratteri sottili a contenere il disegno.', '“Thicken” widens the letters: it helps joined letters touch and thin typefaces hold the drawing.')}</p>`);
+}
+
+// 2 · immagini
+function renderImgModes() {
+  $('#imgModes').innerHTML = [['each', tL('Una per lettera', 'One per letter'), tL('ogni lettera ha la sua illustrazione', 'each letter gets its own illustration')], ['one', tL('Una per tutta la scritta', 'One for the whole text'), tL('l’immagine viene ritagliata dentro le lettere', 'the image is cut out by the letters')]]
+    .map(([id, a, b]) => `<button class="card ${S.imgMode === id ? 'on' : ''}" data-m="${id}" type="button"><b>${a}</b><span>${b}</span></button>`).join('');
+  $$('#imgModes .card').forEach(c => c.onclick = () => { S.imgMode = c.dataset.m; S.pal = null; persist(); renderImgModes(); renderLetters(); schedule(true); });
+  $('#drop').innerHTML = tL('<b>Carica le immagini</b><br><span class="small">JPG, PNG o WebP, anche più di una insieme. Funzionano meglio disegni con pochi colori pieni e contorni netti.</span>', '<b>Load the images</b><br><span class="small">JPG, PNG or WebP, several at once. Drawings with few flat colours and crisp outlines work best.</span>');
+}
+const drop = $('#drop');
+drop.onclick = () => $('#imgFile').click();
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); addFiles(e.dataTransfer.files); };
+$('#imgFile').onchange = (e) => { addFiles(e.target.files); e.target.value = ''; };
+async function addFiles(list) {
+  for (const f of [...list]) { // copia: l'input viene svuotato subito dopo
+    if (!/^image\//.test(f.type)) continue;
+    const url = URL.createObjectURL(f);
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; }).catch(() => null);
+    if (img) S.images.push({ name: f.name, img, url });
+  }
+  S.pal = null; renderThumbs(); renderLetters(); schedule(true);
+}
+function renderThumbs() {
+  $('#thumbs').innerHTML = S.images.map((m, i) => `<div class="t"><img src="${m.url}" alt=""><b>${i + 1}</b><button type="button" data-x="${i}" aria-label="remove">✕</button></div>`).join('');
+  $$('#thumbs button').forEach(b => b.onclick = () => { S.images.splice(+b.dataset.x, 1); S.letters.forEach(l => { if (l.img >= S.images.length) l.img = -1; }); S.pal = null; renderThumbs(); renderLetters(); schedule(true); });
+}
+const glyphs = () => [...S.text.replace(/\r/g, '')].filter(ch => ch.trim());
+function renderLetters() {
+  const gl = glyphs(), el = $('#letterBox');
+  while (S.letters.length < gl.length) S.letters.push({ img: -1, zoom: 1, ox: 0, oy: 0 });
+  if (S.imgMode === 'one') {
+    const L = S.letters[0] || (S.letters[0] = { img: -1, zoom: 1, ox: 0, oy: 0 });
+    el.innerHTML = `<h3>${tL('Inquadratura', 'Framing')}</h3><div class="letters">${letterRow('A', 0, true)}</div>`;
+  } else {
+    el.innerHTML = gl.length ? `<h3>${tL('Lettera per lettera', 'Letter by letter')}</h3><p class="small">${tL('Senza scelta, le immagini vanno alle lettere nell’ordine in cui le hai caricate. Zoom e spostamento centrano il soggetto.', 'With no choice, images go to the letters in the order you loaded them. Zoom and offset centre the subject.')}</p><div class="letters">${gl.map((ch, i) => letterRow(ch, i)).join('')}</div>` : '';
+  }
+  $$('#letterBox .L').forEach(row => {
+    const i = +row.dataset.i, L = S.letters[i];
+    row.querySelector('select').onchange = (e) => { L.img = +e.target.value; schedule(true); };
+    for (const k of ['zoom', 'ox', 'oy']) row.querySelector(`[data-k="${k}"]`).oninput = (e) => { L[k] = +e.target.value; schedule(true); };
+  });
+}
+function letterRow(ch, i, whole) {
+  const L = S.letters[i];
+  const opts = [`<option value="-1">${S.images.length ? tL('automatica', 'automatic') : tL('esempio (nessuna immagine caricata)', 'sample (no image loaded)')}</option>`].concat(S.images.map((m, j) => `<option value="${j}" ${L.img === j ? 'selected' : ''}>${j + 1} · ${esc(m.name.slice(0, 28))}</option>`)).join('');
+  return `<div class="L" data-i="${i}"><span class="ch" style="font-family:'${S.font}'">${whole ? '⬚' : esc(ch)}</span><select>${opts}</select>
+    <div class="mini"><span>zoom</span><input type="range" data-k="zoom" min="1" max="3" step="0.05" value="${L.zoom}"></div>
+    <div class="mini"><span>↔ ↕</span><span style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><input type="range" data-k="ox" min="-1" max="1" step="0.05" value="${L.ox}"><input type="range" data-k="oy" min="-1" max="1" step="0.05" value="${L.oy}"></span></div></div>`;
+}
+
+// 3 · colori
+let INV = null; // filamenti di FilamentBox
+async function loadInventory() {
+  try {
+    const r = await fetch(window.STRATI_INVENTORY_URL || '/api/spools', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+    if (!r.ok) throw 0; const list = await r.json();
+    INV = (Array.isArray(list) ? list : list.spools || []).filter(s => /^#?[0-9a-f]{6}$/i.test(s.colorHex || s.hex || '') && !/TPU|TPE|FLEX/i.test(s.material || ''))
+      .map(s => ({ hex: '#' + String(s.colorHex || s.hex).replace('#', '').toLowerCase(), name: [s.brand, s.name || s.colorName, s.material].filter(Boolean).join(' · '), grams: s.remainingWeight }));
+    const seen = new Set(); INV = INV.filter(f => { const k = f.hex + f.name; if (seen.has(k)) return false; seen.add(k); return true; });
+  } catch (e) { INV = null; }
+  renderPal();
+}
+function renderK() {
+  const el = $('#kBox'); el.innerHTML = '';
+  rng(el, 'k', tL('Numero di colori', 'Number of colours'), 2, 6, 1, '', () => { S.pal = null; schedule(true); });
+}
+function renderPal() {
+  const el = $('#pal'); if (!S.pal) { el.innerHTML = ''; return; }
+  $('#invNote').innerHTML = INV && INV.length ? `<p class="small">${tL(`Puoi scegliere tra i ${INV.length} filamenti di FilamentBox: il colore diventa quello della bobina.`, `You can pick from FilamentBox’s ${INV.length} filaments: the colour becomes the spool’s.`)}</p>` : '';
+  const ord = S.order.slice().reverse();
+  el.innerHTML = ord.map((pi, j) => {
+    const p = S.pal[pi], lvl = ord.length - 1 - j;
+    const inv = INV && INV.length ? `<select data-p="${pi}"><option value="">${tL('colore libero', 'free colour')}</option>${INV.map((f, x) => `<option value="${x}" ${p.inv === x ? 'selected' : ''}>${esc(f.name)}</option>`).join('')}</select>` : '';
+    return `<div class="c"><input type="color" value="${p.hex}" data-p="${pi}"><div><div class="lv">${lvl === ord.length - 1 ? tL('più in alto', 'highest') : lvl === 0 ? tL('più in basso', 'lowest') : tL('livello ', 'level ') + (lvl + 1)} · ${nf(S.base + (lvl + 1) * S.step)} mm · ${pctOf(pi)}%</div>${inv}</div><div class="mv"><button type="button" data-u="${pi}">▲</button><button type="button" data-d="${pi}">▼</button></div></div>`;
+  }).join('');
+  $$('#pal input[type=color]').forEach(i => i.oninput = () => { const p = S.pal[+i.dataset.p]; p.hex = i.value; p.inv = null; p.user = true; schedule(); });
+  $$('#pal select').forEach(s => s.onchange = () => { const p = S.pal[+s.dataset.p]; if (s.value === '') { p.inv = null; } else { p.inv = +s.value; p.hex = INV[p.inv].hex; p.user = true; } renderPal(); schedule(); });
+  $$('#pal [data-u]').forEach(b => b.onclick = () => moveLevel(+b.dataset.u, 1));
+  $$('#pal [data-d]').forEach(b => b.onclick = () => moveLevel(+b.dataset.d, -1));
+  const bb = $('#bodyBox');
+  bb.innerHTML = `<label class="f"><span>${tL('Colore del corpo (base e fianchi della lettera)', 'Body colour (base and sides of the letter)')}</span><select id="bodySel">${S.order.slice().reverse().map(pi => `<option value="${pi}" ${S.body === pi ? 'selected' : ''}>${S.pal[pi].hex.toUpperCase()}${S.pal[pi].inv != null && INV ? ' · ' + esc(INV[S.pal[pi].inv].name) : ''}</option>`).join('')}</select></label>
+    <p class="small">${tL('Di solito è lo stesso colore del bordo in cima, come nelle lettere bianche con il disegno scuro.', 'Usually the same colour as the top rim, like white letters with a dark drawing.')}</p>`;
+  $('#bodySel').onchange = (e) => { S.body = +e.target.value; schedule(); };
+}
+function moveLevel(pi, dir) { const o = S.order, i = o.indexOf(pi), j = i + dir; if (j < 0 || j >= o.length) return; [o[i], o[j]] = [o[j], o[i]]; renderPal(); schedule(); }
+$('#repal').onclick = () => { S.pal = null; schedule(true); };
+function renderClean() {
+  const el = $('#cleanBox'); el.innerHTML = '<h3>' + tL('Pulizia e bordo', 'Clean-up and rim') + '</h3>';
+  rng(el, 'minDetail', tL('Dettaglio minimo', 'Smallest detail'), 0, 2, 0.1, ' mm');
+  rng(el, 'rim', tL('Bordo in cima', 'Top rim'), 0, 3, 0.2, ' mm');
+  el.insertAdjacentHTML('beforeend', `<p class="small">${tL('Il dettaglio minimo toglie i puntini che l’ugello da 0,4 mm non riesce a stampare bene. Il bordo è la cornice più alta attorno a ogni lettera, nel colore più in alto.', 'Smallest detail removes specks a 0.4 mm nozzle cannot print well. The rim is the tallest frame around each letter, in the highest colour.')}</p>`);
+}
+
+// 4 · spessori
+function renderThick() {
+  const el = $('#thickBox'); el.innerHTML = '';
+  rng(el, 'base', tL('Corpo (mm)', 'Body (mm)'), 1, 12, 0.2, ' mm');
+  rng(el, 'step', tL('Salto per colore', 'Step per colour'), 0.2, 1.6, 0.2, ' mm');
+  $('#thickInfo').innerHTML = `<p class="small">${tL('Il corpo è la parte piena della lettera. Ogni colore sta un «salto» più in alto del precedente: con 0,6 mm sono 3 strati da 0,2 mm, abbastanza per coprire il colore sotto.', 'The body is the solid part of the letter. Each colour sits one “step” above the previous one: 0.6 mm is three 0.2 mm layers, enough to cover the colour below.')}</p>`;
+}
+
+// 5 · stampa
+function renderPrinters() {
+  $('#printers').innerHTML = PRINTERS.map(([id, nm, bed]) => `<button class="card ${S.printer === id ? 'on' : ''}" data-p="${id}" type="button"><b>${nm}</b><span>${tL('piatto', 'bed')} ${bed} mm</span></button>`).join('');
+  $$('#printers .card').forEach(c => c.onclick = () => { S.printer = c.dataset.p; persist(); renderPrinters(); schedule(); });
+  $('#changeModes').innerHTML = [[false, tL('Automatico (AMS)', 'Automatic (AMS)'), tL('la stampante cambia filamento da sola', 'the printer swaps filament by itself')], [true, tL('A mano (pause)', 'By hand (pauses)'), tL('senza AMS: si ferma e cambi tu la bobina', 'no AMS: it pauses and you swap the spool')]]
+    .map(([v, a, b]) => `<button class="card ${S.manual === v ? 'on' : ''}" data-v="${v}" type="button"><b>${a}</b><span>${b}</span></button>`).join('');
+  $$('#changeModes .card').forEach(c => c.onclick = () => { S.manual = c.dataset.v === 'true'; persist(); renderPrinters(); renderSummary(); });
+}
+
+// ------------------------------------------------------------------ impaginazione e rasterizzazione
+const F = 200; // dimensione del carattere per misurare
+const meas = document.createElement('canvas').getContext('2d');
+const fontCss = (px) => `${px}px "${S.font}", "Arial Black", Impact, sans-serif`;
+function layout() {
+  meas.font = fontCss(F);
+  const lines = S.text.replace(/\r/g, '').split('\n'), capH = meas.measureText('H').actualBoundingBoxAscent || F * 0.7;
+  const sp = S.spacing / 100 * F, step = capH * (1 + S.lineGap / 100) + capH * 0.25, letters = [];
+  let gi = 0;
+  lines.forEach((line, li) => {
+    let x = 0; const row = [];
+    for (const ch of line) {
+      const m = meas.measureText(ch);
+      if (!ch.trim()) { x += m.width + sp; continue; }
+      const b = { x0: x - m.actualBoundingBoxLeft, x1: x + m.actualBoundingBoxRight, y0: li * step - m.actualBoundingBoxAscent, y1: li * step + m.actualBoundingBoxDescent };
+      row.push({ ch, gi: gi++, ox: x, oy: li * step, b });
+      x += m.width + sp;
+    }
+    if (!row.length) return;
+    const minx = Math.min(...row.map(r => r.b.x0)), maxx = Math.max(...row.map(r => r.b.x1)), sh = -(minx + maxx) / 2;
+    for (const r of row) { r.ox += sh; r.b.x0 += sh; r.b.x1 += sh; letters.push(r); }
+  });
+  if (!letters.length) return null;
+  const bb = { x0: Math.min(...letters.map(r => r.b.x0)), x1: Math.max(...letters.map(r => r.b.x1)), y0: Math.min(...letters.map(r => r.b.y0)), y1: Math.max(...letters.map(r => r.b.y1)) };
+  return { letters, bb, capH };
+}
+// disegna i glifi nella griglia: label (1..n) e maschera; T: coordinate di misura → pixel della griglia
+function rasterLetters(letters, gs, offX, offY, w, h) {
+  const label = new Int32Array(w * h), cv = document.createElement('canvas'), g = cv.getContext('2d', { willReadFrequently: true });
+  for (const L of letters) {
+    const x0 = Math.floor((L.b.x0 - offX) * gs) - 2, y0 = Math.floor((L.b.y0 - offY) * gs) - 2, x1 = Math.ceil((L.b.x1 - offX) * gs) + 2, y1 = Math.ceil((L.b.y1 - offY) * gs) + 2;
+    const cw = x1 - x0, ch = y1 - y0; if (cw <= 0 || ch <= 0) continue;
+    cv.width = cw; cv.height = ch; g.clearRect(0, 0, cw, ch);
+    g.font = fontCss(F * gs); g.fillStyle = '#000'; g.textBaseline = 'alphabetic';
+    g.fillText(L.ch, (L.ox - offX) * gs - x0, (L.oy - offY) * gs - y0);
+    const d = g.getImageData(0, 0, cw, ch).data;
+    for (let y = 0; y < ch; y++) { const gy = y + y0; if (gy < 0 || gy >= h) continue; for (let x = 0; x < cw; x++) { const gx = x + x0; if (gx < 0 || gx >= w) continue; if (d[(y * cw + x) * 4 + 3] >= 128) label[gy * w + gx] = L.gi + 1; } }
+  }
+  return label;
+}
+// ingrossa le lettere: i pixel nuovi prendono l'etichetta della lettera più vicina
+function growLabels(label, w, h, r) {
+  if (r < 1) return label;
+  const out = new Int32Array(label), dist = new Int16Array(w * h).fill(-1), q = new Int32Array(w * h); let qh = 0, qt = 0;
+  for (let i = 0; i < w * h; i++) if (label[i]) { dist[i] = 0; q[qt++] = i; }
+  while (qh < qt) {
+    const i = q[qh++], d = dist[i]; if (d >= r) continue; const x = i % w;
+    for (const j of [x > 0 ? i - 1 : -1, x < w - 1 ? i + 1 : -1, i >= w ? i - w : -1, i < w * (h - 1) ? i + w : -1]) if (j >= 0 && dist[j] < 0) { dist[j] = d + 1; out[j] = out[i]; q[qt++] = j; }
+  }
+  return out;
+}
+// pezzi da stampare: [{ name, w, h, res, label, mask, letters, gs, offX, offY }]
+function makePieces() {
+  const lay = layout(); if (!lay) return [];
+  const U = usable(), pieces = [];
+  const grid = (sizeMM) => Math.min(0.4, Math.max(0.12, sizeMM / 1300));
+  if (S.mode === 'joined') {
+    const bw = lay.bb.x1 - lay.bb.x0, bh = lay.bb.y1 - lay.bb.y0;
+    let mm = S.width / bw; if (bw * mm > U) mm = U / bw; if (bh * mm > U) mm = U / bh;
+    const Wmm = bw * mm, Hmm = bh * mm, res = grid(Math.max(Wmm, Hmm)), gs = mm / res;
+    const pad = Math.ceil((S.bold + 1) / res) + 3, w = Math.ceil(bw * gs) + 2 * pad, h = Math.ceil(bh * gs) + 2 * pad;
+    const offX = lay.bb.x0 - pad / gs, offY = lay.bb.y0 - pad / gs;
+    const label = growLabels(rasterLetters(lay.letters, gs, offX, offY, w, h), w, h, Math.round(S.bold / res));
+    pieces.push({ name: S.text.replace(/\s+/g, ' ').trim() || 'Strati', w, h, res, label, letters: lay.letters, gs, offX, offY, mmW: Wmm, mmH: Hmm, lay });
+  } else {
+    for (const L of lay.letters) {
+      const bw = L.b.x1 - L.b.x0, bh = L.b.y1 - L.b.y0;
+      let mm = S.letterH / bh; if (bw * mm > U) mm = U / bw; if (bh * mm > U) mm = U / bh;
+      const res = grid(Math.max(bw, bh) * mm), gs = mm / res, pad = Math.ceil((S.bold + 1) / res) + 3;
+      const w = Math.ceil(bw * gs) + 2 * pad, h = Math.ceil(bh * gs) + 2 * pad, offX = L.b.x0 - pad / gs, offY = L.b.y0 - pad / gs;
+      const label = growLabels(rasterLetters([L], gs, offX, offY, w, h), w, h, Math.round(S.bold / res));
+      pieces.push({ name: L.ch + ' (' + (L.gi + 1) + ')', w, h, res, label, letters: [L], gs, offX, offY, mmW: bw * mm, mmH: bh * mm, lay });
+    }
+  }
+  for (const p of pieces) { p.mask = new Uint8Array(p.w * p.h); for (let i = 0; i < p.w * p.h; i++) p.mask[i] = p.label[i] ? 1 : 0; }
+  return pieces;
+}
+
+// ------------------------------------------------------------------ illustrazioni → colori dei pixel
+const DEMO = ['#1d1d22', '#7a3fa0', '#b8563f', '#f4f1ea'];
+function demoArt(g, w, h, seed) {
+  const r = ST.mulberry32(seed * 977 + 13);
+  g.fillStyle = DEMO[0]; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 9; i++) { g.strokeStyle = DEMO[1 + (i % 3)]; g.lineWidth = Math.max(2, Math.min(w, h) * (0.03 + r() * 0.05)); g.beginPath(); const y = h * r(); g.moveTo(-10, y); g.bezierCurveTo(w * 0.3, y + h * (r() - 0.5), w * 0.7, y + h * (r() - 0.5), w + 10, y + h * (r() - 0.5) * 0.4); g.stroke(); }
+  for (let i = 0; i < 4; i++) { g.fillStyle = DEMO[1 + Math.floor(r() * 3)]; g.beginPath(); g.arc(w * r(), h * r(), Math.min(w, h) * (0.08 + r() * 0.18), 0, Math.PI * 2); g.fill(); }
+  g.fillStyle = DEMO[3]; g.beginPath(); g.arc(w * (0.3 + r() * 0.4), h * (0.3 + r() * 0.4), Math.min(w, h) * 0.12, 0, Math.PI * 2); g.fill();
+}
+function drawCover(g, img, w, h, L) {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const sc = Math.max(w / iw, h / ih) * (L.zoom || 1), dw = iw * sc, dh = ih * sc;
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);
+  g.drawImage(img, (w - dw) / 2 - (L.ox || 0) * (dw - w) / 2, (h - dh) / 2 - (L.oy || 0) * (dh - h) / 2, dw, dh);
+}
+// colori RGB dei pixel del pezzo (solo dentro le lettere)
+function artOf(p) {
+  const rgb = new Uint8ClampedArray(p.w * p.h * 3), cv = document.createElement('canvas'), g = cv.getContext('2d', { willReadFrequently: true });
+  const imgFor = (gi) => { const L = S.letters[S.imgMode === 'one' ? 0 : gi] || {}; const i = L.img >= 0 ? L.img : (S.images.length ? gi % S.images.length : -1); return { img: i >= 0 ? S.images[i] && S.images[i].img : null, L }; };
+  const paint = (x0, y0, x1, y1, gi, pick) => {
+    const cw = Math.max(1, x1 - x0), ch = Math.max(1, y1 - y0); cv.width = cw; cv.height = ch;
+    const { img, L } = imgFor(gi);
+    if (img) drawCover(g, img, cw, ch, L); else demoArt(g, cw, ch, gi + 1);
+    const d = g.getImageData(0, 0, cw, ch).data;
+    for (let y = Math.max(0, y0); y < Math.min(p.h, y1); y++) for (let x = Math.max(0, x0); x < Math.min(p.w, x1); x++) {
+      const i = y * p.w + x; if (!pick(i)) continue; const o = ((y - y0) * cw + (x - x0)) * 4;
+      rgb[i * 3] = d[o]; rgb[i * 3 + 1] = d[o + 1]; rgb[i * 3 + 2] = d[o + 2];
+    }
+  };
+  if (S.imgMode === 'one') {
+    // un'immagine sola sopra tutta la scritta (anche con le lettere separate: ognuna ne prende la sua parte)
+    const bb = p.lay.bb, x0 = Math.round((bb.x0 - p.offX) * p.gs), y0 = Math.round((bb.y0 - p.offY) * p.gs), x1 = Math.round((bb.x1 - p.offX) * p.gs), y1 = Math.round((bb.y1 - p.offY) * p.gs);
+    paint(x0, y0, x1, y1, 0, (i) => p.mask[i]);
+  } else {
+    // ogni lettera: rettangolo dei suoi pixel
+    const box = new Map();
+    for (let i = 0; i < p.w * p.h; i++) { const l = p.label[i]; if (!l) continue; const x = i % p.w, y = (i - x) / p.w; let b = box.get(l); if (!b) box.set(l, b = [x, y, x, y]); if (x < b[0]) b[0] = x; if (y < b[1]) b[1] = y; if (x > b[2]) b[2] = x; if (y > b[3]) b[3] = y; }
+    for (const [l, b] of box) paint(b[0], b[1], b[2] + 1, b[3] + 1, l - 1, (i) => p.label[i] === l);
+  }
+  return rgb;
+}
+
+// ------------------------------------------------------------------ calcolo
+let PIECES = [], RES = null, timer = 0;
+function schedule(full) { if (full) PIECES.forEach(p => p.rgb = null); clearTimeout(timer); timer = setTimeout(() => compute(full), 60); }
+async function compute(full) {
+  busy(tL('Calcolo…', 'Working…'));
+  await document.fonts.load(`40px "${S.font}"`).catch(() => {});
+  await new Promise(r => setTimeout(r, 0));
+  try {
+    PIECES = makePieces();
+    for (const p of PIECES) p.rgb = artOf(p);
+    // tavolozza: k-means su campioni di tutti i pezzi
+    if (!S.pal || S.pal.length !== S.k) {
+      const samples = []; const want = 24000;
+      for (const p of PIECES) { const n = p.w * p.h, step = Math.max(1, Math.floor(n * PIECES.length / want)); for (let i = 0; i < n; i += step) if (p.mask[i]) samples.push([p.rgb[i * 3], p.rgb[i * 3 + 1], p.rgb[i * 3 + 2]]); }
+      let pal = ST.paletteFrom(samples, S.k, 7);
+      S.pal = pal.map(c => { const hex = ST.rgbToHex(c), m = snapInv(hex); return m ? { hex: INV[m].hex, inv: m } : { hex, inv: null }; });
+      while (S.pal.length < S.k) S.pal.push({ hex: '#888888', inv: null });
+      S.order = S.pal.map((c, i) => i).sort((a, b) => ST.rgbToLab(...ST.hexToRgb(S.pal[a].hex))[0] - ST.rgbToLab(...ST.hexToRgb(S.pal[b].hex))[0]);
+      S.body = S.order[S.order.length - 1];
+    }
+    quantizeAll();
+    renderPal();
+    draw();
+  } catch (e) { console.error(e); toast(tL('Errore: ', 'Error: ') + esc(e.message)); }
+  busy('');
+}
+// colore del filamento più vicino (solo se molto simile)
+function snapInv(hex) {
+  if (!INV || !INV.length) return null;
+  const L = ST.rgbToLab(...ST.hexToRgb(hex)); let b = null, bd = 18 * 18;
+  INV.forEach((f, i) => { const d = ST.d2(L, ST.rgbToLab(...ST.hexToRgb(f.hex))); if (d < bd) { bd = d; b = i; } });
+  return b;
+}
+const pctOf = (pi) => { if (!RES) return 0; const lv = S.order.indexOf(pi); const n = RES.counts[lv] || 0; return Math.round(n / Math.max(1, RES.total) * 100); };
+function quantizeAll() {
+  const k = S.pal.length, labs = S.pal.map(c => ST.rgbToLab(...ST.hexToRgb(c.hex))), rankOf = new Uint8Array(k);
+  S.order.forEach((pi, lv) => rankOf[pi] = lv);
+  const counts = new Array(k).fill(0); let total = 0;
+  for (const p of PIECES) {
+    const n = p.w * p.h, rank = new Uint8Array(n), cache = new Map();
+    for (let i = 0; i < n; i++) {
+      if (!p.mask[i]) continue;
+      const key = (p.rgb[i * 3] >> 2) << 12 | (p.rgb[i * 3 + 1] >> 2) << 6 | (p.rgb[i * 3 + 2] >> 2);
+      let r = cache.get(key);
+      if (r === undefined) { const L = ST.rgbToLab(p.rgb[i * 3], p.rgb[i * 3 + 1], p.rgb[i * 3 + 2]); let b = 0, bd = Infinity; for (let c = 0; c < k; c++) { const d = ST.d2(L, labs[c]); if (d < bd) { bd = d; b = c; } } r = rankOf[b]; cache.set(key, r); }
+      rank[i] = r;
+    }
+    p.rank = ST.modeFilter(rank, p.mask, p.w, p.h, k, Math.round(S.minDetail / p.res / 2));
+    // bordo in cima
+    p.top = new Uint8Array(p.rank);
+    if (S.rim > 0) {
+      // bordo attorno a ogni lettera, anche dove due lettere si sovrappongono
+      const m2 = new Uint8Array(p.mask);
+      for (let i = 0; i < n; i++) { const l = p.label[i]; if (!l) continue; const x = i % p.w; if ((x < p.w - 1 && p.label[i + 1] && p.label[i + 1] !== l) || (i + p.w < n && p.label[i + p.w] && p.label[i + p.w] !== l)) m2[i] = 0; }
+      const d = ST.distInside(m2, p.w, p.h), r = S.rim / p.res; for (let i = 0; i < n; i++) if (p.mask[i] && d[i] <= r) p.top[i] = k - 1;
+    }
+    for (let i = 0; i < n; i++) if (p.mask[i]) { counts[p.top[i]]++; total++; }
+    const comp = ST.components(p.mask, p.w, p.h); p.parts = comp.sizes.filter(s => s * p.res * p.res > 2).length;
+  }
+  RES = { counts, total };
+}
+
+// ------------------------------------------------------------------ anteprima
+const cv = $('#pv'), ctx = cv.getContext('2d');
+$('#vColor').textContent = tL('colori', 'colours'); $('#vRelief').textContent = tL('rilievo', 'relief');
+$('#vColor').onclick = () => { S.view = 'color'; persist(); draw(); };
+$('#vRelief').onclick = () => { S.view = 'relief'; persist(); draw(); };
+new ResizeObserver(() => draw()).observe($('#view'));
+function pieceImage(p) {
+  const k = S.pal.length, cols = S.order.map(pi => ST.hexToRgb(S.pal[pi].hex)), body = ST.hexToRgb(S.pal[S.body].hex);
+  const id = new ImageData(p.w, p.h), d = id.data, relief = S.view === 'relief';
+  const H = (i) => (p.mask[i] ? S.base + (p.top[i] + 1) * S.step : 0);
+  for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) {
+    const i = y * p.w + x, o = i * 4; if (!p.mask[i]) continue;
+    let c = cols[p.top[i]];
+    if (relief) {
+      const hx = (H(Math.min(i + 1, p.w * p.h - 1)) - H(Math.max(i - 1, 0))), hy = (H(Math.min(i + p.w, p.w * p.h - 1)) - H(Math.max(i - p.w, 0)));
+      const sh = Math.max(0.35, Math.min(1.35, 1 - (hx + hy) * 0.9 / Math.max(0.2, S.step)));
+      c = c.map(v => v * sh);
+    }
+    d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+  }
+  // fianco del corpo: ombra spostata verso il basso a destra
+  return { id, body };
+}
+function draw() {
+  const r = $('#view').getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, r.width, r.height);
+  $('#vColor').classList.toggle('on', S.view !== 'relief'); $('#vRelief').classList.toggle('on', S.view === 'relief');
+  if (!PIECES.length || !S.pal) { $('#hud').innerHTML = tL('Scrivi un testo al passo 1.', 'Type some text in step 1.'); return; }
+  // posizione dei pezzi in mm: le lettere separate si dispongono riga per riga, come appese al muro
+  const gap = 8, rows = [];
+  for (const p of PIECES) { const key = Math.round(p.letters[0].oy); let r = rows.find(x => x.key === key); if (!r) rows.push(r = { key, ps: [] }); r.ps.push(p); }
+  const place = []; let yy = 0, totW = 0;
+  for (const r of rows) {
+    const rw = r.ps.reduce((s, p) => s + p.mmW, 0) + gap * (r.ps.length - 1), rh = Math.max(...r.ps.map(p => p.mmH));
+    let xx = -rw / 2; for (const p of r.ps) { place.push({ p, x: xx, y: yy + (rh - p.mmH) / 2 }); xx += p.mmW + gap; }
+    totW = Math.max(totW, rw); yy += rh + gap;
+  }
+  const totH = yy - gap, maxH = Math.max(...PIECES.map(p => p.mmH));
+  const pad = 40, sc = Math.min((r.width - 2 * pad) / totW, (r.height - 2 * pad - 50) / totH);
+  const X0 = r.width / 2, Y0 = (r.height - 40 - totH * sc) / 2;
+  for (const { p, x: mx, y: my } of place) {
+    const { id, body } = pieceImage(p), oc = document.createElement('canvas'); oc.width = p.w; oc.height = p.h; oc.getContext('2d').putImageData(id, 0, 0);
+    const pw = p.w * p.res * sc, ph = p.h * p.res * sc;
+    const px = X0 + mx * sc - (p.w * p.res - p.mmW) / 2 * sc, y = Y0 + my * sc - (p.h * p.res - p.mmH) / 2 * sc;
+    // fianco: la sagoma nel colore del corpo, spostata
+    const depth = Math.max(2, (S.base + S.step * S.pal.length) * sc * 0.6), sil = document.createElement('canvas'); sil.width = p.w; sil.height = p.h;
+    const sg = sil.getContext('2d'); const sd = sg.createImageData(p.w, p.h);
+    for (let i = 0; i < p.w * p.h; i++) if (p.mask[i]) { sd.data[i * 4] = body[0] * 0.72; sd.data[i * 4 + 1] = body[1] * 0.72; sd.data[i * 4 + 2] = body[2] * 0.72; sd.data[i * 4 + 3] = 255; }
+    sg.putImageData(sd, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.globalAlpha = 0.25; ctx.drawImage(sil, px + depth * 1.6, y + depth * 1.6, pw, ph); ctx.globalAlpha = 1;
+    for (let t = depth; t > 0; t -= 1) ctx.drawImage(sil, px + t * 0.7, y + t * 0.7, pw, ph);
+    ctx.drawImage(oc, px, y, pw, ph);
+  }
+  const H = S.base + S.step * S.pal.length;
+  $('#hud').innerHTML = (S.mode === 'joined'
+    ? `<b>${nf(PIECES[0].mmW, 0)} × ${nf(PIECES[0].mmH, 0)} mm</b>`
+    : `<b>${PIECES.length} ${tL('lettere', 'letters')}</b> · ${tL('fino a', 'up to')} <b>${nf(Math.max(...PIECES.map(p => p.mmW)), 0)} × ${nf(maxH, 0)} mm</b>`)
+    + ` · ${tL('alto', 'tall')} ${nf(H)} mm · ${S.pal.length} ${tL('colori', 'colours')} · ${tL('piatto', 'bed')} ${bedOf()} mm`;
+}
+
+// ------------------------------------------------------------------ riepilogo, controlli, file
+function filaments() {
+  // filamento 1 = corpo; poi i colori dei livelli nell'ordine in cui servono (dal basso)
+  const list = [S.pal[S.body].hex.toLowerCase()];
+  for (const pi of S.order) { const h = S.pal[pi].hex.toLowerCase(); if (!list.includes(h)) list.push(h); }
+  return list;
+}
+const nameOf = (hex) => { const p = S.pal.find(c => c.hex.toLowerCase() === hex); return p && p.inv != null && INV && INV[p.inv] ? INV[p.inv].name : hex.toUpperCase(); };
+function changesList() {
+  const fil = filaments(), out = []; let cur = fil[0];
+  S.order.forEach((pi, lv) => { const h = S.pal[pi].hex.toLowerCase(); if (h !== cur) { out.push({ z: S.base + lv * S.step + ST.LAYER, hex: h, to: fil.indexOf(h) + 1 }); cur = h; } });
+  return out;
+}
+function grams() {
+  // stima: corpo con pareti e riempimento (~45%), livelli pieni; PLA 1,24 g/cm³
+  const g = {}; const add = (hex, mm3) => g[hex] = (g[hex] || 0) + mm3 * 1.24 / 1000;
+  for (const p of PIECES) {
+    const a = p.res * p.res; let area = 0; const above = new Array(S.pal.length).fill(0);
+    for (let i = 0; i < p.w * p.h; i++) if (p.mask[i]) { area++; for (let l = 0; l <= p.top[i]; l++) above[l]++; }
+    add(S.pal[S.body].hex.toLowerCase(), area * a * S.base * 0.45);
+    S.order.forEach((pi, lv) => add(S.pal[pi].hex.toLowerCase(), above[lv] * a * S.step));
+  }
+  return g;
+}
+function renderSummary() {
+  if (!PIECES.length || !S.pal) { $('#summary').innerHTML = ''; $('#dl').innerHTML = ''; return; }
+  const fil = filaments(), ch = changesList(), g = grams(), U = usable();
+  const H = S.base + S.step * S.pal.length;
+  let html = `<h3>${tL('Riepilogo', 'Summary')}</h3><table class="tb">
+    <tr><td>${tL('Pezzi', 'Pieces')}</td><td><b>${PIECES.length}</b> ${S.mode === 'joined' ? tL('(scritta unica)', '(one sign)') : tL('(una lettera per file)', '(one letter per file)')}</td></tr>
+    <tr><td>${tL('Altezza', 'Height')}</td><td>${nf(H)} mm · ${Math.round(H / ST.LAYER)} ${tL('strati', 'layers')}</td></tr>
+    <tr><td>${tL('Filamenti', 'Filaments')}</td><td>${fil.map((h, i) => `<span class="sw" style="background:${h}"></span>${i + 1}: ${esc(nameOf(h))} · ≈${Math.round(g[h] || 0)} g`).join('<br>')}</td></tr>
+    <tr><td>${tL('Cambi', 'Changes')}</td><td>${ch.length ? ch.map(c => `${tL('a', 'at')} ${nf(c.z)} mm → <span class="sw" style="background:${c.hex}"></span>${esc(nameOf(c.hex))}`).join('<br>') : tL('nessuno', 'none')}</td></tr></table>`;
+  $('#summary').innerHTML = html;
+  // controlli
+  const out = []; const add = (lv, t) => out.push([lv, t]);
+  const big = PIECES.filter(p => p.mmW > U + 0.5 || p.mmH > U + 0.5);
+  if (big.length) add('err', tL('Un pezzo non sta sul piatto: riduci le dimensioni.', 'A piece does not fit the bed: reduce the size.')); else add('ok', tL(`Ogni pezzo sta sul piatto da ${bedOf()} mm (con ${MARGIN} mm di margine).`, `Every piece fits the ${bedOf()} mm bed (with ${MARGIN} mm margin).`));
+  if (S.mode === 'joined' && PIECES[0].parts > 1) add('warn', tL(`La scritta è in ${PIECES[0].parts} pezzi staccati: aumenta «Ingrossa» o riduci la spaziatura se la vuoi in un pezzo solo.`, `The sign is in ${PIECES[0].parts} separate parts: increase “Thicken” or reduce spacing to make it one piece.`));
+  else if (S.mode === 'joined') add('ok', tL('La scritta è un pezzo unico.', 'The sign is a single piece.'));
+  if (S.step < 0.6) add('warn', tL('Con meno di 0,6 mm per colore, il colore sotto può trasparire (soprattutto il bianco sopra il nero).', 'With less than 0.6 mm per colour, the colour below may show through (especially white over black).'));
+  if (S.manual && ch.length > 3) add('warn', tL(`${ch.length} cambi a mano: la stampante si ferma ${ch.length} volte.`, `${ch.length} manual changes: the printer pauses ${ch.length} times.`));
+  if (!S.manual && fil.length > 4 && S.printer !== 'X1C' && S.printer !== 'P1S' && S.printer !== 'P1P') add('warn', tL('Più di 4 filamenti: l’AMS lite ne tiene 4.', 'More than 4 filaments: the AMS lite holds 4.'));
+  if (!S.manual && fil.length > 4) add('warn', tL('Più di 4 filamenti: servono due AMS o una bobina esterna.', 'More than 4 filaments: you need two AMS units or an external spool.'));
+  $('#checks').innerHTML = `<h3>${tL('Controlli', 'Checks')}</h3><ul class="chk-list">${out.map(([lv, t]) => `<li><b class="k-${lv}">${lv === 'ok' ? '✓' : lv === 'warn' ? '!' : '✕'}</b><span>${t}</span></li>`).join('')}</ul>`;
+  const blocked = out.some(o => o[0] === 'err');
+  $('#dl').innerHTML = `<button class="btn pri" id="dl3mf" type="button" ${blocked ? 'disabled' : ''}>⬇ ${S.mode === 'joined' ? tL('File 3MF', '3MF file') : tL(`ZIP con ${PIECES.length} file 3MF`, `ZIP with ${PIECES.length} 3MF files`)}</button>`;
+  $('#dl3mf').onclick = exportFiles;
+  $('#howto').innerHTML = `<h3>${tL('Come si stampa', 'How to print')}</h3><ol class="small">${(S.manual ? [
+    tL('Apri il 3MF in Bambu Studio o Orca Slicer e affetta: le pause sono già alle quote giuste.', 'Open the 3MF in Bambu Studio or Orca Slicer and slice: the pauses are already at the right heights.'),
+    tL(`Carica il filamento 1 (${esc(nameOf(fil[0]))}) e avvia.`, `Load filament 1 (${esc(nameOf(fil[0]))}) and start.`),
+    tL('A ogni pausa scarica la bobina dal display, carica il colore indicato qui sopra e riprendi.', 'At each pause unload the spool from the screen, load the colour listed above and resume.'),
+  ] : [
+    tL('Apri il 3MF in Bambu Studio o Orca Slicer: i filamenti e i cambi di colore per strato sono già impostati (li vedi sul cursore degli strati nell’anteprima).', 'Open the 3MF in Bambu Studio or Orca Slicer: filaments and per-layer colour changes are already set (you see them on the layer slider in the preview).'),
+    tL('Abbina ogni filamento allo slot dell’AMS con quel colore e affetta.', 'Match each filament to the AMS slot with that colour and slice.'),
+    tL('La torre di spurgo è spenta: il filamento si scarica nello scivolo e la lettera può usare tutto il piatto.', 'The prime tower is off: filament is purged into the chute and the letter can use the whole bed.'),
+  ]).map(t => `<li>${t}</li>`).join('')}</ol>`;
+}
+function thumbPNG(p) {
+  const { id } = pieceImage(p), oc = document.createElement('canvas'); oc.width = p.w; oc.height = p.h; oc.getContext('2d').putImageData(id, 0, 0);
+  const t = document.createElement('canvas'); t.width = t.height = 256; const g = t.getContext('2d'); const s = 240 / Math.max(p.w, p.h);
+  g.drawImage(oc, (256 - p.w * s) / 2, (256 - p.h * s) / 2, p.w * s, p.h * s);
+  const b64 = t.toDataURL('image/png').split(',')[1], bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u;
+}
+async function exportFiles() {
+  busy(tL('Creo i file…', 'Building files…')); await new Promise(r => setTimeout(r, 30));
+  try {
+    const fil = filaments(), base = window.STRATI_BASES[S.printer], bed = bedOf(), files = {};
+    const filOfRank = (r) => fil.indexOf(S.pal[S.order[r]].hex.toLowerCase()) + 1;
+    let n = 0;
+    for (const p of PIECES) {
+      busy(tL('Creo i file… ', 'Building files… ') + (++n) + '/' + PIECES.length); await new Promise(r => setTimeout(r, 0));
+      const B = ST.buildBands({ w: p.w, h: p.h, res: p.res, mask: p.mask, rank: p.top }, { k: S.pal.length, base: S.base, step: S.step, rim: 0, minDetail: S.minDetail }); // bordo già in p.top
+      B.bands.forEach(b => b.label = b.rank < 0 ? tL('corpo', 'body') : tL('colore ', 'colour ') + (b.rank + 1) + ' · ' + nameOf(S.pal[S.order[b.rank]].hex.toLowerCase()));
+      const changes = ST.colorChanges(B.bands, filOfRank, 1);
+      const r = ST.build3MF({ name: p.name, bands: B.bands, colors: fil, changes, manual: S.manual, cx: bed / 2, cy: bed / 2 }, base, { primeTower: S.tower, thumbnail: thumbPNG(p) });
+      files[safe(p.name) + '.3mf'] = r.data;
+    }
+    const names = Object.keys(files);
+    if (names.length === 1) save(new Blob([files[names[0]]], { type: 'model/3mf' }), 'Strati-' + names[0]);
+    else save(new Blob([fflate.zipSync(files, { level: 0 })], { type: 'application/zip' }), 'Strati-' + safe(S.text) + '.zip');
+    toast(tL('File pronto ✓', 'File ready ✓'));
+  } catch (e) { console.error(e); toast(tL('Errore: ', 'Error: ') + esc(e.message)); }
+  busy('');
+}
+const safe = (s) => String(s).replace(/\s+/g, '_').replace(/[^\w\-().]/g, '').slice(0, 40) || 'strati';
+function save(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+
+// ------------------------------------------------------------------ avvio
+renderFonts(); renderModes(); renderSize(); renderImgModes(); renderLetters(); renderK(); renderClean(); renderThick(); renderPrinters();
+loadInventory();
+schedule(true);
+})();
+</script>
+</body>
+</html>

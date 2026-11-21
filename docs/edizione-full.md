@@ -7,7 +7,7 @@ Tutto insieme: l'edizione [Smart](edizione-smart.md) (server, Home Assistant, le
 È identica alla Smart, con due differenze:
 
 - usa `server/docker-compose.full.yml`, oppure imposta `FB_EDITION=full` (è anche il valore predefinito se la variabile manca);
-- nei log compare `FilamentBox v2.1.11 (full) in ascolto sulla porta 3025 · Prismatica su /prismatica/ · Tratto su /tratto/`.
+- nei log compare `FilamentBox v2.2.0 (full) in ascolto sulla porta 3025 · Prismatica su /prismatica/ · Tratto su /tratto/ · Strati su /strati/`.
 
 Segui la guida della [Smart](edizione-smart.md) per Docker, Home Assistant, lettore NFC e Claude.
 
@@ -25,6 +25,10 @@ Funzionamento completo: [prismatica.md](prismatica.md).
 ## Tratto
 
 Si apre dal pulsante **Tratto** nella barra in basso, oppure da `http://<server>:3025/tratto/`. Non usa l'inventario: crea i 3MF per il plotter (penna o lama) con il kit UMTS. Guida: [tratto.md](tratto.md).
+
+## Strati
+
+Si apre dal pulsante **Strati** nella barra in basso, oppure da `http://<server>:3025/strati/`. Per ogni colore puoi scegliere una bobina dell'inventario. Guida: [strati.md](strati.md).
 
 ## Passare da Smart a Full (e viceversa)
 

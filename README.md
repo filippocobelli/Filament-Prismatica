@@ -1,8 +1,8 @@
 # Filament-Prismatica
 
-**FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab X1C, P1S o P1P (A1 e A1 mini da verificare) in plotter a penna e da taglio con il kit UMTS.
+**FilamentBox**, l'inventario dei filamenti per la stampa 3D, con **Prismatica**, il generatore di wall art 3D a triangoli che usa i filamenti che hai davvero, e **Tratto**, che trasforma una Bambu Lab X1C, P1S o P1P (A1 e A1 mini da verificare) in plotter a penna e da taglio con il kit UMTS, e **Strati**, che trasforma una parola in lettere a colori in rilievo con un'illustrazione dentro ogni lettera.
 
-Versione **2.1.11** · Prismatica **1.13** · Tratto **0.9**
+Versione **2.2.0** · Prismatica **1.13** · Tratto **0.9** · Strati **0.1**
 
 [☕ Supporta il progetto su Ko-fi](https://ko-fi.com/filippocobelli)
 
@@ -23,6 +23,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 | File tag OpenTag3D da scrivere col telefono | ✅ | ✅ | ✅ |
 | Prismatica | ✅ | — | ✅ |
 | Tratto (plotter e taglio UMTS) | ✅ | — | ✅ |
+| Strati (lettere a colori in rilievo) | ✅ | — | ✅ con le tue bobine |
 | Più dispositivi vedono gli stessi dati | No (backup/ripristino manuale) | ✅ | ✅ |
 
 ## Quale scegliere
@@ -39,6 +40,7 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 - [Come funziona FilamentBox](docs/funzionamento.md): bobine, scaffali, AMS, consumi, fatture, statistiche
 - [Prismatica](docs/prismatica.md): dall'immagine ai piatti di stampa numerati
 - [Tratto](docs/tratto.md): plotter a penna e da taglio con il kit UMTS su X1C, P1S, P1P, A1 e A1 mini ([English](docs/en/tratto.md)) · [Serve la modalità LAN?](docs/tratto-lan.md) ([English](docs/en/tratto-lan.md))
+- [Strati](docs/strati.md): lettere a colori in rilievo, un'illustrazione dentro ogni lettera e un colore per altezza ([English](docs/en/strati.md))
 - [Chiave API Claude](docs/claude-api.md): scansione intelligente delle etichette in tutte le edizioni
 - [Home Assistant](docs/home-assistant.md): entità, webhook, automazione
 - [Lettore NFC](docs/lettore-nfc.md): hardware, collegamenti, firmware e protocollo
@@ -49,18 +51,19 @@ FilamentBox esiste in tre edizioni. L'interfaccia è la stessa: cambia solo cosa
 
 ```
 server/            edizioni Smart e Full (Node.js + Express, un solo file server.js)
-  public/          interfaccia web, Prismatica, Tratto, librerie (pdf.js, ZXing)
+  public/          interfaccia web, Prismatica, Tratto, Strati, librerie (pdf.js, ZXing)
   docker-compose.full.yml / docker-compose.smart.yml
 lite/              edizione Lite pronta all'uso (generata, non modificarla a mano)
 site/              pagina del progetto (italiano e inglese) pubblicata con GitHub Pages
 prismatica/src/    sorgenti di Prismatica (app.html + core.js)
 tratto/src/        sorgenti di Tratto (app.html + core.js + tavola.js + i18n inglese + profili Orca delle stampanti)
+strati/src/        sorgenti di Strati (app.html + core.js + caratteri; librerie e profili Orca presi da tratto/src)
 tools/             build-lite.mjs: rigenera lite/ da server/public
 nfc-reader/        firmware Arduino del lettore NFC (D1 Mini + PN532)
 docs/              guide
 ```
 
-Per modificare FilamentBox si lavora su `server/public/`; poi `cd tools && npm install && npm run build:lite` rigenera l'edizione Lite. Prismatica si modifica in `prismatica/src/` e si ricompila con `python3 prismatica/src/build.py`; Tratto in `tratto/src/` con `python3 tratto/src/build.py`.
+Per modificare FilamentBox si lavora su `server/public/`; poi `cd tools && npm install && npm run build:lite` rigenera l'edizione Lite. Prismatica si modifica in `prismatica/src/` e si ricompila con `python3 prismatica/src/build.py`; Tratto in `tratto/src/` con `python3 tratto/src/build.py`; Strati in `strati/src/` con `python3 strati/src/build.py`.
 
 ## Dati personali
 
@@ -80,6 +83,7 @@ MIT, vedi [LICENSE](LICENSE).
 - [ZXing](https://github.com/zxing-js/browser) (Apache 2.0): scanner barcode
 - [three.js](https://threejs.org) (MIT): anteprima 3D di Prismatica
 - Dati delle mappe di Tratto: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), via Nominatim e Overpass; quote dai [Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Mapzen, AWS Open Data)
+- Caratteri di Strati: Luckiest Guy (Apache 2.0), Bangers, Anton, Bowlby One e Titan One (SIL Open Font License 1.1), da [Google Fonts](https://github.com/google/fonts)
 - Font Hershey (pubblico dominio) dal pacchetto [hersheytext](https://github.com/techninja/hersheytextjs) (MIT): testo a tratto delle tavole di Tratto
 - [Clipper](https://www.angusj.com/clipper2/) 6.4.2 (Boost Software License), [libtess.js](https://github.com/brendankenny/libtess.js) (SGI Free Software License B) e [fflate](https://github.com/101arrowz/fflate) (MIT): tratti, triangolazione e 3MF di Tratto
 - Profili di Bambu Lab X1C, P1S, P1P, A1 e A1 mini ricavati dai profili di sistema di [OrcaSlicer](https://github.com/SoftFever/OrcaSlicer) (AGPL 3.0); impostazioni del kit [UMTS](https://makerworld.com/models/2029113) di Falu

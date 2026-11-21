@@ -1,6 +1,6 @@
 # Edizione Smart
 
-FilamentBox su un server di casa, collegato a Home Assistant e al lettore NFC fisico. Non include Prismatica e Tratto (se li vuoi, usa la [Full](edizione-full.md): cambia una sola variabile).
+FilamentBox su un server di casa, collegato a Home Assistant e al lettore NFC fisico. Non include Prismatica, Tratto e Strati (se li vuoi, usa la [Full](edizione-full.md): cambia una sola variabile).
 
 ## Cosa serve
 
@@ -14,7 +14,7 @@ FilamentBox su un server di casa, collegato a Home Assistant e al lettore NFC fi
 1. Copia **il contenuto** della cartella `server/` in una cartella del server, per esempio `/opt/filamentbox`. Devono esserci `server.js`, `package.json` e `public/`.
 2. Crea lo stack con `server/docker-compose.smart.yml`. In Portainer: **Stacks → Add stack → Web editor**, incolla il file e controlla il percorso del volume.
 3. Avvia lo stack. Al primo avvio il container installa Express e crea `db.json`.
-4. Controlla i log: deve comparire `FilamentBox v2.1.11 (smart) in ascolto sulla porta 3025`.
+4. Controlla i log: deve comparire `FilamentBox v2.2.0 (smart) in ascolto sulla porta 3025`.
 5. Apri `http://<indirizzo-del-server>:3025`.
 
 Senza Docker: `cd server && npm install && FB_EDITION=smart node server.js` (serve Node.js 20 o più recente).
@@ -23,7 +23,7 @@ Senza Docker: `cd server && npm install && FB_EDITION=smart node server.js` (ser
 
 | Variabile | Valore | A cosa serve |
 |---|---|---|
-| `FB_EDITION` | `smart` | Edizione Smart (senza Prismatica e Tratto). `full` o assente = Full |
+| `FB_EDITION` | `smart` | Edizione Smart (senza Prismatica, Tratto e Strati). `full` o assente = Full |
 | `PORT` | `3025` | Porta del server |
 | `ANTHROPIC_API_KEY` | `sk-ant-…` | Chiave Claude (facoltativa, si può inserire anche da Settings) |
 | `ANTHROPIC_MODEL` | `claude-sonnet-5-5` | Modello predefinito (si cambia anche da Settings) |

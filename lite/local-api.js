@@ -249,7 +249,7 @@ Campi non visibili: null. Solo JSON.`;
   });
 
   // App installabile e offline quando servita via https (es. GitHub Pages)
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !/prismatica\//.test(location.pathname)) {
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !/(prismatica|strati|tratto)\//.test(location.pathname)) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 })();

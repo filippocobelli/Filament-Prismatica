@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Filament-Prismatica · Tratto · lab.cobelli.uk</title>
-<meta name="description" content="FilamentBox, l'inventario dei filamenti per la stampa 3D, e Prismatica, che trasforma un'immagine in una wall art 3D a triangoli, e Tratto, plotter a penna e da taglio per Bambu Lab X1C, P1S, P1P, A1 e A1 mini con il kit UMTS. Funziona nel browser senza server o sul tuo server di casa con Home Assistant.">
+<title>Filament-Prismatica · Tratto · Strati · lab.cobelli.uk</title>
+<meta name="description" content="FilamentBox, l'inventario dei filamenti per la stampa 3D, e Prismatica, che trasforma un'immagine in una wall art 3D a triangoli, e Tratto, plotter a penna e da taglio per Bambu Lab X1C, P1S, P1P, A1 e A1 mini con il kit UMTS, e Strati, lettere a colori in rilievo con un'illustrazione dentro ogni lettera. Funziona nel browser senza server o sul tuo server di casa con Home Assistant.">
 <link rel="icon" href="../icon.svg" type="image/svg+xml">
 <link rel="alternate" hreflang="it" href="https://lab.cobelli.uk/Filament-Prismatica/it/">
 <link rel="alternate" hreflang="en" href="https://lab.cobelli.uk/Filament-Prismatica/">
@@ -90,13 +90,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
 <main class="wrap">
   <section class="hero">
     <p class="prompt mono"><b>~/lab/filament-prismatica</b> $ ./open</p>
-    <h1>Filament-Prismatica · Tratto</h1>
-    <span class="status mono" data-repo="filippocobelli/Filament-Prismatica" data-extra="Prismatica 1.13 · Tratto 0.9">v2.1.11 · Prismatica 1.13 · Tratto 0.9 · live</span>
-    <p class="lead">L'inventario dei filamenti per la stampa 3D, più uno strumento che trasforma un'immagine in una wall art 3D a triangoli, stampata un colore per piatto con i filamenti che hai davvero, e uno che usa la stampante come plotter a penna e da taglio.</p>
+    <h1>Filament-Prismatica · Tratto · Strati</h1>
+    <span class="status mono" data-repo="filippocobelli/Filament-Prismatica" data-extra="Prismatica 1.13 · Tratto 0.9 · Strati 0.1">v2.2.0 · Prismatica 1.13 · Tratto 0.9 · Strati 0.1 · live</span>
+    <p class="lead">L'inventario dei filamenti per la stampa 3D, più uno strumento che trasforma un'immagine in una wall art 3D a triangoli, stampata un colore per piatto con i filamenti che hai davvero, uno che usa la stampante come plotter a penna e da taglio e uno per le lettere a colori in rilievo.</p>
     <div class="cta">
       <a class="btn primary" href="../app/">Apri FilamentBox</a>
       <a class="btn" href="../app/prismatica/index.html">Apri Prismatica</a>
       <a class="btn" href="../app/tratto/index.html?lang=it">Apri Tratto</a>
+      <a class="btn" href="../app/strati/index.html?lang=it">Apri Strati</a>
       <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica/archive/refs/heads/main.zip">Scarica (zip)</a>
       <a class="btn" href="https://ko-fi.com/filippocobelli">☕ Supportami su Ko-fi</a>
       <a class="btn" href="https://github.com/filippocobelli/Filament-Prismatica">Codice</a>
@@ -105,7 +106,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
   </section>
 
   <section>
-    <p class="label mono">tre strumenti, un inventario</p>
+    <p class="label mono">quattro strumenti, un inventario</p>
     <div class="two">
       <div class="card">
         <h3>FilamentBox</h3>
@@ -146,6 +147,19 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
         </ul>
         <ul class="tags mono"><li>plotter</li><li>taglio</li><li>3MF</li><li>Orca Slicer</li></ul>
       </div>
+      <div class="card" style="grid-column:1/-1">
+        <h3>Strati</h3>
+        <p>Trasforma una parola in lettere a colori in rilievo: un'illustrazione dentro ogni lettera, ogni colore alla sua altezza, così la stampante cambia filamento poche volte.</p>
+        <ul>
+          <li>Un'illustrazione per lettera, oppure un'immagine sola ritagliata da tutta la scritta</li>
+          <li>Lettere unite (una scritta grande quanto il piatto) o separate (una per piatto, molto più grandi)</li>
+          <li>Da 2 a 6 colori presi dalle immagini o dalle tue bobine di FilamentBox, nell'ordine di altezza che scegli</li>
+          <li>Bordo in cima attorno a ogni lettera, pulizia dei puntini troppo piccoli per l'ugello</li>
+          <li>3MF per Bambu Studio e Orca con filamenti e cambi colore per strato già impostati: AMS o pause a mano</li>
+          <li>Cinque caratteri da insegna, interfaccia in italiano e inglese</li>
+        </ul>
+        <ul class="tags mono"><li>rilievo</li><li>multicolore</li><li>3MF</li><li>AMS</li></ul>
+      </div>
     </div>
   </section>
 
@@ -164,6 +178,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px 22px}
           <tr><td>Lettore NFC (D1 Mini + PN532)</td><td class="n">no</td><td class="y">sì</td><td class="y">sì</td></tr>
           <tr><td>Prismatica</td><td class="y">sì</td><td class="n">no</td><td class="y">sì, collegata all'inventario</td></tr>
           <tr><td>Tratto: plotter a penna e da taglio con il kit UMTS (X1C, P1S, P1P, A1)</td><td class="y">sì</td><td class="n">no</td><td class="y">sì</td></tr>
+          <tr><td>Strati: lettere a colori in rilievo</td><td class="y">sì</td><td class="n">no</td><td class="y">sì, con le tue bobine</td></tr>
         </tbody>
       </table>
     </div>

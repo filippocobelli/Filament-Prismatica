@@ -1,5 +1,17 @@
 # Storico delle versioni
 
+## FilamentBox 2.2.0 · Strati 0.1
+
+Nuova voce **Strati**: lettere a colori in rilievo con un'illustrazione dentro ogni lettera, come le scritte multicolore che girano sui social.
+
+- Testo su una o più righe, cinque caratteri da insegna inclusi (Luckiest Guy, Bangers, Anton, Bowlby One, Titan One) più Arial Black.
+- **Lettere unite** (una scritta sola grande quanto il piatto, con spaziatura, interlinea e ingrossamento per farle toccare) oppure **lettere separate** (una per piatto, alte fino a ≈ 240 mm).
+- Un'illustrazione per lettera, con zoom e spostamento, oppure un'immagine sola ritagliata da tutta la scritta.
+- Da 2 a 6 colori presi dalle immagini o dalle bobine di FilamentBox, nell'ordine di altezza che scegli; bordo in cima attorno a ogni lettera (anche dove si sovrappongono) e pulizia dei dettagli troppo piccoli.
+- 3MF per Bambu Studio e Orca con filamenti e cambi di colore per strato già impostati: automatici con l'AMS o con pause per cambiarli a mano. Con le lettere separate uno ZIP con un 3MF per lettera.
+- Anteprima a colori e in rilievo, riepilogo con grammi stimati per colore, controlli (piatto, pezzi staccati, spessori).
+- Inclusa nelle edizioni Lite e Full, interfaccia in italiano e inglese.
+
 ## FilamentBox 2.1.11
 
 Il badge in alto mostra subito la versione e l'edizione vere: prima restava su «v2.0.4» finché non si caricavano le impostazioni Claude (lo si vedeva soprattutto nella Lite).

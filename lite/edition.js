@@ -1,2 +1,2 @@
-// FilamentBox Lite v2.1.11 — generato da tools/build-lite.mjs
-window.FB_EDITION = { name: 'lite', version: '2.1.11', features: ['prismatica', 'tratto', 'local'] };
+// FilamentBox Lite v2.2.0 — generato da tools/build-lite.mjs
+window.FB_EDITION = { name: 'lite', version: '2.2.0', features: ['prismatica', 'tratto', 'strati', 'local'] };

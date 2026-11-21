@@ -1,5 +1,6 @@
-// FilamentBox server — v2.1.11
+// FilamentBox server — v2.2.0
 // CHANGELOG
+// v2.2.0 — Strati (lettere con un'illustrazione dentro, colori per altezza) servito su /strati/ nell'edizione Full, come Prismatica e Tratto
 // v2.1.11 — badge della versione corretto nel frontend
 // v2.1.10 — Tratto 0.9: profili X1C, P1P, A1, A1 mini, unione tratti, controlli, simulatore, diagnostica SVG, profili penna, guida LAN
 // v2.1.9 — Tratto 0.8.2: ricerca città prima della provincia, passo curve automatico · v2.1.8 — Tratto 0.8.1: mappe più veloci (server Overpass in parallelo), niente cerchietti di rumore nelle curve · v2.1.7 — Tratto 0.8: piantine di città da OpenStreetMap · v2.1.6 — Tratto 0.7: Eco, Schizzo, spirografo regolabile, effetti · v2.1.5 — Tratto 0.6: 9 generativi nuovi e Puntinato · v2.1.4 — Tratto 0.5: disegni a più colori con più penne · v2.1.3 — Tratto 0.4: interfaccia anche in inglese · v2.1.2 — solo titolo del sito: «Filament-Prismatica · Tratto» · v2.1.1 — Tratto 0.3 (tavole tecniche da foto e da STL/3MF)
@@ -38,9 +39,9 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3025;
-const VERSION = '2.1.11';
+const VERSION = '2.2.0';
 const EDITION = (process.env.FB_EDITION || 'full').toLowerCase() === 'smart' ? 'smart' : 'full';
-const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica', 'tratto'];
+const FEATURES = EDITION === 'smart' ? ['ha', 'nfc', 'server'] : ['ha', 'nfc', 'server', 'prismatica', 'tratto', 'strati'];
 const DB_PATH = path.join(__dirname, 'db.json');
 
 app.use(express.json({ limit: '10mb' }));
@@ -52,6 +53,7 @@ app.get('/edition.js', (req, res) => {
 // L'edizione Smart non include Prismatica
 app.use('/prismatica', (req, res, next) => EDITION === 'smart' ? res.status(404).send('Prismatica non è inclusa nell\'edizione Smart') : next());
 app.use('/tratto', (req, res, next) => EDITION === 'smart' ? res.status(404).send('Tratto non è incluso nell\'edizione Smart') : next());
+app.use('/strati', (req, res, next) => EDITION === 'smart' ? res.status(404).send('Strati non è incluso nell\'edizione Smart') : next());
 app.use(express.static(path.join(__dirname, 'public')));
 
 function updateSpoolStatus(spool) {
@@ -994,6 +996,6 @@ app.get('/api/nfc-write-job/status', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   initDB();
   const db = readDB();
-  console.log(`FilamentBox v${VERSION} (${EDITION}) in ascolto sulla porta ${PORT}${EDITION === 'full' ? ' · Prismatica su /prismatica/ · Tratto su /tratto/' : ''}`);
+  console.log(`FilamentBox v${VERSION} (${EDITION}) in ascolto sulla porta ${PORT}${EDITION === 'full' ? ' · Prismatica su /prismatica/ · Tratto su /tratto/ · Strati su /strati/' : ''}`);
   console.log(`Webhook: http://<indirizzo-del-server>:${PORT}/api/webhook/print-done?token=${db.webhookToken}`);
 });
